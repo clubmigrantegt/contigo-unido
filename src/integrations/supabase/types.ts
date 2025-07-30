@@ -14,7 +14,228 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      banners: {
+        Row: {
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          link_text: string | null
+          link_url: string | null
+          priority: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          priority?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          priority?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_sessions: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          rating: number | null
+          session_end: string | null
+          session_start: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number | null
+          session_end?: string | null
+          session_start?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number | null
+          session_end?: string | null
+          session_start?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      faqs: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          id: string
+          is_published: boolean | null
+          order_index: number | null
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          order_index?: number | null
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          order_index?: number | null
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      legal_topics: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          is_published: boolean | null
+          order_index: number | null
+          slug: string
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          order_index?: number | null
+          slug: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          order_index?: number | null
+          slug?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          country_of_origin: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notifications_enabled: boolean | null
+          phone_number: string | null
+          preferred_language: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country_of_origin?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notifications_enabled?: boolean | null
+          phone_number?: string | null
+          preferred_language?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country_of_origin?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notifications_enabled?: boolean | null
+          phone_number?: string | null
+          preferred_language?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          author_name: string
+          content: string
+          country_of_origin: string | null
+          created_at: string
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author_name: string
+          content: string
+          country_of_origin?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          country_of_origin?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
