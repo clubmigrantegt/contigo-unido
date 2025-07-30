@@ -145,6 +145,40 @@ const Auth = () => {
     }
   };
 
+  const handleDevAccess = async () => {
+    setLoading(true);
+    try {
+      // Create anonymous session for development
+      const { data, error } = await supabase.auth.signInAnonymously();
+      
+      if (error) throw error;
+
+      // Create a basic profile for the test user
+      if (data.user) {
+        await supabase.from('profiles').upsert({
+          user_id: data.user.id,
+          full_name: 'Usuario de Desarrollo',
+          phone_number: '+1 (555) 123-4567'
+        });
+      }
+
+      toast({
+        title: "¡Acceso Directo! 🔧",
+        description: "Sesión de desarrollo iniciada",
+      });
+      
+      navigate('/home');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (otpSent) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-calm-gray">
@@ -252,6 +286,25 @@ const Auth = () => {
               {isLogin ? 'Enviar Código' : 'Crear Cuenta'}
             </Button>
           </form>
+
+          {import.meta.env.DEV && (
+            <div className="mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleDevAccess}
+                disabled={loading}
+                className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950"
+              >
+                {loading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  "🔧 "
+                )}
+                Acceso Desarrollo
+              </Button>
+            </div>
+          )}
 
           <div className="mt-6 text-center">
             <button
