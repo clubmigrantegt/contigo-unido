@@ -57,6 +57,32 @@ const Auth = () => {
 
     setLoading(true);
     try {
+      // Development bypass
+      if (import.meta.env.DEV && otp === '123456') {
+        // Create anonymous session for development
+        const { data, error } = await supabase.auth.signInAnonymously();
+        
+        if (error) throw error;
+
+        // Create a basic profile for the test user
+        if (data.user) {
+          await supabase.from('profiles').upsert({
+            user_id: data.user.id,
+            full_name: fullName || 'Usuario de Prueba',
+            phone_number: phone
+          });
+        }
+
+        toast({
+          title: "¡Bienvenido! (Modo Desarrollo)",
+          description: "Sesión iniciada con código de prueba",
+        });
+        
+        navigate('/home');
+        return;
+      }
+
+      // Production OTP verification
       const { error } = await supabase.auth.verifyOtp({
         phone: phone,
         token: otp,
@@ -137,6 +163,13 @@ const Auth = () => {
             </CardTitle>
             <CardDescription>
               Ingresa el código que enviamos a {phone}
+              {import.meta.env.DEV && (
+                <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950 rounded-md">
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
+                    💡 Modo Desarrollo: usa <strong>123456</strong> para acceder
+                  </p>
+                </div>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
