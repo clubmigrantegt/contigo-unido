@@ -1,18 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, MessageCircle, Phone, Clock, Users, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { usePsychologicalChat } from '@/hooks/usePsychologicalChat';
+import ChatInterface from '@/components/chat/ChatInterface';
+import SessionRatingModal from '@/components/chat/SessionRatingModal';
 
 const PsychologicalSupport = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  
+  const {
+    messages,
+    isLoading: chatLoading,
+    isSessionActive,
+    startSession,
+    sendMessage,
+    endSession,
+    submitRating,
+    messagesEndRef
+  } = usePsychologicalChat();
 
   const supportOptions = [
     {
@@ -59,7 +73,7 @@ const PsychologicalSupport = () => {
     }
   ];
 
-  const handleStartSession = async (type: string) => {
+  const handleStartChatSession = async () => {
     if (!user) {
       toast({
         title: "Error",
@@ -69,43 +83,19 @@ const PsychologicalSupport = () => {
       return;
     }
 
-    setLoading(true);
-    try {
-      // Create a new chat session
-      const { data, error } = await supabase
-        .from('chat_sessions')
-        .insert({
-          user_id: user.id,
-          status: 'active'
-        })
-        .select()
-        .single();
+    await startSession();
+  };
 
-      if (error) throw error;
-
-      toast({
-        title: "Sesión iniciada",
-        description: `Conectando con un profesional por ${type}...`,
-      });
-
-      // In a real implementation, this would redirect to a chat interface
-      // For now, we'll just show a success message
-      setTimeout(() => {
-        toast({
-          title: "¡Conectado!",
-          description: "Un profesional te atenderá en breve",
-        });
-      }, 2000);
-
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "No se pudo iniciar la sesión",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+  const handleEndSession = async () => {
+    const sessionId = await endSession();
+    if (sessionId) {
+      setShowRatingModal(true);
     }
+  };
+
+  const handleRatingSubmit = (rating: number, feedback?: string) => {
+    submitRating(rating, feedback);
+    setShowRatingModal(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -168,60 +158,77 @@ const PsychologicalSupport = () => {
           </AlertDescription>
         </Alert>
 
-        {/* Support Options */}
-        <section>
-          <h2 className="mb-4">Opciones de Apoyo</h2>
-          <div className="grid grid-cols-1 gap-4">
-            {supportOptions.map((option) => (
-              <Card 
-                key={option.id} 
-                className="card-elevated hover:shadow-lg transition-all duration-300"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3">
-                      <div className="p-3 bg-primary/10 rounded-lg">
-                        <option.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{option.title}</CardTitle>
-                        <CardDescription className="mt-1">
-                          {option.description}
-                        </CardDescription>
-                        <div className="flex items-center space-x-2 mt-2">
-                          <Badge className={getStatusColor(option.status)}>
-                            {getStatusText(option.status)}
-                          </Badge>
-                          <span className="caption text-muted-foreground">
-                            {option.type}
-                          </span>
+        {/* Chat Interface or Support Options */}
+        {isSessionActive ? (
+          <section>
+            <h2 className="mb-4">Sesión de Apoyo Psicológico</h2>
+            <ChatInterface
+              messages={messages}
+              isLoading={chatLoading}
+              isSessionActive={isSessionActive}
+              onSendMessage={sendMessage}
+              onEndSession={handleEndSession}
+              messagesEndRef={messagesEndRef}
+            />
+          </section>
+        ) : (
+          <section>
+            <h2 className="mb-4">Opciones de Apoyo</h2>
+            <div className="grid grid-cols-1 gap-4">
+              {supportOptions.map((option) => (
+                <Card 
+                  key={option.id} 
+                  className="card-elevated hover:shadow-lg transition-all duration-300"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-3 bg-primary/10 rounded-lg">
+                          <option.icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{option.title}</CardTitle>
+                          <CardDescription className="mt-1">
+                            {option.description}
+                          </CardDescription>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Badge className={getStatusColor(option.status)}>
+                              {getStatusText(option.status)}
+                            </Badge>
+                            <span className="caption text-muted-foreground">
+                              {option.type}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span className="body-small">{option.waitTime}</span>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center text-muted-foreground">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span className="body-small">{option.waitTime}</span>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <Button 
-                    onClick={() => handleStartSession(option.title)}
-                    disabled={loading || option.status === 'busy'}
-                    className="w-full btn-primary"
-                  >
-                    {loading ? 'Conectando...' : 
-                     option.status === 'busy' ? 'No disponible' : 
-                     option.status === 'scheduled' ? 'Unirse' : 'Iniciar Sesión'}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+                    
+                    <Button 
+                      onClick={option.id === 'chat' ? handleStartChatSession : () => toast({
+                        title: "Próximamente",
+                        description: "Esta funcionalidad estará disponible pronto",
+                      })}
+                      disabled={loading || option.status === 'busy'}
+                      className="w-full btn-primary"
+                    >
+                      {loading ? 'Conectando...' : 
+                       option.status === 'busy' ? 'No disponible' : 
+                       option.status === 'scheduled' ? 'Unirse' : 'Iniciar Sesión'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Crisis Resources */}
         <section>
@@ -274,6 +281,13 @@ const PsychologicalSupport = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Rating Modal */}
+        <SessionRatingModal
+          isOpen={showRatingModal}
+          onClose={() => setShowRatingModal(false)}
+          onSubmit={handleRatingSubmit}
+        />
       </div>
     </div>
   );
