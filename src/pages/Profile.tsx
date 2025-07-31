@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { User, Phone, Mail, Globe, Settings, LogOut, Bell, History } from 'lucide-react';
+import { User, Phone, Mail, Globe, Settings, LogOut, Bell, History, BarChart3, MessageSquare, Heart } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +30,12 @@ const Profile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [userStats, setUserStats] = useState({
+    chat_sessions: 0,
+    testimonials: 0,
+    favorites: 0,
+    last_activity: null as string | null
+  });
 
   const countries = [
     'El Salvador', 'Honduras', 'Guatemala', 'Nicaragua', 
@@ -43,6 +50,7 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchUserStats();
     }
   }, [user]);
 
@@ -64,6 +72,47 @@ const Profile = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserStats = async () => {
+    if (!user) return;
+
+    try {
+      // Get chat sessions count
+      const { count: chatCount } = await supabase
+        .from('chat_sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Get testimonials count
+      const { count: testimonialsCount } = await supabase
+        .from('testimonials')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Get favorites count
+      const { count: favoritesCount } = await supabase
+        .from('user_favorites')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      // Get last activity
+      const { data: lastActivity } = await supabase
+        .from('user_activity')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      setUserStats({
+        chat_sessions: chatCount || 0,
+        testimonials: testimonialsCount || 0,
+        favorites: favoritesCount || 0,
+        last_activity: lastActivity?.[0]?.created_at || null
+      });
+    } catch (error: any) {
+      console.error('Error fetching user stats:', error);
     }
   };
 
@@ -285,6 +334,49 @@ const Profile = () => {
           </CardContent>
         </Card>
 
+        {/* User Activity Dashboard */}
+        <Card className="card-elevated">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <BarChart3 className="h-5 w-5 mr-2" />
+              Tu Actividad
+            </CardTitle>
+            <CardDescription>
+              Resumen de tu uso de los servicios
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1">
+                  {userStats.chat_sessions}
+                </div>
+                <p className="body-small text-muted-foreground">Chats</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-secondary mb-1">
+                  {userStats.testimonials}
+                </div>
+                <p className="body-small text-muted-foreground">Testimonios</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-accent mb-1">
+                  {userStats.favorites}
+                </div>
+                <p className="body-small text-muted-foreground">Favoritos</p>
+              </div>
+            </div>
+            
+            {userStats.last_activity && (
+              <div className="text-center pt-2 border-t">
+                <p className="body-small text-muted-foreground">
+                  Última actividad: {new Date(userStats.last_activity).toLocaleDateString('es-ES')}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
         <Card className="card-elevated">
           <CardHeader>
@@ -292,8 +384,19 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button variant="outline" className="w-full justify-start">
-              <History className="h-4 w-4 mr-2" />
-              Ver Historial de Servicios
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Historial de Chats
+              <Badge variant="secondary" className="ml-auto">
+                {userStats.chat_sessions}
+              </Badge>
+            </Button>
+            
+            <Button variant="outline" className="w-full justify-start">
+              <Heart className="h-4 w-4 mr-2" />
+              Mis Favoritos
+              <Badge variant="secondary" className="ml-auto">
+                {userStats.favorites}
+              </Badge>
             </Button>
             
             <Button variant="outline" className="w-full justify-start">

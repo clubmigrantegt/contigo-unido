@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, FileText, ExternalLink, Search, Scale } from 'lucide-react';
+import { ArrowLeft, FileText, ExternalLink, Search, Scale, BookOpen, Heart, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface LegalTopic {
@@ -16,14 +21,24 @@ interface LegalTopic {
   content: string;
   category: string;
   slug: string;
+  is_favorited?: boolean;
 }
 
 const LegalInfo = () => {
+  const { user } = useAuth();
   const [topics, setTopics] = useState<LegalTopic[]>([]);
   const [filteredTopics, setFilteredTopics] = useState<LegalTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
+  const [showConsultationForm, setShowConsultationForm] = useState(false);
+  const [submittingConsultation, setSubmittingConsultation] = useState(false);
+  const [consultation, setConsultation] = useState({
+    topic_category: '',
+    question: '',
+    contact_preference: 'email',
+    urgency_level: 'medium'
+  });
   const { toast } = useToast();
 
   const categories = [
@@ -52,7 +67,24 @@ const LegalInfo = () => {
         .order('order_index', { ascending: true });
 
       if (error) throw error;
-      setTopics(data || []);
+
+      // Check user favorites if authenticated
+      let topicsWithFavorites = data || [];
+      if (user && data) {
+        const { data: favorites } = await supabase
+          .from('user_favorites')
+          .select('resource_id')
+          .eq('user_id', user.id)
+          .eq('resource_type', 'legal_topic');
+
+        const favoriteIds = new Set(favorites?.map(f => f.resource_id) || []);
+        topicsWithFavorites = data.map(topic => ({
+          ...topic,
+          is_favorited: favoriteIds.has(topic.id)
+        }));
+      }
+
+      setTopics(topicsWithFavorites);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -101,6 +133,113 @@ const LegalInfo = () => {
     return colors[category as keyof typeof colors] || 'bg-muted text-muted-foreground border-border';
   };
 
+  const handleFavoriteToggle = async (topicId: string) => {
+    if (!user) {
+      toast({
+        title: "Inicia sesión",
+        description: "Debes iniciar sesión para guardar favoritos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const topic = topics.find(t => t.id === topicId);
+      if (!topic) return;
+
+      if (topic.is_favorited) {
+        // Remove from favorites
+        await supabase
+          .from('user_favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('resource_type', 'legal_topic')
+          .eq('resource_id', topicId);
+      } else {
+        // Add to favorites
+        await supabase
+          .from('user_favorites')
+          .insert({
+            user_id: user.id,
+            resource_type: 'legal_topic',
+            resource_id: topicId
+          });
+      }
+
+      // Update local state
+      setTopics(prev => prev.map(t => 
+        t.id === topicId ? { ...t, is_favorited: !t.is_favorited } : t
+      ));
+
+      toast({
+        title: topic.is_favorited ? "Eliminado de favoritos" : "Agregado a favoritos",
+        description: topic.is_favorited ? "Se eliminó el tema de tus favoritos" : "Se agregó el tema a tus favoritos",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar los favoritos",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmitConsultation = async () => {
+    if (!user) {
+      toast({
+        title: "Inicia sesión",
+        description: "Debes iniciar sesión para enviar una consulta",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!consultation.topic_category || !consultation.question) {
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos requeridos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmittingConsultation(true);
+    try {
+      const { error } = await supabase
+        .from('legal_consultations')
+        .insert({
+          user_id: user.id,
+          topic_category: consultation.topic_category,
+          question: consultation.question,
+          contact_preference: consultation.contact_preference,
+          urgency_level: consultation.urgency_level
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "¡Consulta enviada!",
+        description: "Te contactaremos pronto para ayudarte con tu consulta legal",
+      });
+
+      setConsultation({
+        topic_category: '',
+        question: '',
+        contact_preference: 'email',
+        urgency_level: 'medium'
+      });
+      setShowConsultationForm(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "No se pudo enviar la consulta",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingConsultation(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -123,13 +262,92 @@ const LegalInfo = () => {
             </Button>
           </div>
           <div className="mt-4">
-            <h1 className="flex items-center">
-              <Scale className="h-6 w-6 mr-3 text-secondary" />
-              Información Legal
-            </h1>
-            <p className="body text-muted-foreground mt-1">
-              Recursos legales y guías para migrantes
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="flex items-center">
+                  <Scale className="h-6 w-6 mr-3 text-secondary" />
+                  Información Legal
+                </h1>
+                <p className="body text-muted-foreground mt-1">
+                  Recursos legales y guías para migrantes
+                </p>
+              </div>
+              
+              <Dialog open={showConsultationForm} onOpenChange={setShowConsultationForm}>
+                <DialogTrigger asChild>
+                  <Button className="btn-primary">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Consultar
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Consulta Legal</DialogTitle>
+                    <DialogDescription>
+                      Envía tu pregunta legal y te contactaremos pronto
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="topic">Categoría del tema</Label>
+                      <Select 
+                        value={consultation.topic_category} 
+                        onValueChange={(value) => setConsultation({...consultation, topic_category: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una categoría" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tps">TPS</SelectItem>
+                          <SelectItem value="asilo">Asilo</SelectItem>
+                          <SelectItem value="derechos_laborales">Derechos Laborales</SelectItem>
+                          <SelectItem value="inmigración">Inmigración</SelectItem>
+                          <SelectItem value="documentos">Documentos</SelectItem>
+                          <SelectItem value="otro">Otro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="question">Tu pregunta</Label>
+                      <Textarea
+                        id="question"
+                        value={consultation.question}
+                        onChange={(e) => setConsultation({...consultation, question: e.target.value})}
+                        placeholder="Describe tu situación legal y tu pregunta..."
+                        className="min-h-[100px]"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="urgency">Nivel de urgencia</Label>
+                      <Select 
+                        value={consultation.urgency_level} 
+                        onValueChange={(value) => setConsultation({...consultation, urgency_level: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Baja</SelectItem>
+                          <SelectItem value="medium">Media</SelectItem>
+                          <SelectItem value="high">Alta</SelectItem>
+                          <SelectItem value="urgent">Urgente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleSubmitConsultation} 
+                      disabled={submittingConsultation}
+                      className="w-full btn-primary"
+                    >
+                      {submittingConsultation ? 'Enviando...' : 'Enviar Consulta'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </div>
@@ -202,6 +420,14 @@ const LegalInfo = () => {
                     <Button variant="outline" size="sm" className="flex-1">
                       <FileText className="h-4 w-4 mr-2" />
                       Ver Detalles
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleFavoriteToggle(topic.id)}
+                      className={topic.is_favorited ? 'text-red-500' : ''}
+                    >
+                      <Heart className={`h-4 w-4 ${topic.is_favorited ? 'fill-current' : ''}`} />
                     </Button>
                     <Button variant="ghost" size="sm">
                       <ExternalLink className="h-4 w-4" />

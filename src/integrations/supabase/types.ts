@@ -119,6 +119,42 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_consultations: {
+        Row: {
+          contact_preference: string
+          created_at: string
+          id: string
+          question: string
+          status: string
+          topic_category: string
+          updated_at: string
+          urgency_level: string
+          user_id: string
+        }
+        Insert: {
+          contact_preference?: string
+          created_at?: string
+          id?: string
+          question: string
+          status?: string
+          topic_category: string
+          updated_at?: string
+          urgency_level?: string
+          user_id: string
+        }
+        Update: {
+          contact_preference?: string
+          created_at?: string
+          id?: string
+          question?: string
+          status?: string
+          topic_category?: string
+          updated_at?: string
+          urgency_level?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       legal_topics: {
         Row: {
           category: string
@@ -197,41 +233,133 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonial_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction_type: string
+          testimonial_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          testimonial_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          testimonial_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "testimonial_reactions_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       testimonials: {
         Row: {
           author_name: string
+          category: string | null
           content: string
           country_of_origin: string | null
           created_at: string
           id: string
           is_approved: boolean | null
           is_featured: boolean | null
+          tags: string[] | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
           author_name: string
+          category?: string | null
           content: string
           country_of_origin?: string | null
           created_at?: string
           id?: string
           is_approved?: boolean | null
           is_featured?: boolean | null
+          tags?: string[] | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
           author_name?: string
+          category?: string | null
           content?: string
           country_of_origin?: string | null
           created_at?: string
           id?: string
           is_approved?: boolean | null
           is_featured?: boolean | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          activity_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          resource_id: string
+          resource_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          resource_id: string
+          resource_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          resource_id?: string
+          resource_type?: string
           user_id?: string
         }
         Relationships: []
