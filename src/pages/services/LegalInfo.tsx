@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, FileText, ExternalLink, Search, Scale, BookOpen, Heart, Plus } from 'lucide-react';
+import { ArrowLeft, FileText, ExternalLink, Search, Scale, BookOpen, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -31,14 +27,6 @@ const LegalInfo = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
-  const [showConsultationForm, setShowConsultationForm] = useState(false);
-  const [submittingConsultation, setSubmittingConsultation] = useState(false);
-  const [consultation, setConsultation] = useState({
-    topic_category: '',
-    question: '',
-    contact_preference: 'email',
-    urgency_level: 'medium'
-  });
   const { toast } = useToast();
 
   const categories = [
@@ -184,61 +172,6 @@ const LegalInfo = () => {
     }
   };
 
-  const handleSubmitConsultation = async () => {
-    if (!user) {
-      toast({
-        title: "Inicia sesión",
-        description: "Debes iniciar sesión para enviar una consulta",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!consultation.topic_category || !consultation.question) {
-      toast({
-        title: "Error",
-        description: "Por favor completa todos los campos requeridos",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSubmittingConsultation(true);
-    try {
-      const { error } = await supabase
-        .from('legal_consultations')
-        .insert({
-          user_id: user.id,
-          topic_category: consultation.topic_category,
-          question: consultation.question,
-          contact_preference: consultation.contact_preference,
-          urgency_level: consultation.urgency_level
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "¡Consulta enviada!",
-        description: "Te contactaremos pronto para ayudarte con tu consulta legal",
-      });
-
-      setConsultation({
-        topic_category: '',
-        question: '',
-        contact_preference: 'email',
-        urgency_level: 'medium'
-      });
-      setShowConsultationForm(false);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "No se pudo enviar la consulta",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmittingConsultation(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -273,80 +206,6 @@ const LegalInfo = () => {
                 </p>
               </div>
               
-              <Dialog open={showConsultationForm} onOpenChange={setShowConsultationForm}>
-                <DialogTrigger asChild>
-                  <Button className="btn-primary">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Consultar
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle>Consulta Legal</DialogTitle>
-                    <DialogDescription>
-                      Envía tu pregunta legal y te contactaremos pronto
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="topic">Categoría del tema</Label>
-                      <Select 
-                        value={consultation.topic_category} 
-                        onValueChange={(value) => setConsultation({...consultation, topic_category: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una categoría" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tps">TPS</SelectItem>
-                          <SelectItem value="asilo">Asilo</SelectItem>
-                          <SelectItem value="derechos_laborales">Derechos Laborales</SelectItem>
-                          <SelectItem value="inmigración">Inmigración</SelectItem>
-                          <SelectItem value="documentos">Documentos</SelectItem>
-                          <SelectItem value="otro">Otro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="question">Tu pregunta</Label>
-                      <Textarea
-                        id="question"
-                        value={consultation.question}
-                        onChange={(e) => setConsultation({...consultation, question: e.target.value})}
-                        placeholder="Describe tu situación legal y tu pregunta..."
-                        className="min-h-[100px]"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="urgency">Nivel de urgencia</Label>
-                      <Select 
-                        value={consultation.urgency_level} 
-                        onValueChange={(value) => setConsultation({...consultation, urgency_level: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">Baja</SelectItem>
-                          <SelectItem value="medium">Media</SelectItem>
-                          <SelectItem value="high">Alta</SelectItem>
-                          <SelectItem value="urgent">Urgente</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <Button 
-                      onClick={handleSubmitConsultation} 
-                      disabled={submittingConsultation}
-                      className="w-full btn-primary"
-                    >
-                      {submittingConsultation ? 'Enviando...' : 'Enviar Consulta'}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </div>
           </div>
         </div>
@@ -365,22 +224,22 @@ const LegalInfo = () => {
             />
           </div>
 
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
-              {categories.map((category) => (
-                <TabsTrigger 
-                  key={category.id} 
-                  value={category.id}
-                  className="text-xs"
-                >
-                  {category.label}
-                  <Badge variant="secondary" className="ml-1 text-xs">
-                    {getCategoryCount(category.id)}
-                  </Badge>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category.id)}
+                className="whitespace-nowrap flex-shrink-0"
+              >
+                {category.label}
+                <Badge variant="secondary" className="ml-1">
+                  {getCategoryCount(category.id)}
+                </Badge>
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Results */}

@@ -118,9 +118,9 @@ const Services = () => {
 
       <div className="container mx-auto px-4 py-6 space-y-6">
         <Tabs defaultValue="services" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="services">Servicios</TabsTrigger>
-            <TabsTrigger value="schedule">Programar Citas</TabsTrigger>
+            {/* <TabsTrigger value="schedule">Programar Citas</TabsTrigger> */}
             <TabsTrigger value="emergency">Emergencias</TabsTrigger>
           </TabsList>
           
@@ -161,9 +161,9 @@ const Services = () => {
             </section>
           </TabsContent>
 
-          <TabsContent value="schedule" className="space-y-6">
+          {/* <TabsContent value="schedule" className="space-y-6">
             <AppointmentScheduler />
-          </TabsContent>
+          </TabsContent> */}
 
           <TabsContent value="emergency" className="space-y-6">
             {/* Quick Actions */}
