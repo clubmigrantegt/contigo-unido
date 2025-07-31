@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
 interface Testimonial {
   id: string;
   title: string;
@@ -27,10 +26,13 @@ interface Testimonial {
   like_count?: number;
   user_liked?: boolean;
 }
-
 const Community = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [filteredTestimonials, setFilteredTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,57 +48,62 @@ const Community = () => {
     country_of_origin: '',
     category: 'general'
   });
-
-  const categories = [
-    { id: 'todos', label: 'Todos' },
-    { id: 'general', label: 'General' },
-    { id: 'trabajo', label: 'Trabajo' },
-    { id: 'educacion', label: 'Educación' },
-    { id: 'salud', label: 'Salud' },
-    { id: 'legal', label: 'Legal' },
-    { id: 'familia', label: 'Familia' }
-  ];
-
+  const categories = [{
+    id: 'todos',
+    label: 'Todos'
+  }, {
+    id: 'general',
+    label: 'General'
+  }, {
+    id: 'trabajo',
+    label: 'Trabajo'
+  }, {
+    id: 'educacion',
+    label: 'Educación'
+  }, {
+    id: 'salud',
+    label: 'Salud'
+  }, {
+    id: 'legal',
+    label: 'Legal'
+  }, {
+    id: 'familia',
+    label: 'Familia'
+  }];
   useEffect(() => {
     fetchTestimonials();
   }, []);
-
   useEffect(() => {
     filterTestimonials();
   }, [testimonials, searchQuery, selectedCategory]);
-
   const fetchTestimonials = async () => {
     try {
       // Fetch testimonials with like counts
-      const { data, error } = await supabase
-        .from('testimonials')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('testimonials').select(`
           id, title, content, author_name, country_of_origin, category, tags, is_featured, created_at,
           testimonial_reactions!left(id)
-        `)
-        .eq('is_approved', true)
-        .order('is_featured', { ascending: false })
-        .order('created_at', { ascending: false });
-
+        `).eq('is_approved', true).order('is_featured', {
+        ascending: false
+      }).order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
 
       // Process testimonials with like counts and user's like status
       const processedTestimonials = await Promise.all((data || []).map(async (testimonial: any) => {
         const like_count = testimonial.testimonial_reactions?.length || 0;
-        
+
         // Check if current user liked this testimonial
         let user_liked = false;
         if (user) {
-          const { data: userReaction } = await supabase
-            .from('testimonial_reactions')
-            .select('id')
-            .eq('testimonial_id', testimonial.id)
-            .eq('user_id', user.id)
-            .single();
-          
+          const {
+            data: userReaction
+          } = await supabase.from('testimonial_reactions').select('id').eq('testimonial_id', testimonial.id).eq('user_id', user.id).single();
           user_liked = !!userReaction;
         }
-
         return {
           ...testimonial,
           like_count,
@@ -104,19 +111,17 @@ const Community = () => {
           testimonial_reactions: undefined // Remove the raw reactions data
         };
       }));
-
       setTestimonials(processedTestimonials);
     } catch (error: any) {
       toast({
         title: "Error",
         description: "No se pudieron cargar los testimonios",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const filterTestimonials = () => {
     let filtered = testimonials;
 
@@ -128,53 +133,42 @@ const Community = () => {
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(t =>
-        t.title.toLowerCase().includes(query) ||
-        t.content.toLowerCase().includes(query) ||
-        t.author_name.toLowerCase().includes(query) ||
-        (t.tags && t.tags.some(tag => tag.toLowerCase().includes(query)))
-      );
+      filtered = filtered.filter(t => t.title.toLowerCase().includes(query) || t.content.toLowerCase().includes(query) || t.author_name.toLowerCase().includes(query) || t.tags && t.tags.some(tag => tag.toLowerCase().includes(query)));
     }
-
     setFilteredTestimonials(filtered);
   };
-
   const handleSubmitTestimonial = async () => {
     if (!user || !newTestimonial.title || !newTestimonial.content || !newTestimonial.author_name) {
       toast({
         title: "Error",
         description: "Por favor completa todos los campos requeridos",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('testimonials')
-        .insert({
-          user_id: user.id,
-          title: newTestimonial.title,
-          content: newTestimonial.content,
-          author_name: newTestimonial.author_name,
-          country_of_origin: newTestimonial.country_of_origin || null,
-          category: newTestimonial.category,
-          is_approved: false,
-          is_featured: false
-        });
-
+      const {
+        error
+      } = await supabase.from('testimonials').insert({
+        user_id: user.id,
+        title: newTestimonial.title,
+        content: newTestimonial.content,
+        author_name: newTestimonial.author_name,
+        country_of_origin: newTestimonial.country_of_origin || null,
+        category: newTestimonial.category,
+        is_approved: false,
+        is_featured: false
+      });
       if (error) throw error;
-
       toast({
         title: "¡Testimonio enviado!",
-        description: "Tu testimonio será revisado antes de publicarse",
+        description: "Tu testimonio será revisado antes de publicarse"
       });
-      
-      setNewTestimonial({ 
-        title: '', 
-        content: '', 
-        author_name: '', 
+      setNewTestimonial({
+        title: '',
+        content: '',
+        author_name: '',
         country_of_origin: '',
         category: 'general'
       });
@@ -183,43 +177,34 @@ const Community = () => {
       toast({
         title: "Error",
         description: "No se pudo enviar el testimonio",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setSubmitting(false);
     }
   };
-
   const handleLikeTestimonial = async (testimonialId: string) => {
     if (!user) {
       toast({
         title: "Inicia sesión",
         description: "Debes iniciar sesión para dar me gusta",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     try {
       const testimonial = testimonials.find(t => t.id === testimonialId);
       if (!testimonial) return;
-
       if (testimonial.user_liked) {
         // Remove like
-        await supabase
-          .from('testimonial_reactions')
-          .delete()
-          .eq('testimonial_id', testimonialId)
-          .eq('user_id', user.id);
+        await supabase.from('testimonial_reactions').delete().eq('testimonial_id', testimonialId).eq('user_id', user.id);
       } else {
         // Add like
-        await supabase
-          .from('testimonial_reactions')
-          .insert({
-            testimonial_id: testimonialId,
-            user_id: user.id,
-            reaction_type: 'like'
-          });
+        await supabase.from('testimonial_reactions').insert({
+          testimonial_id: testimonialId,
+          user_id: user.id,
+          reaction_type: 'like'
+        });
       }
 
       // Update local state
@@ -237,11 +222,10 @@ const Community = () => {
       toast({
         title: "Error",
         description: "No se pudo procesar la reacción",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
       year: 'numeric',
@@ -249,11 +233,9 @@ const Community = () => {
       day: 'numeric'
     });
   };
-
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
-
   const getCountryFlag = (country: string) => {
     const flags: Record<string, string> = {
       'El Salvador': '🇸🇻',
@@ -268,34 +250,28 @@ const Community = () => {
     };
     return flags[country] || '🌎';
   };
-
   const getCategoryStats = () => {
     return categories.filter(c => c.id !== 'todos').map(category => ({
       ...category,
       count: testimonials.filter(t => t.category === category.id).length
     }));
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+    return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header principal - ancho completo */}
-      <div className="gradient-community text-strong-black px-4 py-8">
+      <div className="gradient-community text-strong-black px-4 py-[32px]">
         <div className="container mx-auto text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
             <div className="bg-strong-black/10 rounded-full p-3">
               <Users className="h-8 w-8 text-strong-black" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-strong-black mb-2">Comunidad</h1>
-          <p className="text-xl text-strong-black/80">
+          <h1 className="font-bold text-strong-black mb-2 text-3xl">Comunidad</h1>
+          <p className="text-strong-black/80 text-base">
             Historias de esperanza y superación
           </p>
         </div>
@@ -306,13 +282,7 @@ const Community = () => {
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Buscar historias por título, contenido, autor..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+            <Input type="text" placeholder="Buscar historias por título, contenido, autor..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
           </div>
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogTrigger asChild>
@@ -331,69 +301,54 @@ const Community = () => {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Título de tu historia</Label>
-                  <Input
-                    id="title"
-                    value={newTestimonial.title}
-                    onChange={(e) => setNewTestimonial({...newTestimonial, title: e.target.value})}
-                    placeholder="¿Cómo resumirías tu experiencia?"
-                  />
+                  <Input id="title" value={newTestimonial.title} onChange={e => setNewTestimonial({
+                  ...newTestimonial,
+                  title: e.target.value
+                })} placeholder="¿Cómo resumirías tu experiencia?" />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="author">Tu nombre (o seudónimo)</Label>
-                  <Input
-                    id="author"
-                    value={newTestimonial.author_name}
-                    onChange={(e) => setNewTestimonial({...newTestimonial, author_name: e.target.value})}
-                    placeholder="Como quieres que te identifiquen"
-                  />
+                  <Input id="author" value={newTestimonial.author_name} onChange={e => setNewTestimonial({
+                  ...newTestimonial,
+                  author_name: e.target.value
+                })} placeholder="Como quieres que te identifiquen" />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="country">País de origen (opcional)</Label>
-                  <Input
-                    id="country"
-                    value={newTestimonial.country_of_origin}
-                    onChange={(e) => setNewTestimonial({...newTestimonial, country_of_origin: e.target.value})}
-                    placeholder="Tu país de origen"
-                  />
+                  <Input id="country" value={newTestimonial.country_of_origin} onChange={e => setNewTestimonial({
+                  ...newTestimonial,
+                  country_of_origin: e.target.value
+                })} placeholder="Tu país de origen" />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="category">Categoría</Label>
-                  <Select 
-                    value={newTestimonial.category} 
-                    onValueChange={(value) => setNewTestimonial({...newTestimonial, category: value})}
-                  >
+                  <Select value={newTestimonial.category} onValueChange={value => setNewTestimonial({
+                  ...newTestimonial,
+                  category: value
+                })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una categoría" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.filter(c => c.id !== 'todos').map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
+                      {categories.filter(c => c.id !== 'todos').map(category => <SelectItem key={category.id} value={category.id}>
                           {category.label}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="content">Tu historia</Label>
-                  <Textarea
-                    id="content"
-                    value={newTestimonial.content}
-                    onChange={(e) => setNewTestimonial({...newTestimonial, content: e.target.value})}
-                    placeholder="Comparte tu experiencia, los desafíos que has enfrentado y cómo has salido adelante..."
-                    className="min-h-[120px]"
-                  />
+                  <Textarea id="content" value={newTestimonial.content} onChange={e => setNewTestimonial({
+                  ...newTestimonial,
+                  content: e.target.value
+                })} placeholder="Comparte tu experiencia, los desafíos que has enfrentado y cómo has salido adelante..." className="min-h-[120px]" />
                 </div>
                 
-                <Button 
-                  onClick={handleSubmitTestimonial} 
-                  disabled={submitting}
-                  className="w-full btn-primary"
-                >
+                <Button onClick={handleSubmitTestimonial} disabled={submitting} className="w-full btn-primary">
                   {submitting ? 'Enviando...' : 'Compartir Historia'}
                 </Button>
               </div>
@@ -417,15 +372,9 @@ const Community = () => {
               </div>
               <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
                 <TabsList className="flex w-full overflow-x-auto">
-                  {categories.map((category) => (
-                    <TabsTrigger 
-                      key={category.id} 
-                      value={category.id}
-                      className="text-xs whitespace-nowrap flex-shrink-0"
-                    >
+                  {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="text-xs whitespace-nowrap flex-shrink-0">
                       {category.label}
-                    </TabsTrigger>
-                  ))}
+                    </TabsTrigger>)}
                 </TabsList>
               </Tabs>
             </div>
@@ -451,8 +400,7 @@ const Community = () => {
             </div>
 
             {/* Testimonials */}
-            {filteredTestimonials.length === 0 ? (
-              <Card className="card-elevated">
+            {filteredTestimonials.length === 0 ? <Card className="card-elevated">
                 <CardContent className="text-center py-12">
                   <MessageCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="mb-2">Sé el primero en compartir</h3>
@@ -464,13 +412,8 @@ const Community = () => {
                     Compartir mi Historia
                   </Button>
                 </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {filteredTestimonials.map((testimonial) => (
-                  <Card key={testimonial.id} className={`card-elevated hover:shadow-lg transition-all duration-300 ${
-                    testimonial.is_featured ? 'border-accent bg-accent/5' : ''
-                  }`}>
+              </Card> : <div className="space-y-4">
+                {filteredTestimonials.map(testimonial => <Card key={testimonial.id} className={`card-elevated hover:shadow-lg transition-all duration-300 ${testimonial.is_featured ? 'border-accent bg-accent/5' : ''}`}>
                     <CardHeader className="pb-3">
                       <div className="flex items-start space-x-3">
                         <Avatar className="h-10 w-10">
@@ -481,17 +424,13 @@ const Community = () => {
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
                             <h3 className="font-medium">{testimonial.author_name}</h3>
-                            {testimonial.country_of_origin && (
-                              <span className="text-sm">
+                            {testimonial.country_of_origin && <span className="text-sm">
                                 {getCountryFlag(testimonial.country_of_origin)}
-                              </span>
-                            )}
-                            {testimonial.is_featured && (
-                              <Badge className="bg-accent/20 text-accent-foreground border-accent/30">
+                              </span>}
+                            {testimonial.is_featured && <Badge className="bg-accent/20 text-accent-foreground border-accent/30">
                                 <Star className="h-3 w-3 mr-1" />
                                 Destacado
-                              </Badge>
-                            )}
+                              </Badge>}
                           </div>
                           <p className="caption text-muted-foreground">
                             {formatDate(testimonial.created_at)}
@@ -511,21 +450,14 @@ const Community = () => {
                         <Badge variant="secondary" className="text-xs">
                           {categories.find(c => c.id === testimonial.category)?.label || testimonial.category}
                         </Badge>
-                        {testimonial.tags && testimonial.tags.map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                        {testimonial.tags && testimonial.tags.map((tag, index) => <Badge key={index} variant="outline" className="text-xs">
                             {tag}
-                          </Badge>
-                        ))}
+                          </Badge>)}
                       </div>
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className={`text-muted-foreground ${testimonial.user_liked ? 'text-red-500' : ''}`}
-                            onClick={() => handleLikeTestimonial(testimonial.id)}
-                          >
+                          <Button variant="ghost" size="sm" className={`text-muted-foreground ${testimonial.user_liked ? 'text-red-500' : ''}`} onClick={() => handleLikeTestimonial(testimonial.id)}>
                             <Heart className={`h-4 w-4 mr-1 ${testimonial.user_liked ? 'fill-current' : ''}`} />
                             {testimonial.like_count || 0}
                           </Button>
@@ -535,21 +467,17 @@ const Community = () => {
                         </Button>
                       </div>
                     </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+                  </Card>)}
+              </div>}
           </TabsContent>
 
           <TabsContent value="categorias" className="space-y-6">
             {/* Vista por categorías */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {getCategoryStats().map((category) => (
-                <Card key={category.id} className="card-elevated hover:shadow-lg transition-all duration-300 cursor-pointer"
-                      onClick={() => {
-                        setSelectedCategory(category.id);
-                        setActiveTab('historias');
-                      }}>
+              {getCategoryStats().map(category => <Card key={category.id} className="card-elevated hover:shadow-lg transition-all duration-300 cursor-pointer" onClick={() => {
+              setSelectedCategory(category.id);
+              setActiveTab('historias');
+            }}>
                   <CardHeader className="text-center">
                     <CardTitle className="text-lg">{category.label}</CardTitle>
                     <CardDescription>
@@ -566,8 +494,7 @@ const Community = () => {
                       </Button>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
 
             {/* Estadísticas generales */}
@@ -605,8 +532,6 @@ const Community = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Community;
