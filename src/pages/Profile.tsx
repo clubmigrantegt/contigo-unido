@@ -1,58 +1,57 @@
 import { useEffect, useState } from 'react';
-import { User, Phone, Mail, Globe, Settings, LogOut, Bell, History, BarChart3, MessageSquare, Heart } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { 
+  User, 
+  Settings, 
+  BarChart3,
+  MessageCircle, 
+  Heart, 
+  Users, 
+  ChevronRight,
+  LogOut
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import ChatHistory from '@/components/profile/ChatHistory';
-import NotificationCenter from '@/components/notifications/NotificationCenter';
+import PersonalInfoEditor from '@/components/profile/PersonalInfoEditor';
+import PreferencesEditor from '@/components/profile/PreferencesEditor';
+import ActivityView from '@/components/profile/ActivityView';
 
 interface Profile {
-  id: string;
   full_name: string;
   email: string;
-  phone_number: string;
-  country_of_origin: string;
-  preferred_language: string;
+  phone?: string;
+  country_of_origin?: string;
+  language: string;
   notifications_enabled: boolean;
 }
 
+interface UserStats {
+  totalSessions: number;
+  totalTestimonials: number;
+  totalFavorites: number;
+  lastActivity: string;
+}
+
+type ViewMode = 'main' | 'personalInfo' | 'preferences' | 'activity';
+
 const Profile = () => {
   const { user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [userStats, setUserStats] = useState<UserStats>({
+    totalSessions: 0,
+    totalTestimonials: 0,
+    totalFavorites: 0,
+    lastActivity: 'Nunca'
+  });
+  const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>('main');
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [originalProfile, setOriginalProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
-  const [userStats, setUserStats] = useState({
-    chat_sessions: 0,
-    testimonials: 0,
-    favorites: 0,
-    last_activity: null as string | null
-  });
-
-  const countries = [
-    'El Salvador', 'Honduras', 'Guatemala', 'Nicaragua', 
-    'Venezuela', 'Colombia', 'México', 'Perú', 'Ecuador', 'Otro'
-  ];
-
-  const languages = [
-    { value: 'es', label: 'Español' },
-    { value: 'en', label: 'English' }
-  ];
 
   useEffect(() => {
     if (user) {
@@ -70,9 +69,19 @@ const Profile = () => {
         .single();
 
       if (error) throw error;
-      setProfile(data);
-      setOriginalProfile(data);
-    } catch (error: any) {
+      
+      const profileData = {
+        full_name: data.full_name || '',
+        email: user?.email || '',
+        phone: data.phone_number || '',
+        country_of_origin: data.country_of_origin || '',
+        language: data.preferred_language || 'es',
+        notifications_enabled: data.notifications_enabled ?? true
+      };
+      
+      setProfile(profileData);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
       toast({
         title: "Error",
         description: "No se pudo cargar el perfil",
@@ -84,445 +93,282 @@ const Profile = () => {
   };
 
   const fetchUserStats = async () => {
-    if (!user) return;
-
     try {
-      // Get chat sessions count
-      const { count: chatCount } = await supabase
+      // Fetch chat sessions count
+      const { data: sessions, error: sessionsError } = await supabase
         .from('chat_sessions')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('id, session_start')
+        .eq('user_id', user?.id);
 
-      // Get testimonials count
-      const { count: testimonialsCount } = await supabase
+      if (sessionsError) throw sessionsError;
+
+      // Fetch testimonials count (assuming there's a testimonials table)
+      const { data: testimonials, error: testimonialsError } = await supabase
         .from('testimonials')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('id')
+        .eq('user_id', user?.id);
 
-      // Get favorites count
-      const { count: favoritesCount } = await supabase
+      // Fetch favorites count
+      const { data: favorites, error: favoritesError } = await supabase
         .from('user_favorites')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('id')
+        .eq('user_id', user?.id);
 
-      // Get last activity
-      const { data: lastActivity } = await supabase
-        .from('user_activity')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1);
+      const totalSessions = sessions?.length || 0;
+      const totalTestimonials = testimonials?.length || 0;
+      const totalFavorites = favorites?.length || 0;
+
+      // Get last activity date
+      let lastActivity = 'Nunca';
+      if (sessions && sessions.length > 0) {
+        const sortedSessions = sessions.sort((a, b) => 
+          new Date(b.session_start).getTime() - new Date(a.session_start).getTime()
+        );
+        const lastSessionDate = new Date(sortedSessions[0].session_start);
+        lastActivity = lastSessionDate.toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'short'
+        });
+      }
 
       setUserStats({
-        chat_sessions: chatCount || 0,
-        testimonials: testimonialsCount || 0,
-        favorites: favoritesCount || 0,
-        last_activity: lastActivity?.[0]?.created_at || null
+        totalSessions,
+        totalTestimonials,
+        totalFavorites,
+        lastActivity
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching user stats:', error);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!profile || !user) return;
-
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: profile.full_name,
-          email: profile.email,
-          phone_number: profile.phone_number,
-          country_of_origin: profile.country_of_origin,
-          preferred_language: profile.preferred_language,
-          notifications_enabled: profile.notifications_enabled,
-        })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "¡Perfil actualizado!",
-        description: "Los cambios se han guardado correctamente",
-      });
-      setHasUnsavedChanges(false);
-      setOriginalProfile(profile);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar el perfil",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
     }
   };
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
-      });
       navigate('/onboarding');
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error signing out:', error);
       toast({
         title: "Error",
-        description: "No se pudo cerrar la sesión",
+        description: "No se pudo cerrar sesión. Intenta de nuevo.",
         variant: "destructive",
       });
     }
   };
 
-  const updateProfile = (field: keyof Profile, value: any) => {
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Return to main view
+  const handleBackToMain = () => {
+    setViewMode('main');
+  };
+
+  // Handle profile save from editor
+  const handleProfileSave = (updatedProfile: Profile) => {
+    setProfile(updatedProfile);
+  };
+
+  // Handle preferences save from editor
+  const handlePreferencesSave = (updatedPreferences: { language: string; notifications_enabled: boolean; theme: string }) => {
     if (profile) {
-      const updatedProfile = { ...profile, [field]: value };
-      setProfile(updatedProfile);
-      
-      // Check if there are unsaved changes
-      if (originalProfile) {
-        const hasChanges = JSON.stringify(updatedProfile) !== JSON.stringify(originalProfile);
-        setHasUnsavedChanges(hasChanges);
-      }
+      setProfile({
+        ...profile,
+        language: updatedPreferences.language,
+        notifications_enabled: updatedPreferences.notifications_enabled
+      });
     }
   };
-
-  // Handle navigation with unsaved changes
-  const handleNavigation = (navigationFn: () => void) => {
-    if (hasUnsavedChanges) {
-      setPendingNavigation(() => navigationFn);
-      setShowUnsavedDialog(true);
-    } else {
-      navigationFn();
-    }
-  };
-
-  const handleSaveAndContinue = async () => {
-    await handleSave();
-    if (pendingNavigation) {
-      pendingNavigation();
-      setPendingNavigation(null);
-    }
-    setShowUnsavedDialog(false);
-  };
-
-  const handleDiscardAndContinue = () => {
-    if (originalProfile) {
-      setProfile(originalProfile);
-      setHasUnsavedChanges(false);
-    }
-    if (pendingNavigation) {
-      pendingNavigation();
-      setPendingNavigation(null);
-    }
-    setShowUnsavedDialog(false);
-  };
-
-  // Handle browser back/refresh
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-calm-gray flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="mx-4 max-w-md">
-          <CardContent className="text-center py-12">
-            <User className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="mb-2">Perfil no encontrado</h3>
-            <p className="body text-muted-foreground mb-4">
-              No se pudo cargar la información del perfil
-            </p>
-            <Button onClick={fetchProfile} variant="outline">
-              Intentar de nuevo
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-calm-gray flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Error cargando perfil</h2>
+          <p className="text-muted-foreground">No se pudo cargar la información del perfil</p>
+        </div>
       </div>
     );
   }
 
+  // Handle different view modes
+  if (viewMode === 'personalInfo') {
+    return (
+      <PersonalInfoEditor 
+        profile={profile}
+        onBack={handleBackToMain}
+        onSave={handleProfileSave}
+      />
+    );
+  }
+
+  if (viewMode === 'preferences') {
+    return (
+      <PreferencesEditor 
+        preferences={{
+          language: profile.language,
+          notifications_enabled: profile.notifications_enabled,
+          theme: 'system' // Default theme
+        }}
+        onBack={handleBackToMain}
+        onSave={handlePreferencesSave}
+      />
+    );
+  }
+
+  if (viewMode === 'activity') {
+    return (
+      <ActivityView 
+        stats={userStats}
+        onBack={handleBackToMain}
+      />
+    );
+  }
+
+  // Main profile view with cards
+  const profileSections = [
+    {
+      id: 'personalInfo',
+      icon: User,
+      title: 'Información Personal',
+      description: 'Actualiza tu información básica',
+      onClick: () => setViewMode('personalInfo')
+    },
+    {
+      id: 'preferences',
+      icon: Settings,
+      title: 'Preferencias',
+      description: 'Idioma, notificaciones y tema',
+      onClick: () => setViewMode('preferences')
+    },
+    {
+      id: 'activity',
+      icon: BarChart3,
+      title: 'Tu Actividad',
+      description: 'Estadísticas y historial de uso',
+      onClick: () => setViewMode('activity')
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="gradient-primary text-white px-4 py-8">
-        <div className="container mx-auto">
-          <div className="flex items-center space-x-4">
-            <div className="bg-white/20 rounded-full p-3">
-              <User className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-white mb-1">Mi Perfil</h1>
-              <p className="body text-white/90">
-                Gestiona tu información personal
-              </p>
-            </div>
+    <div className="min-h-screen bg-calm-gray">
+      {/* Header with Profile Info */}
+      <div className="gradient-hero text-white px-4 pt-12 pb-8">
+        <div className="text-center">
+          <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl font-bold text-white">
+              {getInitials(profile.full_name)}
+            </span>
           </div>
+          <h1 className="text-2xl font-bold mb-2">{profile.full_name}</h1>
+          <p className="text-white/80">{profile.email}</p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Personal Information */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2 mb-4">
-            <User className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Información Personal</h2>
-          </div>
-          <p className="text-muted-foreground mb-6">
-            Actualiza tu información personal y de contacto
-          </p>
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nombre Completo</Label>
-              <Input
-                id="name"
-                value={profile.full_name}
-                onChange={(e) => updateProfile('full_name', e.target.value)}
-                placeholder="Tu nombre completo"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Correo Electrónico</Label>
-              <Input
-                id="email"
-                type="email"
-                value={profile.email || ''}
-                onChange={(e) => updateProfile('email', e.target.value)}
-                placeholder="tu@email.com"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Número de Teléfono</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={profile.phone_number || ''}
-                onChange={(e) => updateProfile('phone_number', e.target.value)}
-                placeholder="+1 (555) 123-4567"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country">País de Origen</Label>
-              <Select 
-                value={profile.country_of_origin || ''} 
-                onValueChange={(value) => updateProfile('country_of_origin', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona tu país" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Preferences */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2 mb-4">
-            <Settings className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Preferencias</h2>
-          </div>
-          <p className="text-muted-foreground mb-6">
-            Configura tus preferencias de idioma y notificaciones
-          </p>
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="language">Idioma Preferido</Label>
-              <Select 
-                value={profile.preferred_language} 
-                onValueChange={(value) => updateProfile('preferred_language', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {languages.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label className="flex items-center">
-                  <Bell className="h-4 w-4 mr-2" />
-                  Notificaciones
-                </Label>
-                <p className="body-small text-muted-foreground">
-                  Recibir notificaciones importantes
-                </p>
+      <div className="px-4 -mt-4 pb-20 space-y-4">
+        {/* Profile Sections as Cards */}
+        {profileSections.map((section) => (
+          <Card 
+            key={section.id}
+            className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200" 
+            onClick={section.onClick}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <section.icon size={20} className="text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{section.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {section.description}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight size={20} className="text-muted-foreground" />
               </div>
-              <Switch
-                checked={profile.notifications_enabled}
-                onCheckedChange={(checked) => updateProfile('notifications_enabled', checked)}
-              />
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* User Activity Dashboard */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2 mb-4">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">Tu Actividad</h2>
-          </div>
-          <p className="text-muted-foreground mb-6">
-            Resumen de tu uso de los servicios
-          </p>
-          
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary mb-1">
-                {userStats.chat_sessions}
-              </div>
-              <p className="body-small text-muted-foreground">Chats</p>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-secondary mb-1">
-                {userStats.testimonials}
-              </div>
-              <p className="body-small text-muted-foreground">Testimonios</p>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-accent mb-1">
-                {userStats.favorites}
-              </div>
-              <p className="body-small text-muted-foreground">Favoritos</p>
-            </div>
-          </div>
-          
-          {userStats.last_activity && (
-            <div className="text-center pt-2 border-t">
-              <p className="body-small text-muted-foreground">
-                Última actividad: {new Date(userStats.last_activity).toLocaleDateString('es-ES')}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <Separator />
-
-        {/* Chat History Section */}
-        <ChatHistory />
-
-        <Separator />
-
-        {/* Notifications Section */}
-        <NotificationCenter />
-
-        <Separator />
+            </CardContent>
+          </Card>
+        ))}
 
         {/* Quick Actions */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Acciones Rápidas</h2>
-          
-          <div className="space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => navigate('/services/psychological-support')}
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Nueva Sesión de Chat
-            </Button>
-            
-            <Button variant="outline" className="w-full justify-start">
-              <Heart className="h-4 w-4 mr-2" />
-              Mis Favoritos
-              <Badge variant="secondary" className="ml-auto">
-                {userStats.favorites}
-              </Badge>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => navigate('/community')}
-            >
-              <User className="h-4 w-4 mr-2" />
-              Ver Comunidad
-            </Button>
-          </div>
-        </div>
+        <Card className="card-elevated mt-8">
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Acciones Rápidas</h3>
+            <div className="grid grid-cols-3 gap-3">
+              <Button 
+                variant="outline" 
+                className="flex flex-col h-auto py-4"
+                onClick={() => navigate('/services/psychological')}
+              >
+                <MessageCircle size={24} className="mb-2 text-primary" />
+                <span className="text-xs">Nuevo Chat</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="flex flex-col h-auto py-4"
+                onClick={() => navigate('/community')}
+              >
+                <Heart size={24} className="mb-2 text-secondary" />
+                <span className="text-xs">Favoritos</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="flex flex-col h-auto py-4"
+                onClick={() => navigate('/community')}
+              >
+                <Users size={24} className="mb-2 text-accent" />
+                <span className="text-xs">Comunidad</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Save Button */}
+        {/* Logout Button */}
         <Button 
-          onClick={handleSave} 
-          disabled={saving}
-          className="w-full btn-primary"
-        >
-          {saving ? 'Guardando...' : 'Guardar Cambios'}
-        </Button>
-
-        <Separator />
-
-        {/* Logout */}
-        <Button 
-          variant="destructive" 
-          onClick={() => handleNavigation(handleLogout)}
+          onClick={() => setShowLogoutDialog(true)}
+          variant="destructive"
           className="w-full"
         >
-          <LogOut className="h-4 w-4 mr-2" />
+          <LogOut className="mr-2 h-4 w-4" />
           Cerrar Sesión
         </Button>
-
-        {/* Unsaved Changes Dialog */}
-        <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Guardar cambios?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tienes cambios sin guardar. ¿Qué te gustaría hacer?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={handleDiscardAndContinue}>
-                Descartar cambios
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={handleSaveAndContinue}>
-                Guardar y continuar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cerrar Sesión</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que quieres cerrar sesión? Tendrás que iniciar sesión nuevamente para acceder a tu cuenta.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>
+              Cerrar Sesión
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

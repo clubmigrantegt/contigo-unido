@@ -111,7 +111,12 @@ const Home = () => {
               Estamos contigo en tu camino
             </p>
           </div>
-          <Button variant="ghost" size="icon" className="text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-muted-foreground"
+            onClick={() => navigate('/notifications')}
+          >
             <Bell size={20} />
           </Button>
         </div>

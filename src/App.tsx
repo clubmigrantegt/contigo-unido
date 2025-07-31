@@ -13,6 +13,7 @@ import LegalInfo from "./pages/services/LegalInfo";
 import PsychologicalSupport from "./pages/services/PsychologicalSupport";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="services/legal" element={<LegalInfo />} />
               <Route path="community" element={<Community />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="notifications" element={<Notifications />} />
             </Route>
             
             {/* Catch-all route */}
