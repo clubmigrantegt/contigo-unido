@@ -8,6 +8,11 @@ import AppLayout from "@/components/layout/AppLayout";
 import Onboarding from "./pages/onboarding/Onboarding";
 import Auth from "./pages/auth/Auth";
 import Home from "./pages/Home";
+import Services from "./pages/Services";
+import LegalInfo from "./pages/services/LegalInfo";
+import PsychologicalSupport from "./pages/services/PsychologicalSupport";
+import Community from "./pages/Community";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,11 +56,11 @@ const App = () => (
               </ProtectedRoute>
             }>
               <Route path="home" element={<Home />} />
-              <Route path="services" element={<div>Services Page</div>} />
-              <Route path="services/psychological" element={<div>Psychological Support</div>} />
-              <Route path="services/legal" element={<div>Legal Info</div>} />
-              <Route path="community" element={<div>Community Page</div>} />
-              <Route path="profile" element={<div>Profile Page</div>} />
+              <Route path="services" element={<Services />} />
+              <Route path="services/psychological" element={<PsychologicalSupport />} />
+              <Route path="services/legal" element={<LegalInfo />} />
+              <Route path="community" element={<Community />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
             
             {/* Catch-all route */}
