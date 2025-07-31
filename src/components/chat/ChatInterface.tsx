@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, Bot, User, StopCircle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Send, Bot, User, X, ArrowLeft } from 'lucide-react';
 import { ChatMessage } from '@/hooks/usePsychologicalChat';
 
 interface ChatInterfaceProps {
@@ -12,6 +13,7 @@ interface ChatInterfaceProps {
   isSessionActive: boolean;
   onSendMessage: (message: string) => void;
   onEndSession: () => void;
+  onNavigateBack: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -21,6 +23,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   isSessionActive,
   onSendMessage,
   onEndSession,
+  onNavigateBack,
   messagesEndRef
 }) => {
   const [inputMessage, setInputMessage] = useState('');
@@ -76,6 +79,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Chat Header - Fixed at top */}
       <div className="flex items-center justify-between p-4 border-b bg-card">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onNavigateBack}
+            className="p-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <Avatar className="h-10 w-10">
             <AvatarFallback className="bg-primary text-primary-foreground">
               <Bot className="h-5 w-5" />
@@ -86,15 +97,36 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <p className="text-sm text-muted-foreground">En línea</p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onEndSession}
-          className="text-destructive hover:bg-destructive/10"
-        >
-          <StopCircle className="h-4 w-4 mr-2" />
-          Finalizar
-        </Button>
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:bg-destructive/10 p-2"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Finalizar sesión de chat?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Si finalizas la sesión, no podrás continuar la conversación actual. 
+                Tendrás la oportunidad de calificar la sesión antes de cerrarla completamente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={onEndSession}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Finalizar sesión
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Messages Area - Scrollable middle section */}

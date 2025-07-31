@@ -17,6 +17,7 @@ const PsychologicalSupport = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showChatInterface, setShowChatInterface] = useState(false);
   
   const {
     messages,
@@ -85,10 +86,16 @@ const PsychologicalSupport = () => {
     }
 
     await startSession();
+    setShowChatInterface(true);
+  };
+
+  const handleNavigateBack = () => {
+    setShowChatInterface(false);
   };
 
   const handleEndSession = async () => {
     const sessionId = await endSession();
+    setShowChatInterface(false);
     if (sessionId) {
       setShowRatingModal(true);
     }
@@ -150,18 +157,39 @@ const PsychologicalSupport = () => {
         </div>
       </div>
 
-      {/* If chat is active, show full screen chat */}
-      {isSessionActive ? (
+      {/* If chat interface should be shown, display full screen chat */}
+      {isSessionActive && showChatInterface ? (
         <ChatInterface
           messages={messages}
           isLoading={chatLoading}
           isSessionActive={isSessionActive}
           onSendMessage={sendMessage}
           onEndSession={handleEndSession}
+          onNavigateBack={handleNavigateBack}
           messagesEndRef={messagesEndRef}
         />
       ) : (
         <div className="container mx-auto px-4 py-6 space-y-6">
+          {/* Session Active Indicator */}
+          {isSessionActive && !showChatInterface && (
+            <Alert className="border-primary bg-primary/5 py-3">
+              <MessageCircle className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span className="text-sm">
+                  <strong>Sesión activa:</strong> Tienes una conversación en progreso
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowChatInterface(true)}
+                  className="ml-4"
+                >
+                  Regresar al chat
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Crisis Alert - Made smaller */}
           <Alert className="border-destructive bg-destructive/5 py-2">
             <Phone className="h-3 w-3" />
