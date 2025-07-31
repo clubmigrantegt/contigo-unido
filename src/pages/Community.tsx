@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+
 interface Testimonial {
   id: string;
   title: string;
@@ -26,6 +27,7 @@ interface Testimonial {
   like_count?: number;
   user_liked?: boolean;
 }
+
 const Community = () => {
   const {
     user
@@ -48,6 +50,7 @@ const Community = () => {
     country_of_origin: '',
     category: 'general'
   });
+
   const categories = [{
     id: 'todos',
     label: 'Todos'
@@ -70,12 +73,15 @@ const Community = () => {
     id: 'familia',
     label: 'Familia'
   }];
+
   useEffect(() => {
     fetchTestimonials();
   }, []);
+
   useEffect(() => {
     filterTestimonials();
   }, [testimonials, searchQuery, selectedCategory]);
+
   const fetchTestimonials = async () => {
     try {
       // Fetch testimonials with like counts
@@ -122,6 +128,7 @@ const Community = () => {
       setLoading(false);
     }
   };
+
   const filterTestimonials = () => {
     let filtered = testimonials;
 
@@ -137,6 +144,7 @@ const Community = () => {
     }
     setFilteredTestimonials(filtered);
   };
+
   const handleSubmitTestimonial = async () => {
     if (!user || !newTestimonial.title || !newTestimonial.content || !newTestimonial.author_name) {
       toast({
@@ -183,6 +191,7 @@ const Community = () => {
       setSubmitting(false);
     }
   };
+
   const handleLikeTestimonial = async (testimonialId: string) => {
     if (!user) {
       toast({
@@ -226,6 +235,7 @@ const Community = () => {
       });
     }
   };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
       year: 'numeric',
@@ -233,9 +243,11 @@ const Community = () => {
       day: 'numeric'
     });
   };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
+
   const getCountryFlag = (country: string) => {
     const flags: Record<string, string> = {
       'El Salvador': '🇸🇻',
@@ -250,20 +262,23 @@ const Community = () => {
     };
     return flags[country] || '🌎';
   };
+
   const getCategoryStats = () => {
     return categories.filter(c => c.id !== 'todos').map(category => ({
       ...category,
       count: testimonials.filter(t => t.category === category.id).length
     }));
   };
+
   if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>;
   }
+
   return <div className="min-h-screen bg-background">
       {/* Header principal - ancho completo */}
-      <div className="gradient-community text-strong-black px-4 py-[32px]">
+      <div className="gradient-community text-strong-black px-4 pt-8 pb-4">
         <div className="container mx-auto text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
             <div className="bg-strong-black/10 rounded-full p-3">
@@ -534,4 +549,5 @@ const Community = () => {
       </div>
     </div>;
 };
+
 export default Community;
