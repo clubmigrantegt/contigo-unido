@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -28,8 +29,12 @@ const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [originalProfile, setOriginalProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
   const [userStats, setUserStats] = useState({
     chat_sessions: 0,
     testimonials: 0,
@@ -64,6 +69,7 @@ const Profile = () => {
 
       if (error) throw error;
       setProfile(data);
+      setOriginalProfile(data);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -139,6 +145,8 @@ const Profile = () => {
         title: "¡Perfil actualizado!",
         description: "Los cambios se han guardado correctamente",
       });
+      setHasUnsavedChanges(false);
+      setOriginalProfile(profile);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -169,9 +177,60 @@ const Profile = () => {
 
   const updateProfile = (field: keyof Profile, value: any) => {
     if (profile) {
-      setProfile({ ...profile, [field]: value });
+      const updatedProfile = { ...profile, [field]: value };
+      setProfile(updatedProfile);
+      
+      // Check if there are unsaved changes
+      if (originalProfile) {
+        const hasChanges = JSON.stringify(updatedProfile) !== JSON.stringify(originalProfile);
+        setHasUnsavedChanges(hasChanges);
+      }
     }
   };
+
+  // Handle navigation with unsaved changes
+  const handleNavigation = (navigationFn: () => void) => {
+    if (hasUnsavedChanges) {
+      setPendingNavigation(() => navigationFn);
+      setShowUnsavedDialog(true);
+    } else {
+      navigationFn();
+    }
+  };
+
+  const handleSaveAndContinue = async () => {
+    await handleSave();
+    if (pendingNavigation) {
+      pendingNavigation();
+      setPendingNavigation(null);
+    }
+    setShowUnsavedDialog(false);
+  };
+
+  const handleDiscardAndContinue = () => {
+    if (originalProfile) {
+      setProfile(originalProfile);
+      setHasUnsavedChanges(false);
+    }
+    if (pendingNavigation) {
+      pendingNavigation();
+      setPendingNavigation(null);
+    }
+    setShowUnsavedDialog(false);
+  };
+
+  // Handle browser back/refresh
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   if (loading) {
     return (
@@ -221,17 +280,16 @@ const Profile = () => {
 
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Personal Information */}
-        <Card className="card-elevated">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <User className="h-5 w-5 mr-2" />
-              Información Personal
-            </CardTitle>
-            <CardDescription>
-              Actualiza tu información personal y de contacto
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 mb-4">
+            <User className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Información Personal</h2>
+          </div>
+          <p className="text-muted-foreground mb-6">
+            Actualiza tu información personal y de contacto
+          </p>
+          
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre Completo</Label>
               <Input
@@ -282,21 +340,22 @@ const Profile = () => {
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        <Separator />
 
         {/* Preferences */}
-        <Card className="card-elevated">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Settings className="h-5 w-5 mr-2" />
-              Preferencias
-            </CardTitle>
-            <CardDescription>
-              Configura tus preferencias de idioma y notificaciones
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 mb-4">
+            <Settings className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Preferencias</h2>
+          </div>
+          <p className="text-muted-foreground mb-6">
+            Configura tus preferencias de idioma y notificaciones
+          </p>
+          
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="language">Idioma Preferido</Label>
               <Select 
@@ -331,58 +390,58 @@ const Profile = () => {
                 onCheckedChange={(checked) => updateProfile('notifications_enabled', checked)}
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        <Separator />
 
         {/* User Activity Dashboard */}
-        <Card className="card-elevated">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BarChart3 className="h-5 w-5 mr-2" />
-              Tu Actividad
-            </CardTitle>
-            <CardDescription>
-              Resumen de tu uso de los servicios
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">
-                  {userStats.chat_sessions}
-                </div>
-                <p className="body-small text-muted-foreground">Chats</p>
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 mb-4">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Tu Actividad</h2>
+          </div>
+          <p className="text-muted-foreground mb-6">
+            Resumen de tu uso de los servicios
+          </p>
+          
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary mb-1">
+                {userStats.chat_sessions}
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-secondary mb-1">
-                  {userStats.testimonials}
-                </div>
-                <p className="body-small text-muted-foreground">Testimonios</p>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-accent mb-1">
-                  {userStats.favorites}
-                </div>
-                <p className="body-small text-muted-foreground">Favoritos</p>
-              </div>
+              <p className="body-small text-muted-foreground">Chats</p>
             </div>
-            
-            {userStats.last_activity && (
-              <div className="text-center pt-2 border-t">
-                <p className="body-small text-muted-foreground">
-                  Última actividad: {new Date(userStats.last_activity).toLocaleDateString('es-ES')}
-                </p>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-secondary mb-1">
+                {userStats.testimonials}
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <p className="body-small text-muted-foreground">Testimonios</p>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent mb-1">
+                {userStats.favorites}
+              </div>
+              <p className="body-small text-muted-foreground">Favoritos</p>
+            </div>
+          </div>
+          
+          {userStats.last_activity && (
+            <div className="text-center pt-2 border-t">
+              <p className="body-small text-muted-foreground">
+                Última actividad: {new Date(userStats.last_activity).toLocaleDateString('es-ES')}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <Separator />
 
         {/* Quick Actions */}
-        <Card className="card-elevated">
-          <CardHeader>
-            <CardTitle>Acciones Rápidas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Acciones Rápidas</h2>
+          
+          <div className="space-y-3">
             <Button variant="outline" className="w-full justify-start">
               <MessageSquare className="h-4 w-4 mr-2" />
               Historial de Chats
@@ -403,8 +462,8 @@ const Profile = () => {
               <Settings className="h-4 w-4 mr-2" />
               Configuración de Privacidad
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Save Button */}
         <Button 
@@ -420,12 +479,32 @@ const Profile = () => {
         {/* Logout */}
         <Button 
           variant="destructive" 
-          onClick={handleLogout}
+          onClick={() => handleNavigation(handleLogout)}
           className="w-full"
         >
           <LogOut className="h-4 w-4 mr-2" />
           Cerrar Sesión
         </Button>
+
+        {/* Unsaved Changes Dialog */}
+        <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Guardar cambios?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tienes cambios sin guardar. ¿Qué te gustaría hacer?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleDiscardAndContinue}>
+                Descartar cambios
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleSaveAndContinue}>
+                Guardar y continuar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
