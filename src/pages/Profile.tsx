@@ -13,6 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import ChatHistory from '@/components/profile/ChatHistory';
+import NotificationCenter from '@/components/notifications/NotificationCenter';
 
 interface Profile {
   id: string;
@@ -437,17 +439,28 @@ const Profile = () => {
 
         <Separator />
 
+        {/* Chat History Section */}
+        <ChatHistory />
+
+        <Separator />
+
+        {/* Notifications Section */}
+        <NotificationCenter />
+
+        <Separator />
+
         {/* Quick Actions */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Acciones Rápidas</h2>
           
           <div className="space-y-3">
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/services/psychological-support')}
+            >
               <MessageSquare className="h-4 w-4 mr-2" />
-              Historial de Chats
-              <Badge variant="secondary" className="ml-auto">
-                {userStats.chat_sessions}
-              </Badge>
+              Nueva Sesión de Chat
             </Button>
             
             <Button variant="outline" className="w-full justify-start">
@@ -458,9 +471,13 @@ const Profile = () => {
               </Badge>
             </Button>
             
-            <Button variant="outline" className="w-full justify-start">
-              <Settings className="h-4 w-4 mr-2" />
-              Configuración de Privacidad
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/community')}
+            >
+              <User className="h-4 w-4 mr-2" />
+              Ver Comunidad
             </Button>
           </div>
         </div>

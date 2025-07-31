@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Scale, Users, Phone, MessageCircle, FileText } from 'lucide-react';
+import { Heart, Scale, Users, Phone, MessageCircle, FileText, Calendar } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import AppointmentScheduler from '@/components/services/AppointmentScheduler';
 
 interface FAQ {
   id: string;
@@ -115,74 +117,90 @@ const Services = () => {
       </div>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Quick Actions */}
-        <section>
-          <h2 className="mb-4">Acciones Rápidas</h2>
-          <div className="grid grid-cols-1 gap-3">
-            {quickActions.map((action, index) => (
-              <Card 
-                key={index} 
-                className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                  action.urgent ? 'border-destructive bg-destructive/5' : 'hover:shadow-card'
-                }`}
-                onClick={action.action}
-              >
-                <CardContent className="flex items-center p-4">
-                  <div className={`p-3 rounded-lg mr-4 ${
-                    action.urgent ? 'bg-destructive/10' : 'bg-muted'
-                  }`}>
-                    <action.icon className={`h-5 w-5 ${
-                      action.urgent ? 'text-destructive' : 'text-foreground'
-                    }`} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={action.urgent ? 'text-destructive' : 'text-foreground'}>
-                      {action.title}
-                    </h3>
-                    <p className="body-small text-muted-foreground">
-                      {action.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+        <Tabs defaultValue="services" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="services">Servicios</TabsTrigger>
+            <TabsTrigger value="schedule">Programar Citas</TabsTrigger>
+            <TabsTrigger value="emergency">Emergencias</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="services" className="space-y-6">
+            {/* Main Services */}
+            <section>
+              <h2 className="mb-4">Nuestros Servicios</h2>
+              <div className="grid grid-cols-1 gap-4">
+                {services.map((service) => (
+                  <Card key={service.id} className="card-elevated hover:shadow-lg transition-all duration-300">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start space-x-4">
+                        <div className={`p-3 rounded-lg ${service.bgColor}`}>
+                          <service.icon className={`h-6 w-6 ${service.color}`} />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{service.title}</CardTitle>
+                          <CardDescription className="mt-1">
+                            {service.description}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button 
+                        asChild 
+                        className="w-full btn-primary"
+                        disabled={!service.available}
+                      >
+                        <Link to={service.path}>
+                          {service.available ? 'Acceder' : 'Próximamente'}
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          </TabsContent>
 
-        {/* Main Services */}
-        <section>
-          <h2 className="mb-4">Nuestros Servicios</h2>
-          <div className="grid grid-cols-1 gap-4">
-            {services.map((service) => (
-              <Card key={service.id} className="card-elevated hover:shadow-lg transition-all duration-300">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start space-x-4">
-                    <div className={`p-3 rounded-lg ${service.bgColor}`}>
-                      <service.icon className={`h-6 w-6 ${service.color}`} />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{service.title}</CardTitle>
-                      <CardDescription className="mt-1">
-                        {service.description}
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <Button 
-                    asChild 
-                    className="w-full btn-primary"
-                    disabled={!service.available}
+          <TabsContent value="schedule" className="space-y-6">
+            <AppointmentScheduler />
+          </TabsContent>
+
+          <TabsContent value="emergency" className="space-y-6">
+            {/* Quick Actions */}
+            <section>
+              <h2 className="mb-4">Ayuda Inmediata</h2>
+              <div className="grid grid-cols-1 gap-3">
+                {quickActions.map((action, index) => (
+                  <Card 
+                    key={index} 
+                    className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                      action.urgent ? 'border-destructive bg-destructive/5' : 'hover:shadow-card'
+                    }`}
+                    onClick={action.action}
                   >
-                    <Link to={service.path}>
-                      {service.available ? 'Acceder' : 'Próximamente'}
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+                    <CardContent className="flex items-center p-4">
+                      <div className={`p-3 rounded-lg mr-4 ${
+                        action.urgent ? 'bg-destructive/10' : 'bg-muted'
+                      }`}>
+                        <action.icon className={`h-5 w-5 ${
+                          action.urgent ? 'text-destructive' : 'text-foreground'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className={action.urgent ? 'text-destructive' : 'text-foreground'}>
+                          {action.title}
+                        </h3>
+                        <p className="body-small text-muted-foreground">
+                          {action.description}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          </TabsContent>
+        </Tabs>
 
         {/* FAQs Section */}
         {faqs.length > 0 && (
