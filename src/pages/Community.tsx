@@ -38,6 +38,7 @@ const Community = () => {
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
+  const [activeTab, setActiveTab] = useState('historias');
   const [newTestimonial, setNewTestimonial] = useState({
     title: '',
     content: '',
@@ -268,6 +269,13 @@ const Community = () => {
     return flags[country] || '🌎';
   };
 
+  const getCategoryStats = () => {
+    return categories.filter(c => c.id !== 'todos').map(category => ({
+      ...category,
+      count: testimonials.filter(t => t.category === category.id).length
+    }));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -278,248 +286,324 @@ const Community = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Header principal - ancho completo */}
       <div className="gradient-community text-strong-black px-4 py-8">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-strong-black/10 rounded-full p-3">
-                <Users className="h-6 w-6 text-strong-black" />
-              </div>
-              <div>
-                <h1 className="text-strong-black mb-1">Comunidad</h1>
-                <p className="body text-strong-black/80">
-                  Historias de esperanza y superación
-                </p>
-              </div>
+        <div className="container mx-auto text-center">
+          <div className="flex items-center justify-center space-x-4 mb-4">
+            <div className="bg-strong-black/10 rounded-full p-3">
+              <Users className="h-8 w-8 text-strong-black" />
             </div>
-            
-            <Dialog open={showForm} onOpenChange={setShowForm}>
-              <DialogTrigger asChild>
-                <Button className="btn-secondary">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Compartir
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Comparte tu Historia</DialogTitle>
-                  <DialogDescription>
-                    Tu testimonio puede inspirar y ayudar a otros migrantes
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Título de tu historia</Label>
-                    <Input
-                      id="title"
-                      value={newTestimonial.title}
-                      onChange={(e) => setNewTestimonial({...newTestimonial, title: e.target.value})}
-                      placeholder="¿Cómo resumirías tu experiencia?"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="author">Tu nombre (o seudónimo)</Label>
-                    <Input
-                      id="author"
-                      value={newTestimonial.author_name}
-                      onChange={(e) => setNewTestimonial({...newTestimonial, author_name: e.target.value})}
-                      placeholder="Como quieres que te identifiquen"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="country">País de origen (opcional)</Label>
-                    <Input
-                      id="country"
-                      value={newTestimonial.country_of_origin}
-                      onChange={(e) => setNewTestimonial({...newTestimonial, country_of_origin: e.target.value})}
-                      placeholder="Tu país de origen"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Categoría</Label>
-                    <Select 
-                      value={newTestimonial.category} 
-                      onValueChange={(value) => setNewTestimonial({...newTestimonial, category: value})}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una categoría" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.filter(c => c.id !== 'todos').map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="content">Tu historia</Label>
-                    <Textarea
-                      id="content"
-                      value={newTestimonial.content}
-                      onChange={(e) => setNewTestimonial({...newTestimonial, content: e.target.value})}
-                      placeholder="Comparte tu experiencia, los desafíos que has enfrentado y cómo has salido adelante..."
-                      className="min-h-[120px]"
-                    />
-                  </div>
-                  
-                  <Button 
-                    onClick={handleSubmitTestimonial} 
-                    disabled={submitting}
-                    className="w-full btn-primary"
-                  >
-                    {submitting ? 'Enviando...' : 'Compartir Historia'}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
+          <h1 className="text-4xl font-bold text-strong-black mb-2">Comunidad</h1>
+          <p className="text-xl text-strong-black/80">
+            Historias de esperanza y superación
+          </p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-6">
-        {/* Search and Filters */}
-        <div className="space-y-4 mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        {/* Sección de acciones */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Buscar historias..."
+              type="text"
+              placeholder="Buscar historias por título, contenido, autor..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
-
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
-              {categories.map((category) => (
-                <TabsTrigger 
-                  key={category.id} 
-                  value={category.id}
-                  className="text-xs"
-                >
-                  {category.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-primary mb-1">
-                {filteredTestimonials.length}
-              </div>
-              <p className="body-small text-muted-foreground">Historias encontradas</p>
-            </CardContent>
-          </Card>
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-secondary mb-1">
-                {new Set(filteredTestimonials.filter(t => t.country_of_origin).map(t => t.country_of_origin)).size}
-              </div>
-              <p className="body-small text-muted-foreground">Países representados</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Testimonials */}
-        {filteredTestimonials.length === 0 ? (
-          <Card className="card-elevated">
-            <CardContent className="text-center py-12">
-              <MessageCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="mb-2">Sé el primero en compartir</h3>
-              <p className="body text-muted-foreground mb-4">
-                Tu historia puede inspirar a otros migrantes. Comparte tu experiencia y ayuda a crear una comunidad de apoyo.
-              </p>
-              <Button onClick={() => setShowForm(true)} className="btn-primary">
-                <Plus className="h-4 w-4 mr-2" />
-                Compartir mi Historia
+          <Dialog open={showForm} onOpenChange={setShowForm}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap">
+                <Plus className="w-4 h-4 mr-2" />
+                Compartir Historia
               </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {filteredTestimonials.map((testimonial) => (
-              <Card key={testimonial.id} className={`card-elevated hover:shadow-lg transition-all duration-300 ${
-                testimonial.is_featured ? 'border-accent bg-accent/5' : ''
-              }`}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start space-x-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                        {getInitials(testimonial.author_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="font-medium">{testimonial.author_name}</h3>
-                        {testimonial.country_of_origin && (
-                          <span className="text-sm">
-                            {getCountryFlag(testimonial.country_of_origin)}
-                          </span>
-                        )}
-                        {testimonial.is_featured && (
-                          <Badge className="bg-accent/20 text-accent-foreground border-accent/30">
-                            <Star className="h-3 w-3 mr-1" />
-                            Destacado
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="caption text-muted-foreground">
-                        {formatDate(testimonial.created_at)}
-                      </p>
-                    </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Comparte tu Historia</DialogTitle>
+                <DialogDescription>
+                  Tu testimonio puede inspirar y ayudar a otros migrantes
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Título de tu historia</Label>
+                  <Input
+                    id="title"
+                    value={newTestimonial.title}
+                    onChange={(e) => setNewTestimonial({...newTestimonial, title: e.target.value})}
+                    placeholder="¿Cómo resumirías tu experiencia?"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="author">Tu nombre (o seudónimo)</Label>
+                  <Input
+                    id="author"
+                    value={newTestimonial.author_name}
+                    onChange={(e) => setNewTestimonial({...newTestimonial, author_name: e.target.value})}
+                    placeholder="Como quieres que te identifiquen"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="country">País de origen (opcional)</Label>
+                  <Input
+                    id="country"
+                    value={newTestimonial.country_of_origin}
+                    onChange={(e) => setNewTestimonial({...newTestimonial, country_of_origin: e.target.value})}
+                    placeholder="Tu país de origen"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="category">Categoría</Label>
+                  <Select 
+                    value={newTestimonial.category} 
+                    onValueChange={(value) => setNewTestimonial({...newTestimonial, category: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.filter(c => c.id !== 'todos').map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="content">Tu historia</Label>
+                  <Textarea
+                    id="content"
+                    value={newTestimonial.content}
+                    onChange={(e) => setNewTestimonial({...newTestimonial, content: e.target.value})}
+                    placeholder="Comparte tu experiencia, los desafíos que has enfrentado y cómo has salido adelante..."
+                    className="min-h-[120px]"
+                  />
+                </div>
+                
+                <Button 
+                  onClick={handleSubmitTestimonial} 
+                  disabled={submitting}
+                  className="w-full btn-primary"
+                >
+                  {submitting ? 'Enviando...' : 'Compartir Historia'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Navegación principal con Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="historias">Historias</TabsTrigger>
+            <TabsTrigger value="categorias">Por Categorías</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="historias" className="space-y-6">
+            {/* Filtros de categoría */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Filter className="h-4 w-4" />
+                Filtrar por categoría:
+              </div>
+              <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+                <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+                  {categories.map((category) => (
+                    <TabsTrigger 
+                      key={category.id} 
+                      value={category.id}
+                      className="text-xs"
+                    >
+                      {category.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="text-center">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-primary mb-1">
+                    {filteredTestimonials.length}
                   </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <CardTitle className="text-lg mb-3 leading-tight">
-                    {testimonial.title}
-                  </CardTitle>
-                  <p className="body text-foreground leading-relaxed mb-4">
-                    {testimonial.content}
-                  </p>
-                  {/* Category and Tags */}
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <Badge variant="secondary" className="text-xs">
-                      {categories.find(c => c.id === testimonial.category)?.label || testimonial.category}
-                    </Badge>
-                    {testimonial.tags && testimonial.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className={`text-muted-foreground ${testimonial.user_liked ? 'text-red-500' : ''}`}
-                        onClick={() => handleLikeTestimonial(testimonial.id)}
-                      >
-                        <Heart className={`h-4 w-4 mr-1 ${testimonial.user_liked ? 'fill-current' : ''}`} />
-                        {testimonial.like_count || 0}
-                      </Button>
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground">
-                      <Flag className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <p className="body-small text-muted-foreground">Historias encontradas</p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+              <Card className="text-center">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-secondary mb-1">
+                    {new Set(filteredTestimonials.filter(t => t.country_of_origin).map(t => t.country_of_origin)).size}
+                  </div>
+                  <p className="body-small text-muted-foreground">Países representados</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Testimonials */}
+            {filteredTestimonials.length === 0 ? (
+              <Card className="card-elevated">
+                <CardContent className="text-center py-12">
+                  <MessageCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="mb-2">Sé el primero en compartir</h3>
+                  <p className="body text-muted-foreground mb-4">
+                    Tu historia puede inspirar a otros migrantes. Comparte tu experiencia y ayuda a crear una comunidad de apoyo.
+                  </p>
+                  <Button onClick={() => setShowForm(true)} className="btn-primary">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Compartir mi Historia
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {filteredTestimonials.map((testimonial) => (
+                  <Card key={testimonial.id} className={`card-elevated hover:shadow-lg transition-all duration-300 ${
+                    testimonial.is_featured ? 'border-accent bg-accent/5' : ''
+                  }`}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                            {getInitials(testimonial.author_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className="font-medium">{testimonial.author_name}</h3>
+                            {testimonial.country_of_origin && (
+                              <span className="text-sm">
+                                {getCountryFlag(testimonial.country_of_origin)}
+                              </span>
+                            )}
+                            {testimonial.is_featured && (
+                              <Badge className="bg-accent/20 text-accent-foreground border-accent/30">
+                                <Star className="h-3 w-3 mr-1" />
+                                Destacado
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="caption text-muted-foreground">
+                            {formatDate(testimonial.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <CardTitle className="text-lg mb-3 leading-tight">
+                        {testimonial.title}
+                      </CardTitle>
+                      <p className="body text-foreground leading-relaxed mb-4">
+                        {testimonial.content}
+                      </p>
+                      {/* Category and Tags */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <Badge variant="secondary" className="text-xs">
+                          {categories.find(c => c.id === testimonial.category)?.label || testimonial.category}
+                        </Badge>
+                        {testimonial.tags && testimonial.tags.map((tag, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className={`text-muted-foreground ${testimonial.user_liked ? 'text-red-500' : ''}`}
+                            onClick={() => handleLikeTestimonial(testimonial.id)}
+                          >
+                            <Heart className={`h-4 w-4 mr-1 ${testimonial.user_liked ? 'fill-current' : ''}`} />
+                            {testimonial.like_count || 0}
+                          </Button>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-muted-foreground">
+                          <Flag className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="categorias" className="space-y-6">
+            {/* Vista por categorías */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {getCategoryStats().map((category) => (
+                <Card key={category.id} className="card-elevated hover:shadow-lg transition-all duration-300 cursor-pointer"
+                      onClick={() => {
+                        setSelectedCategory(category.id);
+                        setActiveTab('historias');
+                      }}>
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-lg">{category.label}</CardTitle>
+                    <CardDescription>
+                      {category.count} {category.count === 1 ? 'historia' : 'historias'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-primary mb-2">
+                        {category.count}
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        Ver historias
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Estadísticas generales */}
+            <Card className="card-elevated">
+              <CardHeader>
+                <CardTitle>Estadísticas de la Comunidad</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-primary">{testimonials.length}</div>
+                    <p className="text-sm text-muted-foreground">Total de historias</p>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-secondary">
+                      {new Set(testimonials.filter(t => t.country_of_origin).map(t => t.country_of_origin)).size}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Países</p>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-accent">
+                      {testimonials.filter(t => t.is_featured).length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Destacadas</p>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-muted-foreground">
+                      {testimonials.reduce((acc, t) => acc + (t.like_count || 0), 0)}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Me gusta totales</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
