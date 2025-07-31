@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Send, Bot, User, StopCircle } from 'lucide-react';
 import { ChatMessage } from '@/hooks/usePsychologicalChat';
@@ -25,11 +24,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   messagesEndRef
 }) => {
   const [inputMessage, setInputMessage] = useState('');
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const lastMessageCount = useRef(messages.length);
 
   const handleSend = () => {
     if (inputMessage.trim() && !isLoading) {
       onSendMessage(inputMessage);
       setInputMessage('');
+      // Only auto-scroll when user sends a message
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }
   };
 
@@ -40,18 +46,39 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
+  // Only auto-scroll for bot responses if user is not actively scrolling
+  useEffect(() => {
+    if (messages.length > lastMessageCount.current && !isUserScrolling) {
+      const lastMessage = messages[messages.length - 1];
+      // Only auto-scroll for bot responses, not user messages
+      if (!lastMessage?.isUser) {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+    lastMessageCount.current = messages.length;
+  }, [messages, isUserScrolling]);
+
+  // Detect user scrolling
+  const handleScroll = () => {
+    setIsUserScrolling(true);
+    // Reset scrolling detection after 2 seconds
+    setTimeout(() => setIsUserScrolling(false), 2000);
+  };
+
   if (!isSessionActive) {
     return null;
   }
 
   return (
-    <Card className="flex flex-col h-[600px] bg-card">
-      {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
+    <div className="flex flex-col h-screen bg-background">
+      {/* Chat Header - Fixed at top */}
+      <div className="flex items-center justify-between p-4 border-b bg-card">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
             <AvatarFallback className="bg-primary text-primary-foreground">
-              <Bot className="h-4 w-4" />
+              <Bot className="h-5 w-5" />
             </AvatarFallback>
           </Avatar>
           <div>
@@ -70,94 +97,96 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </Button>
       </div>
 
-      {/* Messages Area */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${message.isUser ? 'justify-end' : 'justify-start'}`}
-            >
-              {!message.isUser && (
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    <Bot className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
-              )}
-              
-              <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.isUser
-                    ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-muted text-foreground'
-                }`}
-              >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <span className="text-xs opacity-70 mt-1 block">
-                  {message.timestamp.toLocaleTimeString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
-              </div>
-
-              {message.isUser && (
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarFallback className="bg-secondary text-secondary-foreground">
-                    <User className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-          ))}
-
-          {isLoading && (
-            <div className="flex gap-3 justify-start">
-              <Avatar className="h-8 w-8 flex-shrink-0">
+      {/* Messages Area - Scrollable middle section */}
+      <div 
+        className="flex-1 overflow-y-auto px-4 py-6 space-y-4"
+        onScroll={handleScroll}
+        ref={scrollAreaRef}
+      >
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex gap-3 ${message.isUser ? 'justify-end' : 'justify-start'}`}
+          >
+            {!message.isUser && (
+              <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   <Bot className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted text-foreground rounded-lg p-3 max-w-[80%]">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                </div>
+            )}
+            
+            <div
+              className={`max-w-[75%] rounded-2xl px-4 py-3 ${
+                message.isUser
+                  ? 'bg-primary text-primary-foreground rounded-br-md'
+                  : 'bg-muted text-foreground rounded-bl-md'
+              }`}
+            >
+              <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+              <span className="text-xs opacity-70 mt-2 block">
+                {message.timestamp.toLocaleTimeString('es-ES', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
+
+            {message.isUser && (
+              <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
+                <AvatarFallback className="bg-secondary text-secondary-foreground">
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+            )}
+          </div>
+        ))}
+
+        {isLoading && (
+          <div className="flex gap-3 justify-start">
+            <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                <Bot className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="bg-muted text-foreground rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
               </div>
             </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
 
-      {/* Input Area */}
+      {/* Input Area - Fixed at bottom */}
       <div className="p-4 border-t bg-card">
-        <div className="flex gap-2">
+        <div className="flex gap-3 items-end">
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Escribe tu mensaje aquí..."
-            className="flex-1 min-h-[44px] max-h-32 resize-none"
+            placeholder="Escribe tu mensaje..."
+            className="flex-1 min-h-[44px] max-h-32 resize-none rounded-2xl border-2 focus:border-primary/50"
             disabled={isLoading}
           />
           <Button
             onClick={handleSend}
             disabled={!inputMessage.trim() || isLoading}
             size="icon"
-            className="self-end"
+            className="h-11 w-11 rounded-full"
           >
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-xs text-muted-foreground mt-2 text-center">
           Presiona Enter para enviar, Shift+Enter para nueva línea
         </p>
       </div>
-    </Card>
+    </div>
   );
 };
 
