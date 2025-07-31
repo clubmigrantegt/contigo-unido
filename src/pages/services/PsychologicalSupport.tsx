@@ -53,8 +53,8 @@ const PsychologicalSupport = () => {
       title: 'Sesión Grupal',
       description: 'Únete a un grupo de apoyo virtual',
       icon: Users,
-      status: 'scheduled',
-      waitTime: 'Próxima: 7:00 PM',
+      status: 'busy',
+      waitTime: 'No disponible',
       type: 'Sesión grupal'
     }
   ];
