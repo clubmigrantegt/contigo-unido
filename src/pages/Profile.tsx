@@ -246,7 +246,7 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="px-4 -mt-4 pb-20 space-y-4">
+      <div className="px-4 mt-4 pb-20 space-y-4">
         {/* Complete Profile Call-to-Action */}
         {isProfileIncomplete && <Card className="card-elevated border-primary/20 bg-primary/5">
             <CardContent className="p-4 px-0 py-[8px]">
