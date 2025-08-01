@@ -252,12 +252,12 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="px-4 -mt-4 pb-20 space-y-4">
+      <div className="px-4 mt-2 pb-20 space-y-4">
         {/* Complete Profile Call-to-Action */}
         {isProfileIncomplete && (
           <Card className="card-elevated border-primary/20 bg-primary/5">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+              <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
                     <User size={20} className="text-primary" />
@@ -272,9 +272,8 @@ const Profile = () => {
                   </div>
                 </div>
                 <Button 
-                  size="sm" 
                   onClick={() => setViewMode('personalInfo')}
-                  className="shrink-0"
+                  className="w-full"
                 >
                   Completar
                 </Button>
