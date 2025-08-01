@@ -213,14 +213,22 @@ const Profile = () => {
   return <div className="min-h-screen bg-calm-gray">
       {/* Header with Profile Info */}
       <div className="gradient-hero text-white px-4 pt-12 pb-8">
-        <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+        <div className="flex items-center space-x-4">
+          <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
             <span className="text-2xl font-bold text-white">
               {getInitials(profile.full_name)}
             </span>
           </div>
-          <h1 className="text-2xl font-bold mb-2">{profile.full_name}</h1>
-          <p className="text-white/80">{profile.email}</p>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold mb-1">{profile.full_name}</h1>
+            <p className="text-white/80 text-sm mb-1">{profile.email}</p>
+            {profile.phone && (
+              <div className="flex items-center text-white/80 text-sm">
+                <span className="mr-2">🇺🇸</span>
+                <span>{profile.phone}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
