@@ -139,7 +139,7 @@ const Profile = () => {
   const displayName = getDisplayName(profile?.full_name);
   const userInitials = getUserInitials(profile?.full_name);
   const formattedPhone = formatPhoneNumber(profile?.phone_number, countryInfo);
-
+  
   // Check if profile is incomplete for UI purposes
   const isProfileIncomplete = !profile?.full_name || !profile?.phone_number;
 
@@ -216,7 +216,7 @@ const Profile = () => {
     description: 'Estadísticas y historial de uso',
     onClick: () => setViewMode('activity')
   }];
-  return <div className="min-h-screen bg-calm-gray">
+  return <div className="min-h-screen bg-calm-gray mt-4">
       {/* Header with Profile Info */}
       <div className="gradient-hero text-white px-4 pt-12 pb-8">
         <div className="flex items-center space-x-4">
@@ -228,29 +228,36 @@ const Profile = () => {
           <div className="flex-1">
             <h1 className="text-2xl font-bold mb-1">
               {displayName}
-              {isProfileIncomplete && <span className="text-sm font-normal text-white/60 ml-2">
+              {isProfileIncomplete && (
+                <span className="text-sm font-normal text-white/60 ml-2">
                   (Perfil incompleto)
-                </span>}
+                </span>
+              )}
             </h1>
             <p className="text-white/80 text-sm mb-1">{profile.email}</p>
-            {profile.phone_number ? <div className="flex items-center text-white/80 text-sm">
+            {profile.phone_number ? (
+              <div className="flex items-center text-white/80 text-sm">
                 <span className="mr-2">
                   {countryInfo?.flag || '📱'}
                 </span>
                 <span>{formattedPhone}</span>
-              </div> : <div className="flex items-center text-white/60 text-sm">
+              </div>
+            ) : (
+              <div className="flex items-center text-white/60 text-sm">
                 <Phone size={14} className="mr-2" />
                 <span>Sin teléfono registrado</span>
-              </div>}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="px-4 mt-4 pb-20 space-y-4">
+      <div className="px-4 mt-2 pb-20 space-y-4">
         {/* Complete Profile Call-to-Action */}
-        {isProfileIncomplete && <Card className="card-elevated border-primary/20 bg-primary/5">
-            <CardContent className="p-4 px-0 py-[8px]">
-              <div className="flex items-center justify-between">
+        {isProfileIncomplete && (
+          <Card className="card-elevated border-primary/20 bg-primary/5">
+            <CardContent className="p-4">
+              <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
                     <User size={20} className="text-primary" />
@@ -264,12 +271,16 @@ const Profile = () => {
                     </p>
                   </div>
                 </div>
-                <Button size="sm" onClick={() => setViewMode('personalInfo')} className="shrink-0">
+                <Button 
+                  onClick={() => setViewMode('personalInfo')}
+                  className="w-full"
+                >
                   Completar
                 </Button>
               </div>
             </CardContent>
-          </Card>}
+          </Card>
+        )}
 
         {/* Profile Sections as Cards */}
         {profileSections.map(section => <Card key={section.id} className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200" onClick={section.onClick}>
