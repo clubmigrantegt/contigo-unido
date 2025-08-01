@@ -3,23 +3,13 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { 
-  User, 
-  Settings, 
-  BarChart3,
-  MessageCircle, 
-  Heart, 
-  Users, 
-  ChevronRight,
-  LogOut
-} from 'lucide-react';
+import { User, Settings, BarChart3, MessageCircle, Heart, Users, ChevronRight, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import PersonalInfoEditor from '@/components/profile/PersonalInfoEditor';
 import PreferencesEditor from '@/components/profile/PreferencesEditor';
 import ActivityView from '@/components/profile/ActivityView';
-
 interface Profile {
   full_name: string;
   email: string;
@@ -28,18 +18,17 @@ interface Profile {
   language: string;
   notifications_enabled: boolean;
 }
-
 interface UserStats {
   totalSessions: number;
   totalTestimonials: number;
   totalFavorites: number;
   lastActivity: string;
 }
-
 type ViewMode = 'main' | 'personalInfo' | 'preferences' | 'activity';
-
 const Profile = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userStats, setUserStats] = useState<UserStats>({
     totalSessions: 0,
@@ -50,26 +39,23 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('main');
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-
   useEffect(() => {
     if (user) {
       fetchProfile();
       fetchUserStats();
     }
   }, [user]);
-
   const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('*').eq('user_id', user?.id).single();
       if (error) throw error;
-      
       const profileData = {
         full_name: data.full_name || '',
         email: user?.email || '',
@@ -78,42 +64,38 @@ const Profile = () => {
         language: data.preferred_language || 'es',
         notifications_enabled: data.notifications_enabled ?? true
       };
-      
       setProfile(profileData);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
         title: "Error",
         description: "No se pudo cargar el perfil",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const fetchUserStats = async () => {
     try {
       // Fetch chat sessions count
-      const { data: sessions, error: sessionsError } = await supabase
-        .from('chat_sessions')
-        .select('id, session_start')
-        .eq('user_id', user?.id);
-
+      const {
+        data: sessions,
+        error: sessionsError
+      } = await supabase.from('chat_sessions').select('id, session_start').eq('user_id', user?.id);
       if (sessionsError) throw sessionsError;
 
       // Fetch testimonials count (assuming there's a testimonials table)
-      const { data: testimonials, error: testimonialsError } = await supabase
-        .from('testimonials')
-        .select('id')
-        .eq('user_id', user?.id);
+      const {
+        data: testimonials,
+        error: testimonialsError
+      } = await supabase.from('testimonials').select('id').eq('user_id', user?.id);
 
       // Fetch favorites count
-      const { data: favorites, error: favoritesError } = await supabase
-        .from('user_favorites')
-        .select('id')
-        .eq('user_id', user?.id);
-
+      const {
+        data: favorites,
+        error: favoritesError
+      } = await supabase.from('user_favorites').select('id').eq('user_id', user?.id);
       const totalSessions = sessions?.length || 0;
       const totalTestimonials = testimonials?.length || 0;
       const totalFavorites = favorites?.length || 0;
@@ -121,16 +103,13 @@ const Profile = () => {
       // Get last activity date
       let lastActivity = 'Nunca';
       if (sessions && sessions.length > 0) {
-        const sortedSessions = sessions.sort((a, b) => 
-          new Date(b.session_start).getTime() - new Date(a.session_start).getTime()
-        );
+        const sortedSessions = sessions.sort((a, b) => new Date(b.session_start).getTime() - new Date(a.session_start).getTime());
         const lastSessionDate = new Date(sortedSessions[0].session_start);
         lastActivity = lastSessionDate.toLocaleDateString('es-ES', {
           day: 'numeric',
           month: 'short'
         });
       }
-
       setUserStats({
         totalSessions,
         totalTestimonials,
@@ -141,7 +120,6 @@ const Profile = () => {
       console.error('Error fetching user stats:', error);
     }
   };
-
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -151,18 +129,12 @@ const Profile = () => {
       toast({
         title: "Error",
         description: "No se pudo cerrar sesión. Intenta de nuevo.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
   };
 
   // Return to main view
@@ -176,7 +148,11 @@ const Profile = () => {
   };
 
   // Handle preferences save from editor
-  const handlePreferencesSave = (updatedPreferences: { language: string; notifications_enabled: boolean; theme: string }) => {
+  const handlePreferencesSave = (updatedPreferences: {
+    language: string;
+    notifications_enabled: boolean;
+    theme: string;
+  }) => {
     if (profile) {
       setProfile({
         ...profile,
@@ -185,87 +161,56 @@ const Profile = () => {
       });
     }
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-calm-gray flex items-center justify-center">
+    return <div className="min-h-screen bg-calm-gray flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+      </div>;
   }
-
   if (!profile) {
-    return (
-      <div className="min-h-screen bg-calm-gray flex items-center justify-center">
+    return <div className="min-h-screen bg-calm-gray flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">Error cargando perfil</h2>
           <p className="text-muted-foreground">No se pudo cargar la información del perfil</p>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Handle different view modes
   if (viewMode === 'personalInfo') {
-    return (
-      <PersonalInfoEditor 
-        profile={profile}
-        onBack={handleBackToMain}
-        onSave={handleProfileSave}
-      />
-    );
+    return <PersonalInfoEditor profile={profile} onBack={handleBackToMain} onSave={handleProfileSave} />;
   }
-
   if (viewMode === 'preferences') {
-    return (
-      <PreferencesEditor 
-        preferences={{
-          language: profile.language,
-          notifications_enabled: profile.notifications_enabled,
-          theme: 'system' // Default theme
-        }}
-        onBack={handleBackToMain}
-        onSave={handlePreferencesSave}
-      />
-    );
+    return <PreferencesEditor preferences={{
+      language: profile.language,
+      notifications_enabled: profile.notifications_enabled,
+      theme: 'system' // Default theme
+    }} onBack={handleBackToMain} onSave={handlePreferencesSave} />;
   }
-
   if (viewMode === 'activity') {
-    return (
-      <ActivityView 
-        stats={userStats}
-        onBack={handleBackToMain}
-      />
-    );
+    return <ActivityView stats={userStats} onBack={handleBackToMain} />;
   }
 
   // Main profile view with cards
-  const profileSections = [
-    {
-      id: 'personalInfo',
-      icon: User,
-      title: 'Información Personal',
-      description: 'Actualiza tu información básica',
-      onClick: () => setViewMode('personalInfo')
-    },
-    {
-      id: 'preferences',
-      icon: Settings,
-      title: 'Preferencias',
-      description: 'Idioma, notificaciones y tema',
-      onClick: () => setViewMode('preferences')
-    },
-    {
-      id: 'activity',
-      icon: BarChart3,
-      title: 'Tu Actividad',
-      description: 'Estadísticas y historial de uso',
-      onClick: () => setViewMode('activity')
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-calm-gray">
+  const profileSections = [{
+    id: 'personalInfo',
+    icon: User,
+    title: 'Información Personal',
+    description: 'Actualiza tu información básica',
+    onClick: () => setViewMode('personalInfo')
+  }, {
+    id: 'preferences',
+    icon: Settings,
+    title: 'Preferencias',
+    description: 'Idioma, notificaciones y tema',
+    onClick: () => setViewMode('preferences')
+  }, {
+    id: 'activity',
+    icon: BarChart3,
+    title: 'Tu Actividad',
+    description: 'Estadísticas y historial de uso',
+    onClick: () => setViewMode('activity')
+  }];
+  return <div className="min-h-screen bg-calm-gray">
       {/* Header with Profile Info */}
       <div className="gradient-hero text-white px-4 pt-12 pb-8">
         <div className="text-center">
@@ -281,13 +226,8 @@ const Profile = () => {
 
       <div className="px-4 -mt-4 pb-20 space-y-4">
         {/* Profile Sections as Cards */}
-        {profileSections.map((section) => (
-          <Card 
-            key={section.id}
-            className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200" 
-            onClick={section.onClick}
-          >
-            <CardContent className="p-6">
+        {profileSections.map(section => <Card key={section.id} className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200" onClick={section.onClick}>
+            <CardContent className="p-6 px-0 py-[8px]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -303,37 +243,24 @@ const Profile = () => {
                 <ChevronRight size={20} className="text-muted-foreground" />
               </div>
             </CardContent>
-          </Card>
-        ))}
+          </Card>)}
 
         {/* Quick Actions */}
         <Card className="card-elevated mt-8">
-          <CardContent className="p-6">
+          <CardContent className="p-6 px-0 py-[12px]">
             <h3 className="font-semibold mb-4">Acciones Rápidas</h3>
             <div className="grid grid-cols-3 gap-3">
-              <Button 
-                variant="outline" 
-                className="flex flex-col h-auto py-4"
-                onClick={() => navigate('/services/psychological')}
-              >
+              <Button variant="outline" className="flex flex-col h-auto py-4" onClick={() => navigate('/services/psychological')}>
                 <MessageCircle size={24} className="mb-2 text-primary" />
                 <span className="text-xs">Nuevo Chat</span>
               </Button>
               
-              <Button 
-                variant="outline" 
-                className="flex flex-col h-auto py-4"
-                onClick={() => navigate('/community')}
-              >
+              <Button variant="outline" className="flex flex-col h-auto py-4" onClick={() => navigate('/community')}>
                 <Heart size={24} className="mb-2 text-secondary" />
                 <span className="text-xs">Favoritos</span>
               </Button>
               
-              <Button 
-                variant="outline" 
-                className="flex flex-col h-auto py-4"
-                onClick={() => navigate('/community')}
-              >
+              <Button variant="outline" className="flex flex-col h-auto py-4" onClick={() => navigate('/community')}>
                 <Users size={24} className="mb-2 text-accent" />
                 <span className="text-xs">Comunidad</span>
               </Button>
@@ -342,11 +269,7 @@ const Profile = () => {
         </Card>
 
         {/* Logout Button */}
-        <Button 
-          onClick={() => setShowLogoutDialog(true)}
-          variant="destructive"
-          className="w-full"
-        >
+        <Button onClick={() => setShowLogoutDialog(true)} variant="destructive" className="w-full">
           <LogOut className="mr-2 h-4 w-4" />
           Cerrar Sesión
         </Button>
@@ -369,8 +292,6 @@ const Profile = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
-
 export default Profile;
