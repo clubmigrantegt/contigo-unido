@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 interface Profile {
   full_name: string;
   email: string;
-  phone?: string;
+  phone_number?: string;
   country_of_origin?: string;
 }
 
@@ -35,7 +35,7 @@ const PersonalInfoEditor = ({ profile, onBack, onSave }: PersonalInfoEditorProps
         .from('profiles')
         .update({
           full_name: formData.full_name,
-          phone: formData.phone,
+          phone_number: formData.phone_number,
           country_of_origin: formData.country_of_origin,
         })
         .eq('user_id', user.data.user.id);
@@ -108,8 +108,8 @@ const PersonalInfoEditor = ({ profile, onBack, onSave }: PersonalInfoEditorProps
               <Label htmlFor="phone">Teléfono</Label>
               <Input
                 id="phone"
-                value={formData.phone || ''}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                value={formData.phone_number || ''}
+                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
                 placeholder="Número de teléfono"
               />
             </div>

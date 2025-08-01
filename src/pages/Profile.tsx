@@ -3,17 +3,18 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { User, Settings, BarChart3, MessageCircle, Heart, Users, ChevronRight, LogOut } from 'lucide-react';
+import { User, Settings, BarChart3, MessageCircle, Heart, Users, ChevronRight, LogOut, Phone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import PersonalInfoEditor from '@/components/profile/PersonalInfoEditor';
 import PreferencesEditor from '@/components/profile/PreferencesEditor';
 import ActivityView from '@/components/profile/ActivityView';
+import { getCountryInfo, formatPhoneNumber, getDisplayName, getUserInitials } from '@/lib/countries';
 interface Profile {
   full_name: string;
   email: string;
-  phone?: string;
+  phone_number?: string;
   country_of_origin?: string;
   language: string;
   notifications_enabled: boolean;
@@ -59,7 +60,7 @@ const Profile = () => {
       const profileData = {
         full_name: data.full_name || '',
         email: user?.email || '',
-        phone: data.phone_number || '',
+        phone_number: data.phone_number || '',
         country_of_origin: data.country_of_origin || '',
         language: data.preferred_language || 'es',
         notifications_enabled: data.notifications_enabled ?? true
@@ -133,9 +134,14 @@ const Profile = () => {
       });
     }
   };
-  const getInitials = (name: string) => {
-    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
-  };
+  // Get country info for dynamic flag and phone formatting
+  const countryInfo = getCountryInfo(profile?.country_of_origin);
+  const displayName = getDisplayName(profile?.full_name);
+  const userInitials = getUserInitials(profile?.full_name);
+  const formattedPhone = formatPhoneNumber(profile?.phone_number, countryInfo);
+  
+  // Check if profile is incomplete for UI purposes
+  const isProfileIncomplete = !profile?.full_name || !profile?.phone_number;
 
   // Return to main view
   const handleBackToMain = () => {
@@ -216,16 +222,30 @@ const Profile = () => {
         <div className="flex items-center space-x-4">
           <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
             <span className="text-2xl font-bold text-white">
-              {getInitials(profile.full_name)}
+              {userInitials}
             </span>
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold mb-1">{profile.full_name}</h1>
+            <h1 className="text-2xl font-bold mb-1">
+              {displayName}
+              {isProfileIncomplete && (
+                <span className="text-sm font-normal text-white/60 ml-2">
+                  (Perfil incompleto)
+                </span>
+              )}
+            </h1>
             <p className="text-white/80 text-sm mb-1">{profile.email}</p>
-            {profile.phone && (
+            {profile.phone_number ? (
               <div className="flex items-center text-white/80 text-sm">
-                <span className="mr-2">🇺🇸</span>
-                <span>{profile.phone}</span>
+                <span className="mr-2">
+                  {countryInfo?.flag || '📱'}
+                </span>
+                <span>{formattedPhone}</span>
+              </div>
+            ) : (
+              <div className="flex items-center text-white/60 text-sm">
+                <Phone size={14} className="mr-2" />
+                <span>Sin teléfono registrado</span>
               </div>
             )}
           </div>
@@ -233,6 +253,36 @@ const Profile = () => {
       </div>
 
       <div className="px-4 -mt-4 pb-20 space-y-4">
+        {/* Complete Profile Call-to-Action */}
+        {isProfileIncomplete && (
+          <Card className="card-elevated border-primary/20 bg-primary/5">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <User size={20} className="text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-primary">
+                      Completa tu perfil
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Agrega tu información personal para una mejor experiencia
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  size="sm" 
+                  onClick={() => setViewMode('personalInfo')}
+                  className="shrink-0"
+                >
+                  Completar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Profile Sections as Cards */}
         {profileSections.map(section => <Card key={section.id} className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200" onClick={section.onClick}>
             <CardContent className="p-6 px-0 py-[8px]">
