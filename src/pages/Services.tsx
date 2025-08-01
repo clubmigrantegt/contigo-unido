@@ -131,7 +131,7 @@ const Services = () => {
               <div className="grid grid-cols-1 gap-4">
                 {services.map((service) => (
                   <Card key={service.id} className="card-elevated hover:shadow-lg transition-all duration-300">
-                    <CardHeader className="pb-3">
+                    <CardHeader className="p-0">
                       <div className="flex items-start space-x-4">
                         <div className={`p-3 rounded-lg ${service.bgColor}`}>
                           <service.icon className={`h-6 w-6 ${service.color}`} />
