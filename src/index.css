@@ -12,25 +12,25 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 11%;
     
-    /* Primary: Migrante Red */
-    --primary: 346 68% 49%;
+    /* Primary: Brand Blue */
+    --primary: 205 95% 61%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 346 68% 60%;
+    --primary-glow: 205 95% 70%;
     
-    /* Secondary: Sky Blue */
-    --secondary: 197 85% 62%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary: Soft Pink */
+    --secondary: 320 100% 84%;
+    --secondary-foreground: 320 100% 15%;
     
-    /* Accent: Community Yellow */
-    --accent: 49 100% 75%;
+    /* Accent: Golden Yellow */
+    --accent: 42 100% 64%;
     --accent-foreground: 220 13% 11%;
     
     /* Functional Colors */
     --muted: 210 40% 96%;
     --muted-foreground: 0 0% 62%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 91% 65%;
     --destructive-foreground: 0 0% 100%;
-    --success: 120 61% 50%;
+    --success: 156 84% 45%;
     --success-foreground: 0 0% 100%;
     
     /* Surfaces */
@@ -41,17 +41,17 @@
     /* Borders and Inputs */
     --border: 0 0% 88%;
     --input: 0 0% 88%;
-    --ring: 346 68% 49%;
+    --ring: 205 95% 61%;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(346 68% 49%), hsl(346 68% 60%));
-    --gradient-hero: linear-gradient(135deg, hsl(346 68% 49%), hsl(197 85% 62%));
-    --gradient-community: linear-gradient(135deg, hsl(49 100% 75%), hsl(49 100% 85%));
+    --gradient-primary: linear-gradient(135deg, hsl(205 95% 61%), hsl(205 95% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(205 95% 61%), hsl(320 100% 84%));
+    --gradient-community: linear-gradient(135deg, hsl(42 100% 64%), hsl(42 100% 75%));
     
     /* Shadows */
-    --shadow-elegant: 0 10px 30px -10px hsl(346 68% 49% / 0.2);
+    --shadow-elegant: 0 10px 30px -10px hsl(205 95% 61% / 0.2);
     --shadow-card: 0 2px 8px hsl(220 13% 11% / 0.08);
-    --shadow-glow: 0 0 40px hsl(346 68% 60% / 0.4);
+    --shadow-glow: 0 0 40px hsl(205 95% 70% / 0.4);
     
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -68,24 +68,24 @@
     --popover: 222 84% 4.9%;
     --popover-foreground: 0 0% 98%;
     
-    /* Keep primary red consistent */
-    --primary: 346 68% 49%;
+    /* Primary blue optimized for dark mode */
+    --primary: 205 85% 55%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 346 68% 60%;
+    --primary-glow: 205 85% 65%;
     
-    /* Adjust secondary for dark mode */
-    --secondary: 197 85% 52%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary pink adjusted for dark mode */
+    --secondary: 320 80% 75%;
+    --secondary-foreground: 320 100% 10%;
     
-    /* Adjust accent for dark mode */
-    --accent: 49 100% 65%;
+    /* Accent yellow adjusted for dark mode */
+    --accent: 42 90% 58%;
     --accent-foreground: 220 13% 11%;
     
     --muted: 217 33% 18%;
     --muted-foreground: 215 20% 65%;
     --border: 217 33% 18%;
     --input: 217 33% 18%;
-    --ring: 346 68% 49%;
+    --ring: 205 85% 55%;
     
     /* Dark mode surfaces */
     --calm-gray: 217 33% 15%;
