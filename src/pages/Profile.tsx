@@ -216,7 +216,7 @@ const Profile = () => {
     description: 'Estadísticas y historial de uso',
     onClick: () => setViewMode('activity')
   }];
-  return <div className="min-h-screen bg-calm-gray mt-4">
+  return <div className="min-h-screen bg-calm-gray">
       {/* Header with Profile Info */}
       <div className="gradient-hero text-white px-4 pt-12 pb-8">
         <div className="flex items-center space-x-4">
