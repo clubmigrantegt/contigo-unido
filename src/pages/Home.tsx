@@ -91,7 +91,7 @@ const Home = () => {
             <h1 className="text-2xl font-bold text-foreground">
               {getGreeting()}, {firstName}
             </h1>
-            <p className="mt-1 font-light text-zinc-600">
+            <p className="text-muted-foreground mt-1">
               Estamos contigo en tu camino
             </p>
           </div>
@@ -108,10 +108,10 @@ const Home = () => {
               <h3 className="font-semibold text-lg mb-2">
                 {banners[0].title}
               </h3>
-              <p className="text-white/90 mb-4 text-base font-light">
+              <p className="text-white/90 mb-4">
                 {banners[0].content}
               </p>
-              {banners[0].link_text && <Button variant="secondary" size="sm" className="text-base font-medium">
+              {banners[0].link_text && <Button variant="secondary" size="sm" className="bg-yellow-400 hover:bg-yellow-300">
                   {banners[0].link_text}
                   <ChevronRight size={16} className="ml-1" />
                 </Button>}
@@ -132,10 +132,10 @@ const Home = () => {
                   <service.icon size={24} className="text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg mb-1 font-bold">
+                  <h3 className="font-semibold text-lg mb-1">
                     {service.title}
                   </h3>
-                  <p className="text-sm text-zinc-600 font-light">
+                  <p className="text-muted-foreground text-sm">
                     {service.description}
                   </p>
                 </div>
