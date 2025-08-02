@@ -111,7 +111,7 @@ const Home = () => {
               <p className="text-white/90 mb-4">
                 {banners[0].content}
               </p>
-              {banners[0].link_text && <Button variant="secondary" size="sm">
+              {banners[0].link_text && <Button variant="secondary" size="sm" className="bg-yellow-400 hover:bg-yellow-300">
                   {banners[0].link_text}
                   <ChevronRight size={16} className="ml-1" />
                 </Button>}
