@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import BottomNav from '@/components/navigation/BottomNav';
+import PWAInstallPrompt from '@/components/pwa/PWAInstallPrompt';
 
 const AppLayout = () => {
   return (
@@ -8,6 +9,7 @@ const AppLayout = () => {
         <Outlet />
       </main>
       <BottomNav />
+      <PWAInstallPrompt />
     </div>
   );
 };
