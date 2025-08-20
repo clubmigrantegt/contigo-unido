@@ -288,7 +288,10 @@ const Auth = () => {
           </form>
 
           {import.meta.env.DEV && (
-            <div className="mt-4">
+            <div className="mt-4 space-y-2">
+              <div className="text-xs text-muted-foreground text-center mb-2">
+                🔧 Modo Desarrollo
+              </div>
               <Button
                 type="button"
                 variant="outline"
@@ -299,9 +302,9 @@ const Auth = () => {
                 {loading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  "🔧 "
+                  "🚀 "
                 )}
-                Acceso Desarrollo
+                Acceso Rápido - Sin SMS
               </Button>
             </div>
           )}

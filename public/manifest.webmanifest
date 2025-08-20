@@ -1,6 +1,6 @@
 {
-  "name": "contigo-app",
-  "short_name": "Contigo",
+  "name": "Club del Migrante",
+  "short_name": "Club Migrante",
   "description": "Apoyo psicológico y legal para migrantes",
   "start_url": "/",
   "scope": "/",
