@@ -287,27 +287,28 @@ const Auth = () => {
             </Button>
           </form>
 
-          {import.meta.env.DEV && (
-            <div className="mt-4 space-y-2">
-              <div className="text-xs text-muted-foreground text-center mb-2">
-                🔧 Modo Desarrollo
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleDevAccess}
-                disabled={loading}
-                className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950"
-              >
-                {loading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  "🚀 "
-                )}
-                Acceso Rápido - Sin SMS
-              </Button>
+          <div className="mt-4 space-y-2">
+            <div className="text-xs text-muted-foreground text-center mb-2">
+              🔧 Modo Desarrollo
             </div>
-          )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDevAccess}
+              disabled={loading}
+              className="w-full bg-blue-50 border-2 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 dark:bg-blue-950 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900 font-semibold py-3"
+            >
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "🚀 "
+              )}
+              ACCESO RÁPIDO - SIN SMS
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Click para entrar directamente sin verificación
+            </p>
+          </div>
 
           <div className="mt-6 text-center">
             <button
