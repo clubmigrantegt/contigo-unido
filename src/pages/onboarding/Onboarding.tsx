@@ -1,29 +1,31 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { HeartHandshake, Scale, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoClub from '@/assets/logo-club-migrante.png';
 import illustrationSupport from '@/assets/illustration-support-onboarding.png';
+import illustrationLegal from '@/assets/illustration-legal-onboarding.png';
 
 const onboardingSteps = [
   {
     type: 'image' as const,
     image: logoClub,
+    size: 'w-48',
     title: 'Bienvenido al Club del Migrante',
     description: 'Tu comunidad de apoyo para acompañarte en tu proceso migratorio.',
   },
   {
     type: 'image' as const,
     image: illustrationSupport,
+    size: 'w-72',
     title: 'Apoyo Psicológico 24/7',
     description: 'Conversa con nuestra IA especializada en salud mental cuando lo necesites.',
   },
   {
-    type: 'icon' as const,
-    icon: Scale,
-    iconBg: 'bg-emerald-100',
-    iconColor: 'text-emerald-600',
+    type: 'image' as const,
+    image: illustrationLegal,
+    size: 'w-72',
     title: 'Orientación Legal',
     description: 'Información legal confiable sobre procesos migratorios y tus derechos.',
   },
@@ -103,11 +105,11 @@ const Onboarding = () => {
             {currentStepData.type === 'image' ? (
               <img 
                 src={currentStepData.image} 
-                alt="Club del Migrante" 
-                className="w-48 h-auto animate-float"
+                alt={currentStepData.title} 
+                className={`${currentStepData.size || 'w-48'} h-auto`}
               />
             ) : IconComponent ? (
-              <div className={`${currentStepData.iconBg} rounded-3xl p-8 shadow-lg animate-float border-0`}>
+              <div className={`${currentStepData.iconBg} rounded-3xl p-8 shadow-lg border-0`}>
                 <IconComponent className={`w-20 h-20 ${currentStepData.iconColor}`} strokeWidth={1.5} />
               </div>
             ) : null}
