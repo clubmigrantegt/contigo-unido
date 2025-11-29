@@ -2,193 +2,148 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Heart, Scale, Users, ChevronRight, Bell, User } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Heart, Scale, Users, User, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useNotifications } from '@/hooks/useNotifications';
-interface Banner {
-  id: string;
-  title: string;
-  content: string;
-  link_url?: string;
-  link_text?: string;
-}
-interface Profile {
-  full_name: string;
-}
 const Home = () => {
-  const {
-    user
-  } = useAuth();
-  const { unreadCount } = useNotifications();
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
-  useEffect(() => {
-    if (user) {
-      fetchBanners();
-      fetchProfile();
+  const services = [
+    {
+      icon: Heart,
+      title: 'Apoyo Psicológico',
+      bgColor: 'bg-blue-50',
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+      route: '/services/psychological'
+    },
+    {
+      icon: Scale,
+      title: 'Orientación Legal',
+      bgColor: 'bg-emerald-50',
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
+      route: '/services/legal'
+    },
+    {
+      icon: Users,
+      title: 'Comunidad',
+      bgColor: 'bg-amber-50',
+      iconBg: 'bg-amber-100',
+      iconColor: 'text-amber-600',
+      route: '/community'
     }
-  }, [user]);
-  const fetchBanners = async () => {
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('banners').select('*').eq('is_active', true).order('priority', {
-        ascending: false
-      }).limit(1);
-      if (error) throw error;
-      setBanners(data || []);
-    } catch (error) {
-      console.error('Error fetching banners:', error);
-    }
-  };
-  const fetchProfile = async () => {
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('profiles').select('full_name').eq('user_id', user?.id).single();
-      if (error) throw error;
-      setProfile(data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
-  };
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 18) return 'Buenas tardes';
-    return 'Buenas noches';
-  };
-  const firstName = profile?.full_name?.split(' ')[0] || 'Amigo';
-  const services = [{
-    icon: Heart,
-    title: 'Apoyo Psicológico 24/7',
-    description: 'Chat en tiempo real con apoyo profesional',
-    color: 'bg-primary',
-    textColor: 'text-primary',
-    route: '/services/psychological'
-  }, {
-    icon: Scale,
-    title: 'Orientación Legal',
-    description: 'Información sobre tus derechos',
-    color: 'bg-secondary',
-    textColor: 'text-secondary',
-    route: '/services/legal'
-  }, {
-    icon: Users,
-    title: 'Comunidad',
-    description: 'Conecta con otros migrantes',
-    color: 'bg-accent',
-    textColor: 'text-accent-foreground',
-    route: '/community'
-  }];
-  return <div className="min-h-screen bg-calm-gray">
-      {/* Header */}
-      <div className="bg-background px-4 pt-12 pb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {getGreeting()}, {firstName}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Estamos contigo en tu camino
-            </p>
-          </div>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="relative bg-primary/10 border-primary/20 text-primary hover:bg-primary/20" 
-            onClick={() => navigate('/notifications')}
-          >
-            <Bell size={22} />
-            {unreadCount > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] flex items-center justify-center"
-              >
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </Badge>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {/* Banner */}
-      {banners.length > 0 && <div className="px-4 pb-6">
-          <Card className="gradient-hero text-white">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-lg mb-2">
-                {banners[0].title}
-              </h3>
-              <p className="text-white/90 mb-4">
-                {banners[0].content}
-              </p>
-              {banners[0].link_text && <Button variant="secondary" size="sm" className="bg-yellow-400 hover:bg-yellow-300">
-                  {banners[0].link_text}
-                  <ChevronRight size={16} className="ml-1" />
-                </Button>}
-            </CardContent>
-          </Card>
-        </div>}
-
-      {/* Services Grid */}
-      <div className="px-4 space-y-4">
-        <h2 className="text-xl font-semibold text-foreground mb-4">
-          Nuestros Servicios
-        </h2>
-        
-        {services.map((service, index) => <Card key={index} className="card-elevated hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate(service.route)}>
-            <CardContent className="p-6 px-0 py-[16px]">
-              <div className="flex items-start space-x-4">
-                <div className={`w-12 h-12 rounded-xl ${service.color} flex items-center justify-center flex-shrink-0`}>
-                  <service.icon size={24} className="text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-1">
-                    {service.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    {service.description}
-                  </p>
-                </div>
-                <ChevronRight size={20} className="text-muted-foreground flex-shrink-0" />
-              </div>
-            </CardContent>
-          </Card>)}
-      </div>
-
-      {/* Quick Access */}
-      <div className="px-4 pt-8 pb-20">
-        <h2 className="text-xl font-semibold text-foreground mb-4">
-          Acceso Rápido
-        </h2>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <Card 
-            className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200"
+  ];
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header Simplificado */}
+      <div className="bg-white px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-[26px] font-bold text-slate-900 tracking-tight">
+            Club del Migrante
+          </h1>
+          <button 
             onClick={() => navigate('/profile')}
+            className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors"
           >
-            <CardContent className="p-4 text-center px-[8px] py-[8px]">
-              <User size={24} className="text-primary mx-auto mb-2" />
-              <h4 className="font-medium text-sm">Mi Perfil</h4>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200"
-            onClick={() => navigate('/community')}
-          >
-            <CardContent className="p-4 text-center px-[8px] py-[8px]">
-              <Users size={24} className="text-accent-foreground mx-auto mb-2" />
-              <h4 className="font-medium text-sm">Testimonios</h4>
-            </CardContent>
-          </Card>
+            <User size={22} />
+          </button>
         </div>
       </div>
-    </div>;
+
+      <div className="px-6 space-y-8 pb-24">
+        {/* Welcome Card */}
+        <Card className="rounded-3xl bg-rose-50/70 border-0 shadow-none">
+          <CardContent className="p-6">
+            <span className="text-[12px] font-semibold text-orange-500 uppercase tracking-wider">
+              BIENVENIDO
+            </span>
+            
+            <h2 className="text-[24px] font-bold text-slate-900 mt-2 leading-tight">
+              Tu apoyo en el camino migratorio
+            </h2>
+            
+            <p className="text-[14px] text-slate-500 mt-3 leading-relaxed">
+              Accede a apoyo psicológico, información legal y una comunidad que te entiende.
+            </p>
+            
+            <div className="flex items-center gap-4 mt-5">
+              <Button 
+                onClick={() => navigate('/services')}
+                className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 py-2.5 text-[14px] font-semibold"
+              >
+                Comenzar
+              </Button>
+              <span className="text-[13px] text-slate-400">v2.0</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Services Grid */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[18px] font-bold text-slate-900">Servicios</h2>
+            <button 
+              onClick={() => navigate('/services')}
+              className="text-[14px] font-medium text-orange-500 hover:text-orange-600"
+            >
+              Ver todos
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {services.map((service, index) => (
+              <Card 
+                key={index}
+                className={`rounded-2xl border-0 shadow-none cursor-pointer hover:scale-105 transition-transform ${service.bgColor}`}
+                onClick={() => navigate(service.route)}
+              >
+                <CardContent className="p-4 flex flex-col items-center text-center">
+                  <div className={`w-14 h-14 rounded-full ${service.iconBg} flex items-center justify-center mb-3`}>
+                    <service.icon size={26} className={service.iconColor} />
+                  </div>
+                  <span className="text-[12px] font-medium text-slate-700 leading-tight">
+                    {service.title}
+                  </span>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Access */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[18px] font-bold text-slate-900">Acceso Rápido</h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Card 
+              className="rounded-2xl bg-violet-50 border-0 shadow-none cursor-pointer hover:scale-105 transition-transform"
+              onClick={() => navigate('/profile')}
+            >
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-violet-100 flex items-center justify-center mb-2">
+                  <User size={22} className="text-violet-600" />
+                </div>
+                <span className="text-[12px] font-medium text-slate-700">Mi Perfil</span>
+              </CardContent>
+            </Card>
+            
+            <Card 
+              className="rounded-2xl bg-pink-50 border-0 shadow-none cursor-pointer hover:scale-105 transition-transform"
+              onClick={() => navigate('/community')}
+            >
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center mb-2">
+                  <MessageCircle size={22} className="text-pink-600" />
+                </div>
+                <span className="text-[12px] font-medium text-slate-700">Testimonios</span>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 export default Home;
