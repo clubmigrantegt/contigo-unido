@@ -280,34 +280,34 @@ const Community = () => {
       </div>;
   }
 
-  return <div className="min-h-screen bg-background">
-      {/* Header principal - ancho completo */}
-      <div className="gradient-community text-strong-black px-4 pt-8 pb-4">
-        <div className="container mx-auto text-center">
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className="bg-strong-black/10 rounded-full p-3">
-              <Users className="h-8 w-8 text-strong-black" />
+  return <div className="min-h-screen bg-slate-50">
+      {/* Header principal */}
+      <div className="bg-background px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-[24px] font-semibold tracking-tight text-slate-900">Comunidad</h1>
+              <p className="text-[12px] text-slate-500">Historias de esperanza</p>
             </div>
           </div>
-          <h1 className="font-bold text-strong-black mb-2 text-3xl">Comunidad</h1>
-          <p className="text-strong-black/80 text-base">
-            Historias de esperanza y superación
-          </p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-4">
         {/* Sección de acciones */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input type="text" placeholder="Buscar historias por título, contenido, autor..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <Input type="text" placeholder="Buscar historias..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12" />
           </div>
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap">
-                <Plus className="w-4 h-4 mr-2" />
-                Compartir Historia
+              <Button className="bg-slate-900 text-white hover:bg-slate-800 rounded-xl whitespace-nowrap gap-2">
+                <Plus className="w-4 h-4" />
+                Compartir
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
@@ -422,90 +422,74 @@ const Community = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold text-primary mb-1">
-                    {filteredTestimonials.length}
-                  </div>
-                  <p className="body-small text-muted-foreground">Historias encontradas</p>
-                </CardContent>
-              </Card>
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold text-secondary mb-1">
-                    {new Set(filteredTestimonials.filter(t => t.country_of_origin).map(t => t.country_of_origin)).size}
-                  </div>
-                  <p className="body-small text-muted-foreground">Países representados</p>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200">
+              <div className="text-center">
+                <p className="text-[20px] font-semibold tracking-tight text-slate-900">
+                  {filteredTestimonials.length}
+                </p>
+                <p className="text-[11px] text-slate-600 mt-0.5">Historias</p>
+              </div>
+              <div className="text-center border-l border-slate-200">
+                <p className="text-[20px] font-semibold tracking-tight text-slate-900">
+                  {new Set(filteredTestimonials.filter(t => t.country_of_origin).map(t => t.country_of_origin)).size}
+                </p>
+                <p className="text-[11px] text-slate-600 mt-0.5">Países</p>
+              </div>
             </div>
 
             {/* Testimonials */}
-            {filteredTestimonials.length === 0 ? <Card className="card-elevated">
-                <CardContent className="min-h-[50vh] flex flex-col items-center justify-center text-center py-12">
-                  <MessageCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="mb-2">Sé el primero en compartir</h3>
-                  <p className="body text-muted-foreground mb-4">
-                    Tu historia puede inspirar a otros migrantes. Comparte tu experiencia y ayuda a crear una comunidad de apoyo.
+            {filteredTestimonials.length === 0 ? <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-6">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                    <MessageCircle className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h3 className="text-[18px] font-semibold text-slate-900 mb-2">Sé el primero</h3>
+                  <p className="text-[13px] text-slate-500 mb-4">
+                    Tu historia puede inspirar a otros
                   </p>
-                  <Button onClick={() => setShowForm(true)} className="btn-primary">
+                  <Button onClick={() => setShowForm(true)} className="bg-slate-900 text-white rounded-xl hover:bg-slate-800">
                     <Plus className="h-4 w-4 mr-2" />
-                    Compartir mi Historia
+                    Compartir Historia
                   </Button>
-                </CardContent>
-              </Card> : <div className="space-y-4">
-                {filteredTestimonials.map(testimonial => <Card key={testimonial.id} className={`card-elevated hover:shadow-lg transition-all duration-300 ${testimonial.is_featured ? 'border-accent bg-accent/5' : ''}`}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start space-x-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                </div> : <div className="space-y-4">
+                {filteredTestimonials.map(testimonial => <Card key={testimonial.id} className={`rounded-2xl ring-1 ring-slate-200 overflow-hidden hover:shadow-md transition-all ${testimonial.is_featured ? 'ring-2 ring-emerald-200 bg-emerald-50/30' : ''}`}>
+                    <CardHeader className="p-4 pb-0">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 ring-2 ring-white">
+                          <AvatarFallback className="bg-slate-100 text-slate-700 text-[12px] font-semibold">
                             {getInitials(testimonial.author_name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="font-medium">{testimonial.author_name}</h3>
-                            {testimonial.country_of_origin && <span className="text-sm">
-                                {getCountryFlag(testimonial.country_of_origin)}
-                              </span>}
-                            {testimonial.is_featured && <Badge className="bg-accent/20 text-accent-foreground border-accent/30">
-                                <Star className="h-3 w-3 mr-1" />
+                          <div className="flex items-center gap-2">
+                            <span className="text-[13px] font-semibold text-slate-900">{testimonial.author_name}</span>
+                            {testimonial.country_of_origin && <span>{getCountryFlag(testimonial.country_of_origin)}</span>}
+                            {testimonial.is_featured && <Badge variant="featured" className="text-[10px]">
                                 Destacado
                               </Badge>}
                           </div>
-                          <p className="caption text-muted-foreground">
+                          <p className="text-[11px] text-slate-500">
                             {formatDate(testimonial.created_at)}
                           </p>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0">
-                      <CardTitle className="text-lg mb-3 leading-tight">
-                        {testimonial.title}
-                      </CardTitle>
-                      <p className="body text-foreground leading-relaxed mb-4">
+                    <CardContent className="p-4 pt-3">
+                      <h3 className="text-[15px] font-semibold text-slate-900 mb-2">{testimonial.title}</h3>
+                      <p className="text-[13px] text-slate-600 leading-relaxed">
                         {testimonial.content}
                       </p>
-                      {/* Category and Tags */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <Badge variant="secondary" className="text-xs">
-                          {categories.find(c => c.id === testimonial.category)?.label || testimonial.category}
-                        </Badge>
-                        {testimonial.tags && testimonial.tags.map((tag, index) => <Badge key={index} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>)}
-                      </div>
                       
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <Button variant="ghost" size="sm" className={`text-muted-foreground ${testimonial.user_liked ? 'text-red-500' : ''}`} onClick={() => handleLikeTestimonial(testimonial.id)}>
-                            <Heart className={`h-4 w-4 mr-1 ${testimonial.user_liked ? 'fill-current' : ''}`} />
-                            {testimonial.like_count || 0}
-                          </Button>
-                        </div>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground">
-                          <Flag className="h-4 w-4" />
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+                        <Button variant="ghost" size="sm" className={`gap-1 ${testimonial.user_liked ? 'text-red-500' : 'text-slate-500 hover:text-red-500'}`} onClick={() => handleLikeTestimonial(testimonial.id)}>
+                          <Heart className={`w-4 h-4 ${testimonial.user_liked ? 'fill-red-500' : ''}`} />
+                          <span className="text-[12px]">{testimonial.like_count || 0}</span>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="gap-1 text-slate-500" onClick={() => {
+                      setSelectedTestimonialId(testimonial.id);
+                      setCommentsOpen(true);
+                    }}>
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="text-[12px]">Comentar</span>
                         </Button>
                       </div>
                     </CardContent>

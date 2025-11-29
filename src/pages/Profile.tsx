@@ -216,36 +216,36 @@ const Profile = () => {
     description: 'Estadísticas y historial de uso',
     onClick: () => setViewMode('activity')
   }];
-  return <div className="min-h-screen bg-calm-gray">
+  return <div className="min-h-screen bg-slate-50">
       {/* Header with Profile Info */}
-      <div className="gradient-hero text-white px-4 pt-12 pb-8">
-        <div className="flex items-center space-x-4">
-          <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl font-bold text-white">
+      <div className="bg-background px-6 pt-8 pb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shadow-lg flex-shrink-0">
+            <span className="text-[24px] font-semibold text-white">
               {userInitials}
             </span>
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold mb-1">
+            <h1 className="text-[20px] font-semibold text-slate-900">
               {displayName}
               {isProfileIncomplete && (
-                <span className="text-sm font-normal text-white/60 ml-2">
-                  (Perfil incompleto)
+                <span className="text-[12px] font-normal text-slate-400 ml-2">
+                  (Incompleto)
                 </span>
               )}
             </h1>
-            <p className="text-white/80 text-sm mb-1">{profile.email}</p>
+            <p className="text-[13px] text-slate-500 mt-0.5">{profile.email}</p>
             {profile.phone_number ? (
-              <div className="flex items-center text-white/80 text-sm">
-                <span className="mr-2">
+              <div className="flex items-center gap-2 mt-1">
+                <span>
                   {countryInfo?.flag || '📱'}
                 </span>
-                <span>{formattedPhone}</span>
+                <span className="text-[12px] text-slate-600">{formattedPhone}</span>
               </div>
             ) : (
-              <div className="flex items-center text-white/60 text-sm">
+              <div className="flex items-center text-slate-400 mt-1">
                 <Phone size={14} className="mr-2" />
-                <span>Sin teléfono registrado</span>
+                <span className="text-[12px]">Sin teléfono registrado</span>
               </div>
             )}
           </div>
@@ -255,25 +255,24 @@ const Profile = () => {
       <div className="px-4 mt-4 pb-20 space-y-4">
         {/* Complete Profile Call-to-Action */}
         {isProfileIncomplete && (
-          <Card className="card-elevated border-primary/20 bg-primary/5">
+          <Card className="rounded-2xl ring-1 ring-emerald-200 bg-emerald-50/50">
             <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <User size={20} className="text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-primary">
-                      Completa tu perfil
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Agrega tu información personal para una mejor experiencia
-                    </p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                  <User size={20} className="text-emerald-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-[14px] font-semibold text-emerald-700">
+                    Completa tu perfil
+                  </h3>
+                  <p className="text-[12px] text-emerald-600/80">
+                    Mejora tu experiencia
+                  </p>
                 </div>
                 <Button 
+                  size="sm"
                   onClick={() => setViewMode('personalInfo')}
-                  className="w-full"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
                 >
                   Completar
                 </Button>
@@ -283,50 +282,52 @@ const Profile = () => {
         )}
 
         {/* Profile Sections as Cards */}
-        {profileSections.map(section => <Card key={section.id} className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200" onClick={section.onClick}>
-            <CardContent className="p-6 px-0 py-[8px]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <section.icon size={20} className="text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{section.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {section.description}
-                    </p>
-                  </div>
+        {profileSections.map(section => <Card key={section.id} className="rounded-2xl ring-1 ring-slate-200 hover:ring-slate-300 transition-all cursor-pointer" onClick={section.onClick}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <section.icon size={20} className="text-blue-600" />
                 </div>
-                <ChevronRight size={20} className="text-muted-foreground" />
+                <div className="flex-1">
+                  <h3 className="text-[14px] font-semibold text-slate-900">{section.title}</h3>
+                  <p className="text-[12px] text-slate-500">
+                    {section.description}
+                  </p>
+                </div>
+                <ChevronRight size={20} className="text-slate-400" />
               </div>
             </CardContent>
           </Card>)}
 
         {/* Quick Actions */}
-        <Card className="card-elevated mt-8">
-          <CardContent className="p-6 px-0 py-[12px]">
-            <h3 className="font-semibold mb-4">Acciones Rápidas</h3>
+        <Card className="rounded-2xl ring-1 ring-slate-200 mt-6">
+          <CardContent className="p-4">
+            <h3 className="text-[15px] font-semibold text-slate-900 mb-4">Acciones Rápidas</h3>
             <div className="grid grid-cols-3 gap-3">
-              <Button variant="outline" className="flex flex-col h-auto py-4" onClick={() => navigate('/services/psychological')}>
-                <MessageCircle size={24} className="mb-2 text-primary" />
-                <span className="text-xs">Nuevo Chat</span>
-              </Button>
+              <button className="p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 hover:ring-slate-300 transition-all" onClick={() => navigate('/services/psychological')}>
+                <MessageCircle size={24} className="text-slate-700 mx-auto mb-2" />
+                <span className="text-[11px] text-slate-600">Nuevo Chat</span>
+              </button>
               
-              <Button variant="outline" className="flex flex-col h-auto py-4" onClick={() => navigate('/community')}>
-                <Heart size={24} className="mb-2 text-secondary" />
-                <span className="text-xs">Favoritos</span>
-              </Button>
+              <button className="p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 hover:ring-slate-300 transition-all" onClick={() => navigate('/community')}>
+                <Heart size={24} className="text-slate-700 mx-auto mb-2" />
+                <span className="text-[11px] text-slate-600">Favoritos</span>
+              </button>
               
-              <Button variant="outline" className="flex flex-col h-auto py-4" onClick={() => navigate('/community')}>
-                <Users size={24} className="mb-2 text-accent" />
-                <span className="text-xs">Comunidad</span>
-              </Button>
+              <button className="p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 hover:ring-slate-300 transition-all" onClick={() => navigate('/community')}>
+                <Users size={24} className="text-slate-700 mx-auto mb-2" />
+                <span className="text-[11px] text-slate-600">Comunidad</span>
+              </button>
             </div>
           </CardContent>
         </Card>
 
         {/* Logout Button */}
-        <Button onClick={() => setShowLogoutDialog(true)} variant="destructive" className="w-full">
+        <Button 
+          onClick={() => setShowLogoutDialog(true)} 
+          variant="outline" 
+          className="w-full rounded-xl ring-1 ring-red-200 text-red-600 hover:bg-red-50 hover:ring-red-300"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Cerrar Sesión
         </Button>
