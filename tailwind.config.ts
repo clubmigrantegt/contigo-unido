@@ -104,6 +104,22 @@ const config: Config = {
           from: { transform: "translateX(100%)" },
           to: { transform: "translateX(0)" },
         },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(30px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-down": {
+          from: { opacity: "1", transform: "translateY(0)" },
+          to: { opacity: "0", transform: "translateY(-30px)" },
+        },
+        "scale-fade-in": {
+          from: { opacity: "0", transform: "scale(0.8)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
         "spring": {
           "0%": { transform: "scale(0.9)" },
           "50%": { transform: "scale(1.05)" },
@@ -115,6 +131,10 @@ const config: Config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "slide-in": "slide-in 0.25s ease-out",
+        "slide-up": "slide-up 0.4s ease-out",
+        "slide-down": "slide-down 0.3s ease-out",
+        "scale-fade-in": "scale-fade-in 0.5s ease-out",
+        "float": "float 3s ease-in-out infinite",
         "spring": "spring 0.3s ease-out",
       },
     },

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CountryPhoneInput } from '@/components/ui/country-phone-input';
+import { CountryPhoneInput, Country } from '@/components/ui/country-phone-input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
@@ -17,11 +17,32 @@ const Auth = () => {
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [fullName, setFullName] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [defaultCountryCode, setDefaultCountryCode] = useState<string>();
   const navigate = useNavigate();
 
   useEffect(() => {
     setIsLogin(mode === 'login');
   }, [mode]);
+
+  // Load user's preferred country
+  useEffect(() => {
+    const loadUserCountry = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('country_of_origin')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (data?.country_of_origin) {
+          setDefaultCountryCode(data.country_of_origin);
+        }
+      }
+    };
+    loadUserCountry();
+  }, []);
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +92,8 @@ const Auth = () => {
           await supabase.from('profiles').upsert({
             user_id: data.user.id,
             full_name: fullName || 'Usuario de Prueba',
-            phone_number: phone
+            phone_number: phone,
+            country_of_origin: selectedCountry?.code
           });
         }
 
@@ -246,8 +268,11 @@ const Auth = () => {
             <CountryPhoneInput
               value={phone}
               onChange={setPhone}
+              onCountryChange={setSelectedCountry}
+              defaultCountryCode={defaultCountryCode}
               disabled={loading}
               required
+              showValidation
             />
           </div>
 
