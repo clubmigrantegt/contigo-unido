@@ -92,7 +92,7 @@ const Onboarding = () => {
       {/* Main Content - Layout con posiciones fijas */}
       <div className="flex-1 flex flex-col px-6 pb-12" key={currentStep}>
         {/* Sección de ilustración - altura fija */}
-        <div className="flex-1 flex items-center justify-center min-h-[80px]">
+        <div className="flex items-center justify-center mb-4">
           <div className="flex justify-center">
             {currentStepData.type === 'image' && (
               <img 
@@ -105,8 +105,8 @@ const Onboarding = () => {
         </div>
         
         {/* Sección de texto - altura fija */}
-        <div className="h-[140px] flex flex-col justify-start">
-          <h2 className="text-2xl font-bold text-strong-black text-center mb-4">
+        <div className="h-[140px] flex flex-col justify-start mb-4">
+          <h2 className="text-2xl font-bold text-strong-black text-center mb-3">
             {currentStepData.title}
           </h2>
           
@@ -116,7 +116,7 @@ const Onboarding = () => {
         </div>
 
         {/* Progress Dots - posición fija */}
-        <div className="flex justify-center space-x-2 py-6">
+        <div className="flex justify-center space-x-2 py-4 mt-auto">
           {onboardingSteps.map((_, index) => (
             <div
               key={index}
