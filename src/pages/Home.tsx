@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Scale, Users, ChevronRight, Bell } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Heart, Scale, Users, ChevronRight, Bell, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useNotifications } from '@/hooks/useNotifications';
 interface Banner {
   id: string;
   title: string;
@@ -19,6 +21,7 @@ const Home = () => {
   const {
     user
   } = useAuth();
+  const { unreadCount } = useNotifications();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const navigate = useNavigate();
@@ -95,8 +98,21 @@ const Home = () => {
               Estamos contigo en tu camino
             </p>
           </div>
-          <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => navigate('/notifications')}>
-            <Bell size={20} />
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="relative bg-primary/10 border-primary/20 text-primary hover:bg-primary/20" 
+            onClick={() => navigate('/notifications')}
+          >
+            <Bell size={22} />
+            {unreadCount > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] flex items-center justify-center"
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Badge>
+            )}
           </Button>
         </div>
       </div>
@@ -152,14 +168,20 @@ const Home = () => {
         </h2>
         
         <div className="grid grid-cols-2 gap-4">
-          <Card className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200">
+          <Card 
+            className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => navigate('/profile')}
+          >
             <CardContent className="p-4 text-center px-[8px] py-[8px]">
-              <Heart size={24} className="text-primary mx-auto mb-2" />
-              <h4 className="font-medium text-sm">Chat de Apoyo</h4>
+              <User size={24} className="text-primary mx-auto mb-2" />
+              <h4 className="font-medium text-sm">Mi Perfil</h4>
             </CardContent>
           </Card>
           
-          <Card className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200">
+          <Card 
+            className="card-elevated cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => navigate('/community')}
+          >
             <CardContent className="p-4 text-center px-[8px] py-[8px]">
               <Users size={24} className="text-accent-foreground mx-auto mb-2" />
               <h4 className="font-medium text-sm">Testimonios</h4>

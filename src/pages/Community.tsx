@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, Plus, Heart, MessageCircle, Flag, Star, Search, Filter } from 'lucide-react';
+import { Users, Plus, Heart, MessageCircle, Flag, Star, Search, Filter, SlidersHorizontal } from 'lucide-react';
 import TestimonialComments from '@/components/community/TestimonialComments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -382,19 +383,42 @@ const Community = () => {
           </TabsList>
 
           <TabsContent value="historias" className="space-y-4">
-            {/* Filtros de categoría */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Filter className="h-4 w-4" />
-                Filtrar por categoría:
+            {/* Filtros de categoría con Popover */}
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {filteredTestimonials.length} historias encontradas
               </div>
-              <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-                <TabsList className="flex w-full overflow-x-auto">
-                  {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="text-xs whitespace-nowrap flex-shrink-0">
-                      {category.label}
-                    </TabsTrigger>)}
-                </TabsList>
-              </Tabs>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    Filtrar
+                    {selectedCategory !== 'todos' && (
+                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                        1
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48" align="end">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm mb-3">Categorías</h4>
+                    <div className="space-y-1">
+                      {categories.map(category => (
+                        <Button
+                          key={category.id}
+                          variant={selectedCategory === category.id ? "secondary" : "ghost"}
+                          size="sm"
+                          className="w-full justify-start"
+                          onClick={() => setSelectedCategory(category.id)}
+                        >
+                          {category.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Stats */}
@@ -419,7 +443,7 @@ const Community = () => {
 
             {/* Testimonials */}
             {filteredTestimonials.length === 0 ? <Card className="card-elevated">
-                <CardContent className="text-center py-12">
+                <CardContent className="min-h-[50vh] flex flex-col items-center justify-center text-center py-12">
                   <MessageCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="mb-2">Sé el primero en compartir</h3>
                   <p className="body text-muted-foreground mb-4">

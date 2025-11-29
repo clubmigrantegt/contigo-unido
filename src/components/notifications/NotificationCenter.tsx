@@ -56,8 +56,6 @@ const NotificationCenter = () => {
   return <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          
-          
           {unreadCount > 0 && <Badge variant="destructive">{unreadCount}</Badge>}
         </div>
         {unreadCount > 0 && <Button variant="outline" size="sm" onClick={markAllAsRead}>
@@ -66,7 +64,7 @@ const NotificationCenter = () => {
       </div>
 
       {notifications.length === 0 ? <Card>
-          <CardContent className="text-center py-12">
+          <CardContent className="min-h-[50vh] flex flex-col items-center justify-center text-center py-12">
             <Bell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No hay notificaciones</h3>
             <p className="text-muted-foreground">
