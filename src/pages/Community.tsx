@@ -280,7 +280,7 @@ const Community = () => {
       </div>;
   }
 
-  return <div className="min-h-screen bg-slate-50">
+  return <div className="min-h-screen bg-white">
       {/* Header principal */}
       <div className="bg-background px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">
@@ -305,7 +305,7 @@ const Community = () => {
           </div>
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogTrigger asChild>
-              <Button className="bg-slate-900 text-white hover:bg-slate-800 rounded-xl whitespace-nowrap gap-2">
+              <Button className="bg-orange-500 text-white hover:bg-orange-600 rounded-xl whitespace-nowrap gap-2">
                 <Plus className="w-4 h-4" />
                 Compartir
               </Button>
@@ -422,7 +422,7 @@ const Community = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200">
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-pink-50 border-0 shadow-none">
               <div className="text-center">
                 <p className="text-[20px] font-semibold tracking-tight text-slate-900">
                   {filteredTestimonials.length}
