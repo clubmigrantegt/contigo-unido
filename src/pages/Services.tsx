@@ -108,14 +108,17 @@ const Services = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="gradient-hero text-white px-4 py-8">
-        <div className="container mx-auto">
-          <h1 className="text-white mb-2">Servicios Disponibles</h1>
-          <p className="body text-white/90">
-            Todo el apoyo que necesitas en un solo lugar
-          </p>
+      <div className="bg-background px-6 pt-6 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+            <span className="text-[15px] font-semibold text-white">SV</span>
+          </div>
+          <div>
+            <h1 className="text-[24px] font-semibold tracking-tight text-slate-900">Servicios</h1>
+            <p className="text-[12px] text-slate-500">Todo el apoyo que necesitas</p>
+          </div>
         </div>
       </div>
 
@@ -130,33 +133,31 @@ const Services = () => {
           <TabsContent value="services" className="space-y-6">
             {/* Main Services */}
             <section>
-              <h2 className="mb-4">Nuestros Servicios</h2>
-              <div className="grid grid-cols-1 gap-4">
+              <h2 className="text-[18px] font-semibold tracking-tight text-slate-900 mb-4">Nuestros Servicios</h2>
+              <div className="grid grid-cols-1 gap-3">
                 {services.map((service) => (
-                  <Card key={service.id} className="card-elevated hover:shadow-lg transition-all duration-300">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start space-x-4">
-                        <div className={`p-3 rounded-lg ${service.bgColor}`}>
+                  <Card key={service.id} className="rounded-2xl ring-1 ring-slate-200 hover:ring-slate-300 hover:shadow-md transition-all cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl ${service.bgColor} flex items-center justify-center flex-shrink-0`}>
                           <service.icon className={`h-6 w-6 ${service.color}`} />
                         </div>
                         <div className="flex-1">
-                          <CardTitle className="text-lg">{service.title}</CardTitle>
-                          <CardDescription className="mt-1">
+                          <h3 className="text-[15px] font-semibold text-slate-900">{service.title}</h3>
+                          <p className="text-[12px] text-slate-500 mt-0.5">
                             {service.description}
-                          </CardDescription>
+                          </p>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <Button 
-                        asChild 
-                        className="w-full btn-primary"
-                        disabled={!service.available}
-                      >
                         <Link to={service.path}>
-                          {service.available ? 'Acceder' : 'Próximamente'}
+                          <Button 
+                            size="sm"
+                            className="rounded-xl bg-slate-900 text-white hover:bg-slate-800"
+                            disabled={!service.available}
+                          >
+                            {service.available ? 'Acceder' : 'Pronto'}
+                          </Button>
                         </Link>
-                      </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -173,29 +174,29 @@ const Services = () => {
           <TabsContent value="emergency" className="space-y-6">
             {/* Quick Actions */}
             <section>
-              <h2 className="mb-4">Ayuda Inmediata</h2>
+              <h2 className="text-[18px] font-semibold tracking-tight text-slate-900 mb-4">Ayuda Inmediata</h2>
               <div className="grid grid-cols-1 gap-3">
                 {quickActions.map((action, index) => (
                   <Card 
                     key={index} 
-                    className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                      action.urgent ? 'border-destructive bg-destructive/5' : 'hover:shadow-card'
+                    className={`cursor-pointer transition-all hover:shadow-md rounded-2xl ${
+                      action.urgent ? 'ring-2 ring-red-200 bg-red-50' : 'ring-1 ring-slate-200'
                     }`}
                     onClick={action.action}
                   >
                     <CardContent className="flex items-center p-4">
-                      <div className={`p-3 rounded-lg mr-4 ${
-                        action.urgent ? 'bg-destructive/10' : 'bg-muted'
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 ${
+                        action.urgent ? 'bg-red-100' : 'bg-slate-100'
                       }`}>
-                        <action.icon className={`h-5 w-5 ${
-                          action.urgent ? 'text-destructive' : 'text-foreground'
+                        <action.icon className={`h-6 w-6 ${
+                          action.urgent ? 'text-red-600' : 'text-slate-700'
                         }`} />
                       </div>
                       <div className="flex-1">
-                        <h3 className={action.urgent ? 'text-destructive' : 'text-foreground'}>
+                        <h3 className={`text-[15px] font-semibold ${action.urgent ? 'text-red-600' : 'text-slate-900'}`}>
                           {action.title}
                         </h3>
-                        <p className="body-small text-muted-foreground">
+                        <p className="text-[12px] text-slate-500">
                           {action.description}
                         </p>
                       </div>
@@ -210,17 +211,17 @@ const Services = () => {
         {/* FAQs Section */}
         {faqs.length > 0 && (
           <section>
-            <h2 className="mb-4">Preguntas Frecuentes</h2>
-            <Card className="card-elevated">
+            <h2 className="text-[18px] font-semibold tracking-tight text-slate-900 mb-4">Preguntas Frecuentes</h2>
+            <Card className="rounded-2xl ring-1 ring-slate-200">
               <CardContent className="p-0">
                 <Accordion type="single" collapsible className="w-full">
                   {faqs.map((faq, index) => (
                     <AccordionItem key={faq.id} value={`item-${index}`} className="px-4">
                       <AccordionTrigger className="text-left hover:no-underline">
-                        <span className="body font-medium">{faq.question}</span>
+                        <span className="text-[14px] font-medium text-slate-900">{faq.question}</span>
                       </AccordionTrigger>
                       <AccordionContent className="pt-2 pb-4">
-                        <p className="body-small text-muted-foreground leading-relaxed">
+                        <p className="text-[13px] text-slate-600 leading-relaxed">
                           {faq.answer}
                         </p>
                       </AccordionContent>
