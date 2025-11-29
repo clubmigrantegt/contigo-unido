@@ -2,38 +2,32 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { HeartHandshake, Scale, Users, Globe } from 'lucide-react';
-import { 
-  WelcomeIllustration, 
-  PsychologicalIllustration, 
-  LegalIllustration, 
-  CommunityIllustration 
-} from '@/components/illustrations/OnboardingIllustrations';
 import { cn } from '@/lib/utils';
 
 const onboardingSteps = [
   {
-    illustration: WelcomeIllustration,
+    icon: Globe,
+    iconBg: 'bg-gradient-to-br from-primary to-secondary',
     title: 'Bienvenido al Club del Migrante',
-    description: 'Tu comunidad de apoyo integral. Somos una plataforma diseñada para acompañarte en tu proceso migratorio con recursos de salud mental, orientación legal y una comunidad solidaria que entiende tu camino.',
-    gradientBg: 'from-primary/10 via-secondary/10 to-accent/10',
+    description: 'Tu comunidad de apoyo para acompañarte en tu proceso migratorio.',
   },
   {
-    illustration: PsychologicalIllustration,
+    icon: HeartHandshake,
+    iconBg: 'bg-gradient-to-br from-primary to-primary/80',
     title: 'Apoyo Psicológico 24/7',
-    description: 'Conversa con nuestra IA especializada en salud mental para migrantes. Recibe apoyo emocional, técnicas de manejo del estrés y orientación personalizada cuando más lo necesites.',
-    gradientBg: 'from-primary/10 to-primary/5',
+    description: 'Conversa con nuestra IA especializada en salud mental cuando lo necesites.',
   },
   {
-    illustration: LegalIllustration,
+    icon: Scale,
+    iconBg: 'bg-gradient-to-br from-secondary to-accent',
     title: 'Orientación Legal',
-    description: 'Accede a información legal confiable sobre procesos migratorios, derechos y procedimientos. Agenda consultas con profesionales especializados.',
-    gradientBg: 'from-secondary/10 to-accent/10',
+    description: 'Información legal confiable sobre procesos migratorios y tus derechos.',
   },
   {
-    illustration: CommunityIllustration,
+    icon: Users,
+    iconBg: 'bg-gradient-to-br from-accent to-primary',
     title: 'Comunidad Solidaria',
-    description: 'Conecta con otras personas que comparten tu experiencia. Comparte testimonios, encuentra apoyo mutuo y construye una red de solidaridad.',
-    gradientBg: 'from-accent/10 to-primary/10',
+    description: 'Conecta con personas que comparten tu experiencia y encuentra apoyo mutuo.',
   },
 ];
 
@@ -74,7 +68,7 @@ const Onboarding = () => {
   };
 
   const currentStepData = onboardingSteps[currentStep];
-  const IllustrationComponent = currentStepData.illustration;
+  const IconComponent = currentStepData.icon;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -98,9 +92,11 @@ const Onboarding = () => {
             !isAnimating && "animate-scale-fade-in"
           )}
         >
-          {/* Illustration */}
-          <div className={`bg-gradient-to-br ${currentStepData.gradientBg} rounded-3xl p-8 mb-8 shadow-card`}>
-            <IllustrationComponent />
+          {/* Icon Container */}
+          <div className="flex justify-center mb-8">
+            <div className={`${currentStepData.iconBg} rounded-full p-8 shadow-lg animate-float`}>
+              <IconComponent className="w-20 h-20 text-white" strokeWidth={1.5} />
+            </div>
           </div>
           
           {/* Text Content */}
