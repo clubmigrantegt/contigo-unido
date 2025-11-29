@@ -30,8 +30,9 @@ const Services = () => {
       title: 'Apoyo Psicológico',
       description: 'Sesiones de chat en vivo con profesionales especializados en migración',
       icon: Heart,
-      color: 'text-primary',
-      bgColor: 'bg-primary/10',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      iconBg: 'bg-blue-100',
       path: '/services/psychological',
       available: true
     },
@@ -40,8 +41,9 @@ const Services = () => {
       title: 'Información Legal',
       description: 'Guías completas sobre TPS, asilo, derechos laborales y más',
       icon: Scale,
-      color: 'text-secondary',
-      bgColor: 'bg-secondary/10',
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      iconBg: 'bg-emerald-100',
       path: '/services/legal',
       available: true
     },
@@ -50,8 +52,9 @@ const Services = () => {
       title: 'Red de Apoyo',
       description: 'Conecta con otros migrantes y comparte experiencias',
       icon: Users,
-      color: 'text-accent-foreground',
-      bgColor: 'bg-accent/30',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      iconBg: 'bg-amber-100',
       path: '/community',
       available: true
     }
@@ -63,6 +66,9 @@ const Services = () => {
       description: 'Ayuda inmediata 24/7',
       icon: Phone,
       action: () => window.open('tel:988'),
+      bgColor: 'bg-red-50',
+      iconBg: 'bg-red-100',
+      iconColor: 'text-red-600',
       urgent: true
     },
     {
@@ -70,6 +76,9 @@ const Services = () => {
       description: 'Inicia una consulta ahora',
       icon: MessageCircle,
       action: () => window.location.href = '/services/psychological',
+      bgColor: 'bg-violet-50',
+      iconBg: 'bg-violet-100',
+      iconColor: 'text-violet-600',
       urgent: false
     },
     {
@@ -77,6 +86,9 @@ const Services = () => {
       description: 'Documentos y formularios',
       icon: FileText,
       action: () => window.location.href = '/services/legal',
+      bgColor: 'bg-emerald-50',
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
       urgent: false
     }
   ];
@@ -108,7 +120,7 @@ const Services = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-background px-6 pt-6 pb-4">
         <div className="flex items-center gap-3">
@@ -136,10 +148,10 @@ const Services = () => {
               <h2 className="text-[18px] font-semibold tracking-tight text-slate-900 mb-4">Nuestros Servicios</h2>
               <div className="grid grid-cols-1 gap-3">
                 {services.map((service) => (
-                  <Card key={service.id} className="rounded-2xl ring-1 ring-slate-200 hover:ring-slate-300 hover:shadow-md transition-all cursor-pointer">
+                  <Card key={service.id} className={`rounded-2xl border-0 shadow-none hover:shadow-md transition-all cursor-pointer ${service.bgColor}`}>
                     <CardContent className="p-4">
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl ${service.bgColor} flex items-center justify-center flex-shrink-0`}>
+                        <div className={`w-12 h-12 rounded-full ${service.iconBg} flex items-center justify-center flex-shrink-0`}>
                           <service.icon className={`h-6 w-6 ${service.color}`} />
                         </div>
                         <div className="flex-1">
@@ -151,7 +163,7 @@ const Services = () => {
                         <Link to={service.path}>
                           <Button 
                             size="sm"
-                            className="rounded-xl bg-slate-900 text-white hover:bg-slate-800"
+                            className="rounded-xl bg-orange-500 text-white hover:bg-orange-600"
                             disabled={!service.available}
                           >
                             {service.available ? 'Acceder' : 'Pronto'}
@@ -179,18 +191,12 @@ const Services = () => {
                 {quickActions.map((action, index) => (
                   <Card 
                     key={index} 
-                    className={`cursor-pointer transition-all hover:shadow-md rounded-2xl ${
-                      action.urgent ? 'ring-2 ring-red-200 bg-red-50' : 'ring-1 ring-slate-200'
-                    }`}
+                    className={`cursor-pointer transition-all hover:shadow-md rounded-2xl border-0 shadow-none ${action.bgColor}`}
                     onClick={action.action}
                   >
                     <CardContent className="flex items-center p-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 ${
-                        action.urgent ? 'bg-red-100' : 'bg-slate-100'
-                      }`}>
-                        <action.icon className={`h-6 w-6 ${
-                          action.urgent ? 'text-red-600' : 'text-slate-700'
-                        }`} />
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 ${action.iconBg}`}>
+                        <action.icon className={`h-6 w-6 ${action.iconColor}`} />
                       </div>
                       <div className="flex-1">
                         <h3 className={`text-[15px] font-semibold ${action.urgent ? 'text-red-600' : 'text-slate-900'}`}>

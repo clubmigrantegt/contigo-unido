@@ -42,7 +42,7 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col animate-fade-in">
+    <div className="min-h-screen bg-white flex flex-col animate-fade-in">
       {/* Main Content - Text + Buttons */}
       <div className="flex-1 flex flex-col justify-center px-6">
         {/* Welcome Text */}
@@ -59,7 +59,7 @@ const Welcome = () => {
         <div className="space-y-4">
           <Button 
             size="lg" 
-            className="w-full text-lg h-14 animate-slide-up"
+            className="w-full text-lg h-14 animate-slide-up bg-orange-500 hover:bg-orange-600 text-white rounded-full"
             style={{ animationDelay: '0.2s' }}
             onClick={() => navigate('/auth?mode=login')}
           >
@@ -69,7 +69,7 @@ const Welcome = () => {
           <Button 
             size="lg" 
             variant="outline"
-            className="w-full text-lg h-14 animate-slide-up"
+            className="w-full text-lg h-14 animate-slide-up border-slate-200 text-slate-900 rounded-full"
             style={{ animationDelay: '0.3s' }}
             onClick={() => navigate('/auth?mode=signup')}
           >

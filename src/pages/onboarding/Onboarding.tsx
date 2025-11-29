@@ -71,7 +71,7 @@ const Onboarding = () => {
   const IconComponent = currentStepData.icon;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
       <div className="flex justify-end items-center p-6">
         <Button
@@ -94,7 +94,7 @@ const Onboarding = () => {
         >
           {/* Icon Container */}
           <div className="flex justify-center mb-8">
-            <div className={`${currentStepData.iconBg} rounded-full p-8 shadow-lg animate-float`}>
+            <div className={`${currentStepData.iconBg} rounded-3xl p-8 shadow-lg animate-float border-0`}>
               <IconComponent className="w-20 h-20 text-white" strokeWidth={1.5} />
             </div>
           </div>
@@ -118,8 +118,8 @@ const Onboarding = () => {
               key={index}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === currentStep 
-                  ? 'w-8 bg-primary' 
-                  : 'w-2 bg-muted'
+                  ? 'w-8 bg-orange-500' 
+                  : 'w-2 bg-slate-200'
               }`}
             />
           ))}
@@ -140,7 +140,7 @@ const Onboarding = () => {
           
           <Button 
             onClick={nextStep}
-            className="flex-1"
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full"
             disabled={isAnimating}
           >
             {currentStep === onboardingSteps.length - 1 ? 'Comenzar' : 'Siguiente'}

@@ -36,6 +36,9 @@ const PsychologicalSupport = () => {
       title: 'Chat en Vivo',
       description: 'Conecta instantáneamente con un profesional',
       icon: MessageCircle,
+      bgColor: 'bg-blue-50',
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
       status: 'available',
       waitTime: '2-5 min',
       type: 'Conversación escrita'
@@ -45,6 +48,9 @@ const PsychologicalSupport = () => {
       title: 'Llamada Telefónica',
       description: 'Habla directamente con un consejero',
       icon: Phone,
+      bgColor: 'bg-violet-50',
+      iconBg: 'bg-violet-100',
+      iconColor: 'text-violet-600',
       status: 'busy',
       waitTime: '10-15 min',
       type: 'Conversación de voz'
@@ -54,6 +60,9 @@ const PsychologicalSupport = () => {
       title: 'Sesión Grupal',
       description: 'Únete a un grupo de apoyo virtual',
       icon: Users,
+      bgColor: 'bg-amber-50',
+      iconBg: 'bg-amber-100',
+      iconColor: 'text-amber-600',
       status: 'busy',
       waitTime: 'No disponible',
       type: 'Sesión grupal'
@@ -133,9 +142,9 @@ const PsychologicalSupport = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-card border-b border-border">
+      <div className="bg-white border-b border-slate-100">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm" asChild>
@@ -212,13 +221,13 @@ const PsychologicalSupport = () => {
                   {supportOptions.map((option) => (
                     <Card 
                       key={option.id} 
-                      className="card-elevated hover:shadow-lg transition-all duration-300"
+                      className={`rounded-2xl border-0 shadow-none hover:shadow-lg transition-all duration-300 ${option.bgColor}`}
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start space-x-3">
-                            <div className="p-3 bg-primary/10 rounded-lg">
-                              <option.icon className="h-5 w-5 text-primary" />
+                            <div className={`p-3 ${option.iconBg} rounded-full`}>
+                              <option.icon className={`h-5 w-5 ${option.iconColor}`} />
                             </div>
                             <div className="flex-1">
                               <CardTitle className="text-lg">{option.title}</CardTitle>
@@ -251,7 +260,7 @@ const PsychologicalSupport = () => {
                             description: "Esta funcionalidad estará disponible pronto",
                           })}
                           disabled={loading || option.status === 'busy'}
-                          className="w-full btn-primary"
+                          className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl"
                         >
                           {loading ? 'Conectando...' : 
                            option.status === 'busy' ? 'No disponible' : 

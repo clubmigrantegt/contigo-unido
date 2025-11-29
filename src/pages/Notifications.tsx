@@ -7,7 +7,7 @@ const Notifications = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-calm-gray">
+    <div className="min-h-screen bg-white">
       <div className="bg-background px-4 pt-12 pb-6">
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>

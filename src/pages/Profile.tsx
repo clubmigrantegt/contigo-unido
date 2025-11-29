@@ -200,23 +200,29 @@ const Profile = () => {
   const profileSections = [{
     id: 'personalInfo',
     icon: User,
+    iconBg: 'bg-blue-100',
+    iconColor: 'text-blue-600',
     title: 'Información Personal',
     description: 'Actualiza tu información básica',
     onClick: () => setViewMode('personalInfo')
   }, {
     id: 'preferences',
     icon: Settings,
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-600',
     title: 'Preferencias',
     description: 'Idioma, notificaciones y tema',
     onClick: () => setViewMode('preferences')
   }, {
     id: 'activity',
     icon: BarChart3,
+    iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600',
     title: 'Tu Actividad',
     description: 'Estadísticas y historial de uso',
     onClick: () => setViewMode('activity')
   }];
-  return <div className="min-h-screen bg-slate-50">
+  return <div className="min-h-screen bg-white">
       {/* Header with Profile Info */}
       <div className="bg-background px-6 pt-8 pb-6">
         <div className="flex items-center gap-4">
@@ -285,8 +291,8 @@ const Profile = () => {
         {profileSections.map(section => <Card key={section.id} className="rounded-2xl ring-1 ring-slate-200 hover:ring-slate-300 transition-all cursor-pointer" onClick={section.onClick}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <section.icon size={20} className="text-blue-600" />
+                <div className={`w-10 h-10 rounded-xl ${section.iconBg} flex items-center justify-center`}>
+                  <section.icon size={20} className={section.iconColor} />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-[14px] font-semibold text-slate-900">{section.title}</h3>
@@ -304,18 +310,24 @@ const Profile = () => {
           <CardContent className="p-4">
             <h3 className="text-[15px] font-semibold text-slate-900 mb-4">Acciones Rápidas</h3>
             <div className="grid grid-cols-3 gap-3">
-              <button className="p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 hover:ring-slate-300 transition-all" onClick={() => navigate('/services/psychological')}>
-                <MessageCircle size={24} className="text-slate-700 mx-auto mb-2" />
+              <button className="p-4 rounded-2xl bg-blue-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/services/psychological')}>
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+                  <MessageCircle size={20} className="text-blue-600" />
+                </div>
                 <span className="text-[11px] text-slate-600">Nuevo Chat</span>
               </button>
               
-              <button className="p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 hover:ring-slate-300 transition-all" onClick={() => navigate('/community')}>
-                <Heart size={24} className="text-slate-700 mx-auto mb-2" />
+              <button className="p-4 rounded-2xl bg-pink-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/community')}>
+                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-2">
+                  <Heart size={20} className="text-pink-600" />
+                </div>
                 <span className="text-[11px] text-slate-600">Favoritos</span>
               </button>
               
-              <button className="p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 hover:ring-slate-300 transition-all" onClick={() => navigate('/community')}>
-                <Users size={24} className="text-slate-700 mx-auto mb-2" />
+              <button className="p-4 rounded-2xl bg-amber-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/community')}>
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
+                  <Users size={20} className="text-amber-600" />
+                </div>
                 <span className="text-[11px] text-slate-600">Comunidad</span>
               </button>
             </div>

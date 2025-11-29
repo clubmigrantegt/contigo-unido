@@ -169,7 +169,7 @@ const Auth = () => {
 
   if (otpSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-[#FAFAFA]">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-white">
         <div className="w-full max-w-md space-y-6">
           <Button
             variant="ghost"
@@ -211,7 +211,7 @@ const Auth = () => {
             </div>
             <Button
               type="submit"
-              className="w-full btn-primary"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl"
               disabled={loading || !otp}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -224,7 +224,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#FAFAFA]">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-white">
       <div className="w-full max-w-md space-y-6">
         <Button
           variant="ghost"
@@ -278,7 +278,7 @@ const Auth = () => {
 
           <Button
             type="submit"
-            className="w-full btn-primary"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl"
             disabled={loading || !phone || (!isLogin && !fullName)}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -293,7 +293,7 @@ const Auth = () => {
               setIsLogin(!isLogin);
               navigate(`/auth?mode=${isLogin ? 'signup' : 'login'}`);
             }}
-            className="text-primary text-sm font-medium hover:underline"
+            className="text-orange-500 text-sm font-medium hover:underline"
           >
             {isLogin 
               ? '¿No tienes cuenta? Regístrate'

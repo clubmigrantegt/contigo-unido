@@ -112,13 +112,13 @@ const LegalInfo = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      'tps': 'bg-primary/10 text-primary border-primary/20',
-      'asilo': 'bg-secondary/10 text-secondary border-secondary/20',
-      'derechos_laborales': 'bg-accent/30 text-accent-foreground border-accent/40',
-      'inmigración': 'bg-success/10 text-success border-success/20',
-      'documentos': 'bg-muted text-muted-foreground border-border'
+      'tps': 'bg-blue-50 text-blue-600 border-0',
+      'asilo': 'bg-violet-50 text-violet-600 border-0',
+      'derechos_laborales': 'bg-amber-50 text-amber-600 border-0',
+      'inmigración': 'bg-emerald-50 text-emerald-600 border-0',
+      'documentos': 'bg-slate-50 text-slate-600 border-0'
     };
-    return colors[category as keyof typeof colors] || 'bg-muted text-muted-foreground border-border';
+    return colors[category as keyof typeof colors] || 'bg-slate-50 text-slate-600 border-0';
   };
 
   const handleFavoriteToggle = async (topicId: string) => {
@@ -182,9 +182,9 @@ const LegalInfo = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-card border-b border-border">
+      <div className="bg-white border-b border-slate-100">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm" asChild>
@@ -231,7 +231,7 @@ const LegalInfo = () => {
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category.id)}
-                className="whitespace-nowrap flex-shrink-0"
+                className={`whitespace-nowrap flex-shrink-0 ${selectedCategory === category.id ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
               >
                 {category.label}
                 <Badge variant="secondary" className="ml-1">
