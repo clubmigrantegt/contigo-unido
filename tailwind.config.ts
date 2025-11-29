@@ -31,7 +31,7 @@ const config: Config = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          glow: "hsl(var(--primary-glow))",
+          hover: "hsl(var(--primary-hover))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -61,10 +61,17 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Club del Migrante specific colors
-        'calm-gray': "hsl(var(--calm-gray))",
-        'divider-gray': "hsl(var(--divider-gray))",
-        'strong-black': "hsl(var(--strong-black))",
+        // Slate color system
+        slate: {
+          50: "hsl(var(--slate-50))",
+          100: "hsl(var(--slate-100))",
+          200: "hsl(var(--slate-200))",
+          300: "hsl(var(--slate-300))",
+          400: "hsl(var(--slate-400))",
+          600: "hsl(var(--slate-600))",
+          700: "hsl(var(--slate-700))",
+          900: "hsl(var(--slate-900))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -73,16 +80,20 @@ const config: Config = {
         xl: "calc(var(--radius) + 4px)",
       },
       boxShadow: {
-        'elegant': 'var(--shadow-elegant)',
+        'sm': 'var(--shadow-sm)',
+        'DEFAULT': 'var(--shadow)',
+        'md': 'var(--shadow-md)',
+        'lg': 'var(--shadow-lg)',
+        'xl': 'var(--shadow-xl)',
         'card': 'var(--shadow-card)',
-        'glow': 'var(--shadow-glow)',
+        'elegant': 'var(--shadow-elegant)',
       },
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Inter', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
       },
       transitionTimingFunction: {
         'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -125,6 +136,10 @@ const config: Config = {
           "50%": { transform: "scale(1.05)" },
           "100%": { transform: "scale(1)" },
         },
+        "blur-in": {
+          from: { opacity: "0", filter: "blur(10px)" },
+          to: { opacity: "1", filter: "blur(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -136,6 +151,7 @@ const config: Config = {
         "scale-fade-in": "scale-fade-in 0.5s ease-out",
         "float": "float 3s ease-in-out infinite",
         "spring": "spring 0.3s ease-out",
+        "blur-in": "blur-in 0.8s ease-out",
       },
     },
   },
