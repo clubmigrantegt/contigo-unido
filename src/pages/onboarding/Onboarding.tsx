@@ -1,31 +1,38 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { HeartHandshake, Scale, Users, Globe } from 'lucide-react';
+import { HeartHandshake, Scale, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logoClub from '@/assets/logo-club-migrante.png';
 
 const onboardingSteps = [
   {
-    icon: Globe,
-    iconBg: 'bg-gradient-to-br from-primary to-secondary',
+    type: 'image' as const,
+    image: logoClub,
     title: 'Bienvenido al Club del Migrante',
     description: 'Tu comunidad de apoyo para acompañarte en tu proceso migratorio.',
   },
   {
+    type: 'icon' as const,
     icon: HeartHandshake,
-    iconBg: 'bg-gradient-to-br from-primary to-primary/80',
+    iconBg: 'bg-blue-100',
+    iconColor: 'text-blue-600',
     title: 'Apoyo Psicológico 24/7',
     description: 'Conversa con nuestra IA especializada en salud mental cuando lo necesites.',
   },
   {
+    type: 'icon' as const,
     icon: Scale,
-    iconBg: 'bg-gradient-to-br from-secondary to-accent',
+    iconBg: 'bg-emerald-100',
+    iconColor: 'text-emerald-600',
     title: 'Orientación Legal',
     description: 'Información legal confiable sobre procesos migratorios y tus derechos.',
   },
   {
+    type: 'icon' as const,
     icon: Users,
-    iconBg: 'bg-gradient-to-br from-accent to-primary',
+    iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600',
     title: 'Comunidad Solidaria',
     description: 'Conecta con personas que comparten tu experiencia y encuentra apoyo mutuo.',
   },
@@ -68,7 +75,7 @@ const Onboarding = () => {
   };
 
   const currentStepData = onboardingSteps[currentStep];
-  const IconComponent = currentStepData.icon;
+  const IconComponent = currentStepData.type === 'icon' ? currentStepData.icon : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -92,11 +99,19 @@ const Onboarding = () => {
             !isAnimating && "animate-scale-fade-in"
           )}
         >
-          {/* Icon Container */}
+          {/* Icon or Image Container */}
           <div className="flex justify-center mb-8">
-            <div className={`${currentStepData.iconBg} rounded-3xl p-8 shadow-lg animate-float border-0`}>
-              <IconComponent className="w-20 h-20 text-white" strokeWidth={1.5} />
-            </div>
+            {currentStepData.type === 'image' ? (
+              <img 
+                src={currentStepData.image} 
+                alt="Club del Migrante" 
+                className="w-48 h-auto animate-float"
+              />
+            ) : IconComponent ? (
+              <div className={`${currentStepData.iconBg} rounded-3xl p-8 shadow-lg animate-float border-0`}>
+                <IconComponent className={`w-20 h-20 ${currentStepData.iconColor}`} strokeWidth={1.5} />
+              </div>
+            ) : null}
           </div>
           
           {/* Text Content */}
@@ -118,7 +133,7 @@ const Onboarding = () => {
               key={index}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === currentStep 
-                  ? 'w-8 bg-orange-500' 
+                  ? 'w-8 bg-brand' 
                   : 'w-2 bg-slate-200'
               }`}
             />
@@ -140,7 +155,7 @@ const Onboarding = () => {
           
           <Button 
             onClick={nextStep}
-            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full"
+            className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-full"
             disabled={isAnimating}
           >
             {currentStep === onboardingSteps.length - 1 ? 'Comenzar' : 'Siguiente'}

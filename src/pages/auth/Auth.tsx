@@ -211,7 +211,7 @@ const Auth = () => {
             </div>
             <Button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl"
+              className="w-full bg-brand hover:bg-brand-hover text-white rounded-xl"
               disabled={loading || !otp}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -278,7 +278,7 @@ const Auth = () => {
 
           <Button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl"
+            className="w-full bg-brand hover:bg-brand-hover text-white rounded-xl"
             disabled={loading || !phone || (!isLogin && !fullName)}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -293,7 +293,7 @@ const Auth = () => {
               setIsLogin(!isLogin);
               navigate(`/auth?mode=${isLogin ? 'signup' : 'login'}`);
             }}
-            className="text-orange-500 text-sm font-medium hover:underline"
+            className="text-brand text-sm font-medium hover:underline"
           >
             {isLogin 
               ? '¿No tienes cuenta? Regístrate'

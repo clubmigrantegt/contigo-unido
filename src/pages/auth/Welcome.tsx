@@ -59,7 +59,7 @@ const Welcome = () => {
         <div className="space-y-4">
           <Button 
             size="lg" 
-            className="w-full text-lg h-14 animate-slide-up bg-orange-500 hover:bg-orange-600 text-white rounded-full"
+            className="w-full text-lg h-14 animate-slide-up bg-brand hover:bg-brand-hover text-white rounded-full"
             style={{ animationDelay: '0.2s' }}
             onClick={() => navigate('/auth?mode=login')}
           >

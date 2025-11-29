@@ -54,7 +54,7 @@ const Home = () => {
         {/* Welcome Card */}
         <Card className="rounded-3xl bg-rose-50/70 border-0 shadow-none">
           <CardContent className="p-6">
-            <span className="text-[12px] font-semibold text-orange-500 uppercase tracking-wider">
+            <span className="text-[12px] font-semibold text-brand uppercase tracking-wider">
               BIENVENIDO
             </span>
             
@@ -69,7 +69,7 @@ const Home = () => {
             <div className="flex items-center gap-4 mt-5">
               <Button 
                 onClick={() => navigate('/services')}
-                className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 py-2.5 text-[14px] font-semibold"
+                className="bg-brand hover:bg-brand-hover text-white rounded-full px-6 py-2.5 text-[14px] font-semibold"
               >
                 Comenzar
               </Button>
@@ -84,7 +84,7 @@ const Home = () => {
             <h2 className="text-[18px] font-bold text-slate-900">Servicios</h2>
             <button 
               onClick={() => navigate('/services')}
-              className="text-[14px] font-medium text-orange-500 hover:text-orange-600"
+              className="text-[14px] font-medium text-brand hover:text-brand-hover"
             >
               Ver todos
             </button>
