@@ -305,7 +305,7 @@ const Community = () => {
           </div>
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogTrigger asChild>
-              <Button className="bg-orange-500 text-white hover:bg-orange-600 rounded-xl whitespace-nowrap gap-2">
+              <Button className="bg-brand text-white hover:bg-brand-hover rounded-xl whitespace-nowrap gap-2">
                 <Plus className="w-4 h-4" />
                 Compartir
               </Button>

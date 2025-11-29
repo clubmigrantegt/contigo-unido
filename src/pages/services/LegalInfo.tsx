@@ -231,7 +231,7 @@ const LegalInfo = () => {
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category.id)}
-                className={`whitespace-nowrap flex-shrink-0 ${selectedCategory === category.id ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                className={`whitespace-nowrap flex-shrink-0 ${selectedCategory === category.id ? 'bg-brand hover:bg-brand-hover text-white' : ''}`}
               >
                 {category.label}
                 <Badge variant="secondary" className="ml-1">

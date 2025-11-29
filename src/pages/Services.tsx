@@ -163,7 +163,7 @@ const Services = () => {
                         <Link to={service.path}>
                           <Button 
                             size="sm"
-                            className="rounded-xl bg-orange-500 text-white hover:bg-orange-600"
+                            className="rounded-xl bg-brand text-white hover:bg-brand-hover"
                             disabled={!service.available}
                           >
                             {service.available ? 'Acceder' : 'Pronto'}

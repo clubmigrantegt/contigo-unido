@@ -21,8 +21,13 @@
     --secondary: 210 40% 96%;         /* #F1F5F9 */
     --secondary-foreground: 222 47% 11%;
     
-    /* Accent: Warm Yellow */
-    --accent: 48 96% 53%;             /* #FACC15 */
+    /* Brand Colors - Club del Migrante */
+    --brand: 204 95% 62%;              /* #40A9FA - Celeste */
+    --brand-hover: 207 90% 54%;        /* #2196F3 - Celeste oscuro para hover */
+    --brand-secondary: 40 100% 69%;    /* #FFCB62 - Amarillo */
+    
+    /* Accent: Warm Yellow (same as brand secondary) */
+    --accent: 40 100% 69%;             /* #FFCB62 */
     --accent-foreground: 222 47% 11%;
     
     /* Functional Colors */

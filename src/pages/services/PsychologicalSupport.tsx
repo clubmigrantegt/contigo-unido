@@ -260,7 +260,7 @@ const PsychologicalSupport = () => {
                             description: "Esta funcionalidad estará disponible pronto",
                           })}
                           disabled={loading || option.status === 'busy'}
-                          className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl"
+                          className="w-full bg-brand hover:bg-brand-hover text-white rounded-xl"
                         >
                           {loading ? 'Conectando...' : 
                            option.status === 'busy' ? 'No disponible' : 
