@@ -8,11 +8,13 @@ import { ArrowLeft, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
+import { LATIN_AMERICAN_COUNTRIES } from '@/components/ui/country-phone-input';
 
 interface Preferences {
   language: string;
   notifications_enabled: boolean;
   theme: string;
+  country_of_origin?: string;
 }
 
 interface PreferencesEditorProps {
@@ -38,6 +40,7 @@ const PreferencesEditor = ({ preferences, onBack, onSave }: PreferencesEditorPro
         .update({
           language: formData.language,
           notifications_enabled: formData.notifications_enabled,
+          country_of_origin: formData.country_of_origin,
         })
         .eq('user_id', user.data.user.id);
 
@@ -113,6 +116,25 @@ const PreferencesEditor = ({ preferences, onBack, onSave }: PreferencesEditorPro
                   <SelectItem value="light">Claro</SelectItem>
                   <SelectItem value="dark">Oscuro</SelectItem>
                   <SelectItem value="system">Sistema</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="country">País de origen</Label>
+              <Select 
+                value={formData.country_of_origin} 
+                onValueChange={(value) => setFormData({ ...formData, country_of_origin: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona tu país" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LATIN_AMERICAN_COUNTRIES.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

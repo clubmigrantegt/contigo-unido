@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,14 +53,28 @@ const LATIN_AMERICAN_COUNTRIES: Country[] = [
 interface CountryPhoneInputProps {
   value: string;
   onChange: (value: string) => void;
+  onCountryChange?: (country: Country) => void;
+  defaultCountryCode?: string;
   disabled?: boolean;
   required?: boolean;
+  showValidation?: boolean;
 }
 
-export function CountryPhoneInput({ value, onChange, disabled, required }: CountryPhoneInputProps) {
+export function CountryPhoneInput({ 
+  value, 
+  onChange, 
+  onCountryChange,
+  defaultCountryCode,
+  disabled, 
+  required,
+  showValidation = true 
+}: CountryPhoneInputProps) {
   const [open, setOpen] = React.useState(false);
-  const [selectedCountry, setSelectedCountry] = React.useState<Country>(LATIN_AMERICAN_COUNTRIES[0]);
+  const [selectedCountry, setSelectedCountry] = React.useState<Country>(
+    LATIN_AMERICAN_COUNTRIES.find(c => c.code === defaultCountryCode) || LATIN_AMERICAN_COUNTRIES[0]
+  );
   const [phoneNumber, setPhoneNumber] = React.useState("");
+  const [isTouched, setIsTouched] = React.useState(false);
 
   // Extract phone number without country code
   React.useEffect(() => {
@@ -71,17 +85,58 @@ export function CountryPhoneInput({ value, onChange, disabled, required }: Count
     }
   }, [value, selectedCountry.phoneCode]);
 
+  // Format phone number according to country format
+  const formatPhoneNumber = (input: string, format: string) => {
+    const digits = input.replace(/\D/g, '');
+    let result = '';
+    let digitIndex = 0;
+    
+    for (const char of format) {
+      if (char === '#') {
+        if (digitIndex < digits.length) {
+          result += digits[digitIndex];
+          digitIndex++;
+        }
+      } else {
+        if (digitIndex < digits.length && digitIndex > 0) {
+          result += char;
+        }
+      }
+    }
+    return result;
+  };
+
+  // Get expected length from format
+  const getExpectedLength = (format: string) => {
+    return format.replace(/[^#]/g, '').length;
+  };
+
+  // Validate phone number
+  const isValid = React.useMemo(() => {
+    const digits = phoneNumber.replace(/\D/g, '');
+    const expectedLength = getExpectedLength(selectedCountry.format);
+    return digits.length === expectedLength;
+  }, [phoneNumber, selectedCountry.format]);
+
+  const currentLength = phoneNumber.replace(/\D/g, '').length;
+  const expectedLength = getExpectedLength(selectedCountry.format);
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    setPhoneNumber(input);
-    onChange(`${selectedCountry.phoneCode}${input}`);
+    const digits = input.replace(/\D/g, '');
+    const formatted = formatPhoneNumber(digits, selectedCountry.format);
+    
+    setPhoneNumber(formatted);
+    setIsTouched(true);
+    onChange(`${selectedCountry.phoneCode}${digits}`);
   };
 
   const handleCountryChange = (country: Country) => {
     setSelectedCountry(country);
     setOpen(false);
-    // Update the full phone number with new country code
-    onChange(`${country.phoneCode}${phoneNumber}`);
+    const digits = phoneNumber.replace(/\D/g, '');
+    onChange(`${country.phoneCode}${digits}`);
+    onCountryChange?.(country);
   };
 
   return (
@@ -132,15 +187,38 @@ export function CountryPhoneInput({ value, onChange, disabled, required }: Count
         </PopoverContent>
       </Popover>
       
-      <Input
-        type="tel"
-        placeholder={selectedCountry.placeholder}
-        value={phoneNumber}
-        onChange={handlePhoneChange}
-        disabled={disabled}
-        required={required}
-        className="flex-1"
-      />
+      <div className="flex-1 relative">
+        <Input
+          type="tel"
+          placeholder={selectedCountry.placeholder}
+          value={phoneNumber}
+          onChange={handlePhoneChange}
+          disabled={disabled}
+          required={required}
+          className={cn(
+            "pr-10",
+            showValidation && isTouched && (
+              isValid 
+                ? "border-success focus-visible:ring-success" 
+                : "border-destructive focus-visible:ring-destructive"
+            )
+          )}
+        />
+        {showValidation && isTouched && phoneNumber && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            {isValid ? (
+              <CheckCircle2 className="h-5 w-5 text-success" />
+            ) : (
+              <XCircle className="h-5 w-5 text-destructive" />
+            )}
+          </div>
+        )}
+        {showValidation && isTouched && !isValid && phoneNumber && (
+          <p className="text-xs text-destructive mt-1">
+            {currentLength} de {expectedLength} dígitos
+          </p>
+        )}
+      </div>
     </div>
   );
 }
