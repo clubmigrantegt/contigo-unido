@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react';
-import { MessageSquare, Send, Heart } from 'lucide-react';
+import { MessageSquare, Send, Heart, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Comment {
   id: string;
   content: string;
   author_name: string;
+  author_country?: string;
   created_at: string;
   likes: number;
   user_liked: boolean;
@@ -41,41 +44,51 @@ const TestimonialComments = ({ testimonialId, isOpen, onClose }: TestimonialComm
   const fetchComments = async () => {
     setLoading(true);
     try {
-      // In a real implementation, this would fetch from a comments table
-      // For now, we'll simulate with mock data
-      const mockComments: Comment[] = [
-        {
-          id: '1',
-          content: '¡Qué historia tan inspiradora! Me da mucha esperanza saber que otros han pasado por experiencias similares.',
-          author_name: 'Ana M.',
-          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          likes: 3,
-          user_liked: false
-        },
-        {
-          id: '2',
-          content: 'Gracias por compartir tu experiencia. Es muy valiente de tu parte y seguro ayudará a muchas personas.',
-          author_name: 'Carlos R.',
-          created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-          likes: 1,
-          user_liked: true
-        },
-        {
-          id: '3',
-          content: 'Me identifico mucho con lo que cuentas. ¿Podrías compartir más detalles sobre cómo lograste superarlo?',
-          author_name: 'María L.',
-          created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          likes: 2,
-          user_liked: false
-        }
-      ];
-      
-      setComments(mockComments);
+      const { data: commentsData, error: commentsError } = await supabase
+        .from('testimonial_comments')
+        .select('id, content, author_name, created_at, user_id')
+        .eq('testimonial_id', testimonialId)
+        .order('created_at', { ascending: false });
+
+      if (commentsError) throw commentsError;
+
+      const commentIds = commentsData?.map(c => c.id) || [];
+      const { data: likesData, error: likesError } = await supabase
+        .from('comment_likes')
+        .select('comment_id, user_id')
+        .in('comment_id', commentIds);
+
+      if (likesError) throw likesError;
+
+      const userIds = commentsData?.map(c => c.user_id) || [];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, country_of_origin')
+        .in('user_id', userIds);
+
+      const enrichedComments: Comment[] = (commentsData || []).map(comment => {
+        const commentLikes = likesData?.filter(l => l.comment_id === comment.id) || [];
+        const userLiked = commentLikes.some(l => l.user_id === user?.id);
+        const profile = profilesData?.find(p => p.user_id === comment.user_id);
+
+        return {
+          id: comment.id,
+          content: comment.content,
+          author_name: comment.author_name,
+          author_country: profile?.country_of_origin || undefined,
+          created_at: comment.created_at,
+          likes: commentLikes.length,
+          user_liked: userLiked,
+        };
+      });
+
+      setComments(enrichedComments);
     } catch (error) {
+      console.error('Error fetching comments:', error);
       toast({
-        title: "Error",
-        description: "No se pudieron cargar los comentarios",
-        variant: "destructive",
+        title: 'Error',
+        description: 'No se pudieron cargar los comentarios',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -103,17 +116,35 @@ const TestimonialComments = ({ testimonialId, isOpen, onClose }: TestimonialComm
 
     setSubmitting(true);
     try {
-      // In a real implementation, this would save to the database
-      const comment: Comment = {
-        id: Date.now().toString(),
-        content: newComment.trim(),
-        author_name: user.user_metadata?.full_name || 'Usuario Anónimo',
-        created_at: new Date().toISOString(),
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+
+      const { data, error } = await supabase
+        .from('testimonial_comments')
+        .insert({
+          testimonial_id: testimonialId,
+          user_id: user.id,
+          content: newComment.trim(),
+          author_name: profile?.full_name || 'Usuario',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newCommentObj: Comment = {
+        id: data.id,
+        content: data.content,
+        author_name: data.author_name,
+        created_at: data.created_at,
         likes: 0,
-        user_liked: false
+        user_liked: false,
       };
 
-      setComments(prev => [comment, ...prev]);
+      setComments([newCommentObj, ...comments]);
       setNewComment('');
       
       toast({
@@ -121,6 +152,7 @@ const TestimonialComments = ({ testimonialId, isOpen, onClose }: TestimonialComm
         description: "Tu comentario ha sido agregado exitosamente",
       });
     } catch (error) {
+      console.error('Error submitting comment:', error);
       toast({
         title: "Error",
         description: "No se pudo publicar el comentario",
@@ -142,22 +174,47 @@ const TestimonialComments = ({ testimonialId, isOpen, onClose }: TestimonialComm
     }
 
     try {
-      setComments(prev => prev.map(comment => {
-        if (comment.id === commentId) {
-          return {
-            ...comment,
-            likes: comment.user_liked ? comment.likes - 1 : comment.likes + 1,
-            user_liked: !comment.user_liked
-          };
-        }
-        return comment;
-      }));
+      const comment = comments.find(c => c.id === commentId);
+      if (!comment) return;
+
+      if (comment.user_liked) {
+        const { error } = await supabase
+          .from('comment_likes')
+          .delete()
+          .eq('comment_id', commentId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        setComments(comments.map(c =>
+          c.id === commentId
+            ? { ...c, likes: c.likes - 1, user_liked: false }
+            : c
+        ));
+      } else {
+        const { error } = await supabase
+          .from('comment_likes')
+          .insert({
+            comment_id: commentId,
+            user_id: user.id,
+          });
+
+        if (error) throw error;
+
+        setComments(comments.map(c =>
+          c.id === commentId
+            ? { ...c, likes: c.likes + 1, user_liked: true }
+            : c
+        ));
+      }
     } catch (error) {
+      console.error('Error liking comment:', error);
       toast({
         title: "Error",
         description: "No se pudo procesar la reacción",
         variant: "destructive",
       });
+      fetchComments();
     }
   };
 
@@ -191,14 +248,13 @@ const TestimonialComments = ({ testimonialId, isOpen, onClose }: TestimonialComm
               <span>Comentarios</span>
               <Badge variant="secondary">{comments.length}</Badge>
             </CardTitle>
-            <Button variant="ghost" onClick={onClose}>
-              ✕
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
         
         <CardContent className="space-y-4 overflow-y-auto max-h-[60vh]">
-          {/* Add Comment Form */}
           {user && (
             <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
               <Textarea
@@ -230,16 +286,15 @@ const TestimonialComments = ({ testimonialId, isOpen, onClose }: TestimonialComm
 
           <Separator />
 
-          {/* Comments List */}
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse">
+                <div key={i} className="space-y-2">
                   <div className="flex space-x-3">
-                    <div className="w-10 h-10 bg-muted rounded-full"></div>
+                    <Skeleton className="w-10 h-10 rounded-full" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-muted rounded w-1/4"></div>
-                      <div className="h-16 bg-muted rounded"></div>
+                      <Skeleton className="h-4 w-1/4" />
+                      <Skeleton className="h-16 w-full" />
                     </div>
                   </div>
                 </div>

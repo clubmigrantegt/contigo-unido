@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          appointment_date: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          professional_name: string | null
+          service_type: string
+          status: string | null
+          time_slot: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          professional_name?: string | null
+          service_type: string
+          status?: string | null
+          time_slot: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          professional_name?: string | null
+          service_type?: string
+          status?: string | null
+          time_slot?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      available_time_slots: {
+        Row: {
+          created_at: string | null
+          day_of_week: number
+          id: string
+          is_active: boolean | null
+          professional_name: string
+          service_type: string
+          time: string
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week: number
+          id?: string
+          is_active?: boolean | null
+          professional_name: string
+          service_type: string
+          time: string
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: number
+          id?: string
+          is_active?: boolean | null
+          professional_name?: string
+          service_type?: string
+          time?: string
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           content: string
@@ -85,6 +154,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "testimonial_comments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       faqs: {
         Row: {
@@ -194,6 +292,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -241,6 +375,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      testimonial_comments: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string | null
+          id: string
+          testimonial_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          author_name: string
+          content: string
+          created_at?: string | null
+          id?: string
+          testimonial_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          testimonial_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "testimonial_comments_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       testimonial_reactions: {
         Row: {

@@ -1,118 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Bell, X, MessageSquare, Heart, Info, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/components/auth/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-
-interface Notification {
-  id: string;
-  type: 'chat_reminder' | 'community_update' | 'system_info' | 'achievement';
-  title: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-  action_url?: string;
-}
+import { useNavigate } from 'react-router-dom';
 
 const NotificationCenter = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      fetchNotifications();
-      // Create some demo notifications for now
-      createDemoNotifications();
-    }
-  }, [user]);
-
-  const fetchNotifications = async () => {
-    // In a real implementation, this would fetch from a notifications table
-    // For now, we'll simulate with localStorage
-    try {
-      const stored = localStorage.getItem(`notifications_${user?.id}`);
-      if (stored) {
-        setNotifications(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createDemoNotifications = () => {
-    const demoNotifications: Notification[] = [
-      {
-        id: '1',
-        type: 'chat_reminder',
-        title: 'Recordatorio de seguimiento',
-        message: 'Ha pasado una semana desde tu última sesión de apoyo. ¿Te gustaría programar otra?',
-        read: false,
-        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        action_url: '/services/psychological-support'
-      },
-      {
-        id: '2',
-        type: 'community_update',
-        title: 'Nueva historia en la comunidad',
-        message: 'Alguien ha compartido una nueva historia de superación que podría interesarte.',
-        read: false,
-        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        action_url: '/community'
-      },
-      {
-        id: '3',
-        type: 'system_info',
-        title: 'Nuevos recursos disponibles',
-        message: 'Hemos agregado nueva información legal sobre derechos laborales.',
-        read: true,
-        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        action_url: '/services/legal-info'
-      },
-      {
-        id: '4',
-        type: 'achievement',
-        title: '¡Felicidades!',
-        message: 'Has completado tu tercera sesión de apoyo psicológico. ¡Sigue así!',
-        read: true,
-        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    ];
-
-    setNotifications(demoNotifications);
-    localStorage.setItem(`notifications_${user?.id}`, JSON.stringify(demoNotifications));
-  };
-
-  const markAsRead = (notificationId: string) => {
-    const updated = notifications.map(notif => 
-      notif.id === notificationId ? { ...notif, read: true } : notif
-    );
-    setNotifications(updated);
-    localStorage.setItem(`notifications_${user?.id}`, JSON.stringify(updated));
-  };
-
-  const markAllAsRead = () => {
-    const updated = notifications.map(notif => ({ ...notif, read: true }));
-    setNotifications(updated);
-    localStorage.setItem(`notifications_${user?.id}`, JSON.stringify(updated));
-    
-    toast({
-      title: "Notificaciones marcadas",
-      description: "Todas las notificaciones han sido marcadas como leídas",
-    });
-  };
-
-  const deleteNotification = (notificationId: string) => {
-    const updated = notifications.filter(notif => notif.id !== notificationId);
-    setNotifications(updated);
-    localStorage.setItem(`notifications_${user?.id}`, JSON.stringify(updated));
-  };
+  const { notifications, loading, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const navigate = useNavigate();
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -124,6 +19,8 @@ const NotificationCenter = () => {
         return <Info className="h-5 w-5 text-accent" />;
       case 'achievement':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'appointment_reminder':
+        return <Bell className="h-5 w-5 text-orange-500" />;
       default:
         return <Bell className="h-5 w-5 text-muted-foreground" />;
     }
@@ -143,7 +40,11 @@ const NotificationCenter = () => {
     return date.toLocaleDateString('es-ES');
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const handleActionClick = (actionUrl?: string) => {
+    if (actionUrl) {
+      navigate(actionUrl);
+    }
+  };
 
   if (loading) {
     return (
@@ -236,7 +137,11 @@ const NotificationCenter = () => {
                       </Button>
                     )}
                     {notification.action_url && (
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleActionClick(notification.action_url)}
+                      >
                         Ver más
                       </Button>
                     )}
