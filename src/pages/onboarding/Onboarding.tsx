@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { HeartHandshake, Scale, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoClub from '@/assets/logo-club-migrante.png';
+import illustrationSupport from '@/assets/illustration-support-onboarding.png';
 
 const onboardingSteps = [
   {
@@ -13,10 +14,8 @@ const onboardingSteps = [
     description: 'Tu comunidad de apoyo para acompañarte en tu proceso migratorio.',
   },
   {
-    type: 'icon' as const,
-    icon: HeartHandshake,
-    iconBg: 'bg-blue-100',
-    iconColor: 'text-blue-600',
+    type: 'image' as const,
+    image: illustrationSupport,
     title: 'Apoyo Psicológico 24/7',
     description: 'Conversa con nuestra IA especializada en salud mental cuando lo necesites.',
   },

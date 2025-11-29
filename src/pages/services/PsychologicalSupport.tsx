@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, MessageCircle, Phone, Clock, Users, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import illustrationSupport from '@/assets/illustration-support.png';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -180,18 +179,6 @@ const PsychologicalSupport = () => {
         />
       ) : (
         <div className="container mx-auto px-4 py-6 space-y-6">
-          {/* Hero Section con ilustración */}
-          <div className="flex flex-col items-center text-center mb-2">
-            <img 
-              src={illustrationSupport}
-              alt="Apoyo psicológico activo"
-              className="w-64 h-auto mb-4"
-            />
-            <p className="text-slate-500 text-sm max-w-xs">
-              Estamos aquí para acompañarte. Nuestro equipo de profesionales está listo para escucharte.
-            </p>
-          </div>
-
           {/* Session Active Indicator */}
           {isSessionActive && !showChatInterface && (
             <Alert className="border-primary bg-primary/5 py-3">
