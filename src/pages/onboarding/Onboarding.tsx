@@ -92,7 +92,7 @@ const Onboarding = () => {
       {/* Main Content - Layout con posiciones fijas */}
       <div className="flex-1 flex flex-col px-6 pb-12" key={currentStep}>
         {/* Sección de ilustración - altura fija */}
-        <div className="flex-1 flex items-center justify-center min-h-[280px]">
+        <div className="flex-1 flex items-center justify-center min-h-[140px]">
           <div className="flex justify-center">
             {currentStepData.type === 'image' && (
               <img 
