@@ -261,7 +261,7 @@ const Profile = () => {
       <div className="px-4 mt-4 pb-20 space-y-4">
         {/* Complete Profile Call-to-Action */}
         {isProfileIncomplete && (
-          <Card className="rounded-2xl ring-1 ring-emerald-200 bg-emerald-50/50">
+          <Card className="rounded-2xl border border-emerald-200 bg-emerald-50/50">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
@@ -288,7 +288,7 @@ const Profile = () => {
         )}
 
         {/* Profile Sections as Cards */}
-        {profileSections.map(section => <Card key={section.id} className="rounded-2xl ring-1 ring-slate-200 hover:ring-slate-300 transition-all cursor-pointer" onClick={section.onClick}>
+        {profileSections.map(section => <Card key={section.id} className="rounded-2xl border border-slate-200 hover:border-slate-300 transition-all cursor-pointer" onClick={section.onClick}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl ${section.iconBg} flex items-center justify-center`}>
@@ -305,40 +305,38 @@ const Profile = () => {
             </CardContent>
           </Card>)}
 
-        {/* Quick Actions */}
-        <Card className="rounded-2xl ring-1 ring-slate-200 mt-6">
-          <CardContent className="p-4">
-            <h3 className="text-[15px] font-semibold text-slate-900 mb-4">Acciones Rápidas</h3>
-            <div className="grid grid-cols-3 gap-3">
-              <button className="p-4 rounded-2xl bg-blue-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/services/psychological')}>
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
-                  <MessageCircle size={20} className="text-blue-600" />
-                </div>
-                <span className="text-[11px] text-slate-600">Nuevo Chat</span>
-              </button>
-              
-              <button className="p-4 rounded-2xl bg-pink-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/community')}>
-                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-2">
-                  <Heart size={20} className="text-pink-600" />
-                </div>
-                <span className="text-[11px] text-slate-600">Favoritos</span>
-              </button>
-              
-              <button className="p-4 rounded-2xl bg-amber-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/community')}>
-                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
-                  <Users size={20} className="text-amber-600" />
-                </div>
-                <span className="text-[11px] text-slate-600">Comunidad</span>
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Quick Actions - Sin card contenedora */}
+        <div className="mt-6">
+          <h3 className="text-[15px] font-semibold text-slate-900 mb-4">Acciones Rápidas</h3>
+          <div className="grid grid-cols-3 gap-3">
+            <button className="p-4 rounded-2xl bg-blue-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/services/psychological')}>
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+                <MessageCircle size={20} className="text-blue-600" />
+              </div>
+              <span className="text-[11px] text-slate-600">Nuevo Chat</span>
+            </button>
+            
+            <button className="p-4 rounded-2xl bg-pink-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/community')}>
+              <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-2">
+                <Heart size={20} className="text-pink-600" />
+              </div>
+              <span className="text-[11px] text-slate-600">Favoritos</span>
+            </button>
+            
+            <button className="p-4 rounded-2xl bg-amber-50 border-0 shadow-none hover:shadow-md transition-all" onClick={() => navigate('/community')}>
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
+                <Users size={20} className="text-amber-600" />
+              </div>
+              <span className="text-[11px] text-slate-600">Comunidad</span>
+            </button>
+          </div>
+        </div>
 
         {/* Logout Button */}
         <Button 
           onClick={() => setShowLogoutDialog(true)} 
           variant="outline" 
-          className="w-full rounded-xl ring-1 ring-red-200 text-red-600 hover:bg-red-50 hover:ring-red-300"
+          className="w-full rounded-xl border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
         >
           <LogOut className="mr-2 h-4 w-4" />
           Cerrar Sesión
