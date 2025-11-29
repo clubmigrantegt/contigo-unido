@@ -1,12 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import { Home, Heart, Users, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { useNotifications } from '@/hooks/useNotifications';
 
 const BottomNav = () => {
-  const { unreadCount } = useNotifications();
-  
   const navItems = [
     { to: '/home', icon: Home, label: 'Inicio' },
     { to: '/services', icon: Heart, label: 'Servicios' },
@@ -15,9 +11,9 @@ const BottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-around h-16">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 z-50 shadow-[0_-1px_0_0_rgba(0,0,0,0.05),0_-4px_12px_-2px_rgba(0,0,0,0.08)]">
+      <div className="container mx-auto px-6">
+        <div className="flex items-center justify-around py-3">
           {navItems.map((item) => {
             const { to, icon: Icon, label } = item;
             return (
@@ -26,17 +22,15 @@ const BottomNav = () => {
                 to={to}
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center space-y-1 p-2 min-w-[60px] transition-colors duration-200 relative",
+                    "flex flex-col items-center gap-1 py-2 px-4 transition-all duration-200",
                     isActive 
-                      ? "text-primary" 
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "text-slate-900" 
+                      : "text-slate-400 hover:text-slate-600"
                   )
                 }
               >
-                <div className="relative">
-                  <Icon size={20} />
-                </div>
-                <span className="text-xs font-medium">{label}</span>
+                <Icon className="w-6 h-6" strokeWidth={1.5} />
+                <span className="text-[10px] font-medium">{label}</span>
               </NavLink>
             );
           })}
