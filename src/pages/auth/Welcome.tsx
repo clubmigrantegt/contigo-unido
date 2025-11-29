@@ -43,36 +43,39 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex flex-col animate-fade-in">
-      {/* Header */}
-      <div className="px-6 pt-12 pb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-        <h1 className="text-3xl font-bold text-strong-black mb-2">
-          Bienvenido
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Tu camino comienza aquí
-        </p>
-      </div>
+      {/* Main Content - Text + Buttons */}
+      <div className="flex-1 flex flex-col justify-center px-6">
+        {/* Welcome Text */}
+        <div className="mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <h1 className="text-3xl font-bold text-strong-black mb-2">
+            Bienvenido
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Tu camino comienza aquí
+          </p>
+        </div>
 
-      {/* Action Buttons */}
-      <div className="flex-1 flex flex-col justify-center px-6 space-y-4">
-        <Button 
-          size="lg" 
-          className="w-full text-lg h-14 animate-slide-up"
-          style={{ animationDelay: '0.2s' }}
-          onClick={() => navigate('/auth?mode=login')}
-        >
-          Iniciar Sesión
-        </Button>
-        
-        <Button 
-          size="lg" 
-          variant="outline"
-          className="w-full text-lg h-14 animate-slide-up"
-          style={{ animationDelay: '0.3s' }}
-          onClick={() => navigate('/auth?mode=signup')}
-        >
-          Crear Cuenta
-        </Button>
+        {/* Action Buttons */}
+        <div className="space-y-4">
+          <Button 
+            size="lg" 
+            className="w-full text-lg h-14 animate-slide-up"
+            style={{ animationDelay: '0.2s' }}
+            onClick={() => navigate('/auth?mode=login')}
+          >
+            Iniciar Sesión
+          </Button>
+          
+          <Button 
+            size="lg" 
+            variant="outline"
+            className="w-full text-lg h-14 animate-slide-up"
+            style={{ animationDelay: '0.3s' }}
+            onClick={() => navigate('/auth?mode=signup')}
+          >
+            Crear Cuenta
+          </Button>
+        </div>
       </div>
 
       {/* Dev Mode Access */}
