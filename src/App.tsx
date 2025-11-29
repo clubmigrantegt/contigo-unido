@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import Onboarding from "./pages/onboarding/Onboarding";
+import Welcome from "./pages/auth/Welcome";
 import Auth from "./pages/auth/Auth";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
@@ -48,6 +49,7 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<Navigate to="/onboarding" replace />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/welcome" element={<Welcome />} />
             <Route path="/auth" element={<Auth />} />
             
             {/* Protected routes */}
