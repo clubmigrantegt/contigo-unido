@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Calendar, Clock, User, Phone, Video } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { Calendar, Clock, User, Phone, Video, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TimeSlot {
   id: string;
@@ -36,23 +38,73 @@ const AppointmentScheduler = () => {
     notes: ''
   });
   const [loading, setLoading] = useState(false);
-
-  // Mock data for available time slots
-  const timeSlots: TimeSlot[] = [
-    { id: '1', time: '09:00', available: true, professional: 'Dr. María González' },
-    { id: '2', time: '10:00', available: false, professional: 'Dr. Carlos Ruiz' },
-    { id: '3', time: '11:00', available: true, professional: 'Dr. Ana López' },
-    { id: '4', time: '14:00', available: true, professional: 'Dr. María González' },
-    { id: '5', time: '15:00', available: true, professional: 'Dr. Luis Martín' },
-    { id: '6', time: '16:00', available: false, professional: 'Dr. Ana López' },
-    { id: '7', time: '17:00', available: true, professional: 'Dr. Carlos Ruiz' },
-  ];
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const serviceTypes = [
     { value: 'psychological', label: 'Apoyo Psicológico', icon: User },
     { value: 'legal', label: 'Consulta Legal', icon: Phone },
     { value: 'group', label: 'Sesión Grupal', icon: Video },
   ];
+
+  useEffect(() => {
+    if (appointment.date && appointment.serviceType) {
+      fetchTimeSlots();
+    }
+  }, [appointment.date, appointment.serviceType]);
+
+  const fetchTimeSlots = async () => {
+    if (!appointment.date || !appointment.serviceType) return;
+
+    setLoadingSlots(true);
+    try {
+      const dayOfWeek = appointment.date.getDay();
+      const dateStr = format(appointment.date, 'yyyy-MM-dd');
+
+      const { data: slots, error: slotsError } = await supabase
+        .from('available_time_slots')
+        .select('*')
+        .eq('day_of_week', dayOfWeek)
+        .eq('service_type', appointment.serviceType)
+        .eq('is_active', true);
+
+      if (slotsError) throw slotsError;
+
+      const { data: existingAppointments, error: apptError } = await supabase
+        .from('appointments')
+        .select('time_slot, professional_name')
+        .eq('appointment_date', dateStr)
+        .neq('status', 'cancelled');
+
+      if (apptError) throw apptError;
+
+      const availableSlots: TimeSlot[] = (slots || []).map((slot) => {
+        const isBooked = existingAppointments?.some(
+          (apt) =>
+            apt.time_slot === slot.time &&
+            apt.professional_name === slot.professional_name
+        );
+
+        return {
+          id: slot.id,
+          time: slot.time,
+          professional: slot.professional_name,
+          available: !isBooked,
+        };
+      });
+
+      setTimeSlots(availableSlots);
+    } catch (error) {
+      console.error('Error fetching time slots:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar los horarios disponibles',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -67,7 +119,7 @@ const AppointmentScheduler = () => {
   };
 
   const handleServiceTypeSelect = (serviceType: string) => {
-    setAppointment(prev => ({ ...prev, serviceType }));
+    setAppointment(prev => ({ ...prev, serviceType, timeSlot: '' }));
   };
 
   const handleNotesChange = (notes: string) => {
@@ -93,18 +145,50 @@ const AppointmentScheduler = () => {
       return;
     }
 
+    const selectedSlot = timeSlots.find(slot => slot.id === appointment.timeSlot);
+    if (!selectedSlot) {
+      toast({
+        title: "Error",
+        description: "Horario no válido",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      // In a real implementation, this would save to the database
-      // For now, we'll simulate the appointment creation
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const dateStr = format(appointment.date, 'yyyy-MM-dd');
+
+      const { data, error } = await supabase
+        .from('appointments')
+        .insert({
+          user_id: user.id,
+          appointment_date: dateStr,
+          time_slot: selectedSlot.time,
+          service_type: appointment.serviceType,
+          professional_name: selectedSlot.professional,
+          notes: appointment.notes || null,
+          status: 'scheduled',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await supabase.from('notifications').insert({
+        user_id: user.id,
+        type: 'appointment_reminder',
+        title: 'Recordatorio de Cita',
+        message: `Tienes una cita el ${format(appointment.date, 'dd/MM/yyyy')} a las ${selectedSlot.time} con ${selectedSlot.professional}`,
+        action_url: '/services?tab=appointments',
+        metadata: { appointment_id: data.id },
+      });
 
       toast({
         title: "¡Cita programada!",
-        description: "Tu cita ha sido programada exitosamente. Recibirás una confirmación por email.",
+        description: `Tu cita ha sido programada para el ${format(appointment.date, 'dd/MM/yyyy')} a las ${selectedSlot.time}`,
       });
 
-      // Reset form
       setAppointment({
         date: undefined,
         timeSlot: '',
@@ -112,7 +196,9 @@ const AppointmentScheduler = () => {
         notes: ''
       });
       setSelectedDate(new Date());
+      fetchTimeSlots();
     } catch (error) {
+      console.error('Error creating appointment:', error);
       toast({
         title: "Error",
         description: "No se pudo programar la cita. Intenta de nuevo.",
@@ -143,7 +229,6 @@ const AppointmentScheduler = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Calendar and Time Selection */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -165,42 +250,59 @@ const AppointmentScheduler = () => {
               className="rounded-md border"
             />
             
-            {selectedDate && (
+            {selectedDate && appointment.serviceType && (
               <div className="space-y-3">
                 <Label>Horarios disponibles para {selectedDate.toLocaleDateString('es-ES')}</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {timeSlots.map((slot) => (
-                    <Button
-                      key={slot.id}
-                      variant={appointment.timeSlot === slot.id ? "default" : "outline"}
-                      disabled={!slot.available}
-                      onClick={() => handleTimeSlotSelect(slot.id)}
-                      className="text-sm"
-                    >
-                      <Clock className="h-3 w-3 mr-1" />
-                      {slot.time}
-                      {!slot.available && (
-                        <Badge variant="secondary" className="ml-1 text-xs">
-                          No disponible
-                        </Badge>
-                      )}
-                    </Button>
-                  ))}
-                </div>
-                
-                {selectedTimeSlot && (
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-sm font-medium">
-                      Profesional asignado: {selectedTimeSlot.professional}
-                    </p>
+                {loadingSlots ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
+                ) : timeSlots.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    No hay horarios disponibles para esta fecha
+                  </p>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
+                      {timeSlots.map((slot) => (
+                        <Button
+                          key={slot.id}
+                          variant={appointment.timeSlot === slot.id ? "default" : "outline"}
+                          disabled={!slot.available}
+                          onClick={() => handleTimeSlotSelect(slot.id)}
+                          className="text-sm"
+                        >
+                          <Clock className="h-3 w-3 mr-1" />
+                          {slot.time}
+                          {!slot.available && (
+                            <Badge variant="secondary" className="ml-1 text-xs">
+                              No disponible
+                            </Badge>
+                          )}
+                        </Button>
+                      ))}
+                    </div>
+                    
+                    {selectedTimeSlot && (
+                      <div className="bg-muted/50 rounded-lg p-3">
+                        <p className="text-sm font-medium">
+                          Profesional asignado: {selectedTimeSlot.professional}
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
+            )}
+
+            {selectedDate && !appointment.serviceType && (
+              <p className="text-center text-muted-foreground py-8">
+                Selecciona un tipo de servicio primero
+              </p>
             )}
           </CardContent>
         </Card>
 
-        {/* Service Type and Details */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -248,7 +350,6 @@ const AppointmentScheduler = () => {
               />
             </div>
 
-            {/* Appointment Summary */}
             {(appointment.date || appointment.timeSlot || appointment.serviceType) && (
               <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                 <h4 className="font-semibold">Resumen de la cita:</h4>
@@ -280,7 +381,14 @@ const AppointmentScheduler = () => {
               disabled={loading || !appointment.date || !appointment.timeSlot || !appointment.serviceType}
               className="w-full"
             >
-              {loading ? 'Programando...' : 'Confirmar Cita'}
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Programando...
+                </>
+              ) : (
+                'Confirmar Cita'
+              )}
             </Button>
           </CardContent>
         </Card>

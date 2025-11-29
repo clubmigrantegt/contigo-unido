@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Users, Plus, Heart, MessageCircle, Flag, Star, Search, Filter } from 'lucide-react';
+import TestimonialComments from '@/components/community/TestimonialComments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +44,8 @@ const Community = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [activeTab, setActiveTab] = useState('historias');
+  const [selectedTestimonialId, setSelectedTestimonialId] = useState<string | null>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const [newTestimonial, setNewTestimonial] = useState({
     title: '',
     content: '',
