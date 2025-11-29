@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoClub from '@/assets/logo-club-migrante.png';
 import illustrationSupport from '@/assets/illustration-support-onboarding.png';
 import illustrationLegal from '@/assets/illustration-legal-onboarding.png';
+import illustrationCommunity from '@/assets/illustration-community-onboarding.png';
 
 const onboardingSteps = [
   {
@@ -30,10 +30,9 @@ const onboardingSteps = [
     description: 'Información legal confiable sobre procesos migratorios y tus derechos.',
   },
   {
-    type: 'icon' as const,
-    icon: Users,
-    iconBg: 'bg-amber-100',
-    iconColor: 'text-amber-600',
+    type: 'image' as const,
+    image: illustrationCommunity,
+    size: 'w-72',
     title: 'Comunidad Solidaria',
     description: 'Conecta con personas que comparten tu experiencia y encuentra apoyo mutuo.',
   },
@@ -76,7 +75,6 @@ const Onboarding = () => {
   };
 
   const currentStepData = onboardingSteps[currentStep];
-  const IconComponent = currentStepData.type === 'icon' ? currentStepData.icon : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -91,44 +89,34 @@ const Onboarding = () => {
         </Button>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
-        <div 
-          key={currentStep}
-          className={cn(
-            "w-full max-w-md transition-all duration-300",
-            !isAnimating && "animate-scale-fade-in"
-          )}
-        >
-          {/* Icon or Image Container */}
-          <div className="flex justify-center mb-8">
-            {currentStepData.type === 'image' ? (
+      {/* Main Content - Layout con posiciones fijas */}
+      <div className="flex-1 flex flex-col px-6 pb-12" key={currentStep}>
+        {/* Sección de ilustración - altura fija */}
+        <div className="flex-1 flex items-center justify-center min-h-[280px]">
+          <div className="flex justify-center">
+            {currentStepData.type === 'image' && (
               <img 
                 src={currentStepData.image} 
                 alt={currentStepData.title} 
-                className={`${currentStepData.size || 'w-48'} h-auto`}
+                className={`${currentStepData.size || 'w-48'} h-auto max-h-[240px] object-contain`}
               />
-            ) : IconComponent ? (
-              <div className={`${currentStepData.iconBg} rounded-3xl p-8 shadow-lg border-0`}>
-                <IconComponent className={`w-20 h-20 ${currentStepData.iconColor}`} strokeWidth={1.5} />
-              </div>
-            ) : null}
-          </div>
-          
-          {/* Text Content */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <h2 className="text-2xl font-bold text-strong-black text-center mb-4">
-              {currentStepData.title}
-            </h2>
-            
-            <p className="text-center text-muted-foreground text-lg px-4 mb-8">
-              {currentStepData.description}
-            </p>
+            )}
           </div>
         </div>
+        
+        {/* Sección de texto - altura fija */}
+        <div className="h-[140px] flex flex-col justify-start">
+          <h2 className="text-2xl font-bold text-strong-black text-center mb-4">
+            {currentStepData.title}
+          </h2>
+          
+          <p className="text-center text-muted-foreground text-lg px-4">
+            {currentStepData.description}
+          </p>
+        </div>
 
-        {/* Progress Dots */}
-        <div className="flex justify-center space-x-2 mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        {/* Progress Dots - posición fija */}
+        <div className="flex justify-center space-x-2 py-6">
           {onboardingSteps.map((_, index) => (
             <div
               key={index}
@@ -141,8 +129,8 @@ const Onboarding = () => {
           ))}
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex space-x-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        {/* Navigation Buttons - posición fija al final */}
+        <div className="flex space-x-4">
           {currentStep > 0 && (
             <Button 
               variant="outline" 
