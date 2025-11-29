@@ -11,7 +11,7 @@ const BottomNav = () => {
     { to: '/home', icon: Home, label: 'Inicio' },
     { to: '/services', icon: Heart, label: 'Servicios' },
     { to: '/community', icon: Users, label: 'Comunidad' },
-    { to: '/profile', icon: User, label: 'Perfil', badge: unreadCount },
+    { to: '/profile', icon: User, label: 'Perfil' },
   ];
 
   return (
@@ -19,7 +19,7 @@ const BottomNav = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-around h-16">
           {navItems.map((item) => {
-            const { to, icon: Icon, label, badge } = item;
+            const { to, icon: Icon, label } = item;
             return (
               <NavLink
                 key={to}
@@ -35,14 +35,6 @@ const BottomNav = () => {
               >
                 <div className="relative">
                   <Icon size={20} />
-                  {badge && badge > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-2 -right-2 h-4 min-w-[16px] px-1 text-[10px] flex items-center justify-center"
-                    >
-                      {badge > 99 ? '99+' : badge}
-                    </Badge>
-                  )}
                 </div>
                 <span className="text-xs font-medium">{label}</span>
               </NavLink>

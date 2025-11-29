@@ -10,7 +10,7 @@ const Notifications = () => {
     <div className="min-h-screen bg-calm-gray">
       <div className="bg-background px-4 pt-12 pb-6">
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft size={20} />
           </Button>
           <h1 className="text-2xl font-bold text-foreground">
