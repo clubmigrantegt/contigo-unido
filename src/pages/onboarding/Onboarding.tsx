@@ -2,9 +2,17 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, Scale, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, Scale, Users, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 
 const onboardingSteps = [
+  {
+    icon: Globe,
+    iconBg: 'bg-gradient-to-br from-primary via-secondary to-accent',
+    title: 'Bienvenido al Club del Migrante',
+    description: 'Tu comunidad de apoyo integral. Somos una plataforma diseñada para acompañarte en tu proceso migratorio con recursos de salud mental, orientación legal y una comunidad solidaria que entiende tu camino.',
+    color: 'text-primary',
+    isWelcome: true
+  },
   {
     icon: Heart,
     iconBg: 'bg-primary',
@@ -36,7 +44,7 @@ const Onboarding = () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      navigate('/auth');
+      navigate('/welcome');
     }
   };
 
@@ -47,7 +55,7 @@ const Onboarding = () => {
   };
 
   const skip = () => {
-    navigate('/auth');
+    navigate('/welcome');
   };
 
   const currentStepData = onboardingSteps[currentStep];

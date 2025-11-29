@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CountryPhoneInput } from '@/components/ui/country-phone-input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode') || 'login';
+  const [isLogin, setIsLogin] = useState(mode === 'login');
   const [loading, setLoading] = useState(false);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -17,14 +19,16 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setIsLogin(mode === 'login');
+  }, [mode]);
+
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone) return;
 
     setLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/home`;
-      
       const { error } = await supabase.auth.signInWithOtp({
         phone: phone,
         options: {
@@ -59,12 +63,10 @@ const Auth = () => {
     try {
       // Development bypass
       if (import.meta.env.DEV && otp === '123456') {
-        // Create anonymous session for development
         const { data, error } = await supabase.auth.signInAnonymously();
         
         if (error) throw error;
 
-        // Create a basic profile for the test user
         if (data.user) {
           await supabase.from('profiles').upsert({
             user_id: data.user.id,
@@ -114,8 +116,6 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/home`;
-      
       const { error } = await supabase.auth.signInWithOtp({
         phone: phone,
         options: {
@@ -145,185 +145,138 @@ const Auth = () => {
     }
   };
 
-  const handleDevAccess = async () => {
-    setLoading(true);
-    try {
-      // Create anonymous session for development
-      const { data, error } = await supabase.auth.signInAnonymously();
-      
-      if (error) throw error;
-
-      // Create a basic profile for the test user
-      if (data.user) {
-        await supabase.from('profiles').upsert({
-          user_id: data.user.id,
-          full_name: 'Usuario de Desarrollo',
-          phone_number: '+1 (555) 123-4567'
-        });
-      }
-
-      toast({
-        title: "¡Acceso Directo! 🔧",
-        description: "Sesión de desarrollo iniciada",
-      });
-      
-      navigate('/home');
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (otpSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-calm-gray">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setOtpSent(false)}
-              className="absolute left-4 top-4 p-2"
-            >
-              <ArrowLeft size={20} />
-            </Button>
-            <CardTitle className="text-2xl font-bold text-primary">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-[#FAFAFA]">
+        <div className="w-full max-w-md space-y-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setOtpSent(false)}
+            className="p-2 -ml-2"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground">
               Verificar Código
-            </CardTitle>
-            <CardDescription>
+            </h1>
+            <p className="text-muted-foreground">
               Ingresa el código que enviamos a {phone}
-              {import.meta.env.DEV && (
-                <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950 rounded-md">
-                  <p className="text-xs text-blue-600 dark:text-blue-400">
-                    💡 Modo Desarrollo: usa <strong>123456</strong> para acceder
-                  </p>
-                </div>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="otp">Código de verificación</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="123456"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  maxLength={6}
-                  className="text-center text-2xl tracking-widest"
-                />
+            </p>
+            {import.meta.env.DEV && (
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                  💡 Modo Desarrollo: usa <strong>123456</strong> para acceder
+                </p>
               </div>
-              <Button
-                type="submit"
-                className="w-full btn-primary"
-                disabled={loading || !otp}
-              >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Verificar
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            )}
+          </div>
+
+          <form onSubmit={handleVerifyOTP} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="otp">Código de verificación</Label>
+              <Input
+                id="otp"
+                type="text"
+                placeholder="123456"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                maxLength={6}
+                className="text-center text-2xl tracking-widest h-14"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full btn-primary"
+              disabled={loading || !otp}
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Verificar
+            </Button>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-calm-gray">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#FAFAFA]">
+      <div className="w-full max-w-md space-y-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/welcome')}
+          className="p-2 -ml-2"
+        >
+          <ArrowLeft size={20} />
+        </Button>
+
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">
             {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
-          </CardTitle>
-          <CardDescription>
+          </h1>
+          <p className="text-muted-foreground">
             {isLogin 
-              ? 'Ingresa tu número de teléfono para continuar'
-              : 'Regístrate para acceder a todos nuestros servicios'
+              ? 'Ingresa tu número de teléfono'
+              : 'Únete a la comunidad'
             }
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={isLogin ? handleSendOTP : handleSignUp} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Nombre completo</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="Tu nombre completo"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-            
+          </p>
+        </div>
+
+        <form onSubmit={isLogin ? handleSendOTP : handleSignUp} className="space-y-6">
+          {!isLogin && (
             <div className="space-y-2">
-              <Label htmlFor="phone">Número de teléfono</Label>
+              <Label htmlFor="fullName">Nombre completo</Label>
               <Input
-                id="phone"
-                type="tel"
-                placeholder="+1 234 567 8900"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                id="fullName"
+                type="text"
+                placeholder="Tu nombre completo"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 required
+                className="h-12"
               />
             </div>
-
-            <Button
-              type="submit"
-              className="w-full btn-primary"
-              disabled={loading || !phone || (!isLogin && !fullName)}
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLogin ? 'Enviar Código' : 'Crear Cuenta'}
-            </Button>
-          </form>
-
-          <div className="mt-4 space-y-2">
-            <div className="text-xs text-muted-foreground text-center mb-2">
-              🔧 Modo Desarrollo
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleDevAccess}
+          )}
+          
+          <div className="space-y-2">
+            <Label htmlFor="phone">Número de teléfono</Label>
+            <CountryPhoneInput
+              value={phone}
+              onChange={setPhone}
               disabled={loading}
-              className="w-full bg-blue-50 border-2 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 dark:bg-blue-950 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900 font-semibold py-3"
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                "🚀 "
-              )}
-              ACCESO RÁPIDO - SIN SMS
-            </Button>
-            <p className="text-xs text-center text-muted-foreground">
-              Click para entrar directamente sin verificación
-            </p>
+              required
+            />
           </div>
 
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-primary text-sm font-medium hover:underline"
-            >
-              {isLogin 
-                ? '¿No tienes cuenta? Regístrate'
-                : '¿Ya tienes cuenta? Inicia sesión'
-              }
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+          <Button
+            type="submit"
+            className="w-full btn-primary"
+            disabled={loading || !phone || (!isLogin && !fullName)}
+          >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isLogin ? 'Enviar Código' : 'Crear Cuenta'}
+          </Button>
+        </form>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => {
+              setIsLogin(!isLogin);
+              navigate(`/auth?mode=${isLogin ? 'signup' : 'login'}`);
+            }}
+            className="text-primary text-sm font-medium hover:underline"
+          >
+            {isLogin 
+              ? '¿No tienes cuenta? Regístrate'
+              : '¿Ya tienes cuenta? Inicia sesión'
+            }
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

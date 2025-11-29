@@ -4,39 +4,39 @@ export interface CountryInfo {
   flag: string;
   code: string;
   phoneCode: string;
+  placeholder?: string;
+  format?: string;
 }
 
 export const COUNTRIES: Record<string, CountryInfo> = {
   // América Latina y España - países principales
-  'México': { flag: '🇲🇽', code: 'MX', phoneCode: '+52' },
-  'Colombia': { flag: '🇨🇴', code: 'CO', phoneCode: '+57' },
-  'Venezuela': { flag: '🇻🇪', code: 'VE', phoneCode: '+58' },
-  'Argentina': { flag: '🇦🇷', code: 'AR', phoneCode: '+54' },
-  'Chile': { flag: '🇨🇱', code: 'CL', phoneCode: '+56' },
-  'Perú': { flag: '🇵🇪', code: 'PE', phoneCode: '+51' },
-  'Ecuador': { flag: '🇪🇨', code: 'EC', phoneCode: '+593' },
-  'Bolivia': { flag: '🇧🇴', code: 'BO', phoneCode: '+591' },
-  'Uruguay': { flag: '🇺🇾', code: 'UY', phoneCode: '+598' },
-  'Paraguay': { flag: '🇵🇾', code: 'PY', phoneCode: '+595' },
-  'Costa Rica': { flag: '🇨🇷', code: 'CR', phoneCode: '+506' },
-  'Panamá': { flag: '🇵🇦', code: 'PA', phoneCode: '+507' },
-  'Guatemala': { flag: '🇬🇹', code: 'GT', phoneCode: '+502' },
-  'Honduras': { flag: '🇭🇳', code: 'HN', phoneCode: '+504' },
-  'El Salvador': { flag: '🇸🇻', code: 'SV', phoneCode: '+503' },
-  'Nicaragua': { flag: '🇳🇮', code: 'NI', phoneCode: '+505' },
-  'República Dominicana': { flag: '🇩🇴', code: 'DO', phoneCode: '+1' },
-  'Cuba': { flag: '🇨🇺', code: 'CU', phoneCode: '+53' },
-  'Puerto Rico': { flag: '🇵🇷', code: 'PR', phoneCode: '+1' },
-  'España': { flag: '🇪🇸', code: 'ES', phoneCode: '+34' },
-  
-  // Otros países comunes
-  'Estados Unidos': { flag: '🇺🇸', code: 'US', phoneCode: '+1' },
-  'Canadá': { flag: '🇨🇦', code: 'CA', phoneCode: '+1' },
-  'Brasil': { flag: '🇧🇷', code: 'BR', phoneCode: '+55' },
-  'Francia': { flag: '🇫🇷', code: 'FR', phoneCode: '+33' },
-  'Italia': { flag: '🇮🇹', code: 'IT', phoneCode: '+39' },
-  'Alemania': { flag: '🇩🇪', code: 'DE', phoneCode: '+49' },
-  'Reino Unido': { flag: '🇬🇧', code: 'GB', phoneCode: '+44' },
+  'Estados Unidos': { flag: '🇺🇸', code: 'US', phoneCode: '+1', placeholder: '(555) 123-4567', format: '(###) ###-####' },
+  'México': { flag: '🇲🇽', code: 'MX', phoneCode: '+52', placeholder: '55 1234 5678', format: '## #### ####' },
+  'Colombia': { flag: '🇨🇴', code: 'CO', phoneCode: '+57', placeholder: '300 123 4567', format: '### ### ####' },
+  'Venezuela': { flag: '🇻🇪', code: 'VE', phoneCode: '+58', placeholder: '412 123 4567', format: '### ### ####' },
+  'Guatemala': { flag: '🇬🇹', code: 'GT', phoneCode: '+502', placeholder: '5123 4567', format: '#### ####' },
+  'El Salvador': { flag: '🇸🇻', code: 'SV', phoneCode: '+503', placeholder: '7123 4567', format: '#### ####' },
+  'Honduras': { flag: '🇭🇳', code: 'HN', phoneCode: '+504', placeholder: '9123-4567', format: '####-####' },
+  'Nicaragua': { flag: '🇳🇮', code: 'NI', phoneCode: '+505', placeholder: '8123 4567', format: '#### ####' },
+  'Costa Rica': { flag: '🇨🇷', code: 'CR', phoneCode: '+506', placeholder: '8123 4567', format: '#### ####' },
+  'Panamá': { flag: '🇵🇦', code: 'PA', phoneCode: '+507', placeholder: '6123-4567', format: '####-####' },
+  'Cuba': { flag: '🇨🇺', code: 'CU', phoneCode: '+53', placeholder: '5 123 4567', format: '# ### ####' },
+  'República Dominicana': { flag: '🇩🇴', code: 'DO', phoneCode: '+1', placeholder: '809 123 4567', format: '### ### ####' },
+  'Puerto Rico': { flag: '🇵🇷', code: 'PR', phoneCode: '+1', placeholder: '787 123 4567', format: '### ### ####' },
+  'Ecuador': { flag: '🇪🇨', code: 'EC', phoneCode: '+593', placeholder: '99 123 4567', format: '## ### ####' },
+  'Perú': { flag: '🇵🇪', code: 'PE', phoneCode: '+51', placeholder: '912 345 678', format: '### ### ###' },
+  'Bolivia': { flag: '🇧🇴', code: 'BO', phoneCode: '+591', placeholder: '7 123 4567', format: '# ### ####' },
+  'Chile': { flag: '🇨🇱', code: 'CL', phoneCode: '+56', placeholder: '9 1234 5678', format: '# #### ####' },
+  'Argentina': { flag: '🇦🇷', code: 'AR', phoneCode: '+54', placeholder: '11 1234-5678', format: '## ####-####' },
+  'Uruguay': { flag: '🇺🇾', code: 'UY', phoneCode: '+598', placeholder: '91 234 567', format: '## ### ###' },
+  'Paraguay': { flag: '🇵🇾', code: 'PY', phoneCode: '+595', placeholder: '981 123456', format: '### ######' },
+  'Brasil': { flag: '🇧🇷', code: 'BR', phoneCode: '+55', placeholder: '11 91234-5678', format: '## #####-####' },
+  'España': { flag: '🇪🇸', code: 'ES', phoneCode: '+34', placeholder: '612 34 56 78', format: '### ## ## ##' },
+  'Canadá': { flag: '🇨🇦', code: 'CA', phoneCode: '+1', placeholder: '(555) 123-4567', format: '(###) ###-####' },
+  'Francia': { flag: '🇫🇷', code: 'FR', phoneCode: '+33', placeholder: '6 12 34 56 78', format: '# ## ## ## ##' },
+  'Italia': { flag: '🇮🇹', code: 'IT', phoneCode: '+39', placeholder: '312 345 6789', format: '### ### ####' },
+  'Alemania': { flag: '🇩🇪', code: 'DE', phoneCode: '+49', placeholder: '151 23456789', format: '### ########' },
+  'Reino Unido': { flag: '🇬🇧', code: 'GB', phoneCode: '+44', placeholder: '7400 123456', format: '#### ######' },
 };
 
 export const getCountryInfo = (countryName?: string): CountryInfo | null => {
