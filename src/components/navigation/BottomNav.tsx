@@ -1,11 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Search, MessageCircle, User } from 'lucide-react';
+import { Home, MessageCircle, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BottomNav = () => {
   const navItems = [
     { to: '/home', icon: Home, label: 'Inicio' },
-    { to: '/services', icon: Search, label: 'Servicios' },
     { to: '/chat', icon: MessageCircle, label: 'Chat', hasIndicator: true },
     { to: '/profile', icon: User, label: 'Perfil' },
   ];

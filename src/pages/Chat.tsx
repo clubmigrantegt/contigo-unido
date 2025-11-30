@@ -13,8 +13,9 @@ import {
   Bot 
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { usePsychologicalChat } from '@/hooks/usePsychologicalChat';
+import ChatInterface from '@/components/chat/ChatInterface';
+import SessionRatingModal from '@/components/chat/SessionRatingModal';
 
 interface ChatSession {
   id: string;
@@ -30,6 +31,19 @@ const Chat = () => {
   const { toast } = useToast();
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showChatInterface, setShowChatInterface] = useState(false);
+
+  const {
+    messages,
+    isLoading: chatLoading,
+    isSessionActive,
+    startSession,
+    sendMessage,
+    endSession,
+    submitRating,
+    messagesEndRef
+  } = usePsychologicalChat();
 
   useEffect(() => {
     if (user) {
@@ -57,8 +71,36 @@ const Chat = () => {
     }
   };
 
-  const handleStartChat = () => {
-    navigate('/services/psychological');
+  const handleStartChat = async () => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Debes iniciar sesión para acceder al chat",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await startSession();
+    setShowChatInterface(true);
+  };
+
+  const handleNavigateBack = () => {
+    setShowChatInterface(false);
+  };
+
+  const handleEndSession = async () => {
+    const sessionId = await endSession();
+    setShowChatInterface(false);
+    if (sessionId) {
+      setShowRatingModal(true);
+    }
+  };
+
+  const handleRatingSubmit = (rating: number, feedback?: string) => {
+    submitRating(rating, feedback);
+    setShowRatingModal(false);
+    fetchChatHistory(); // Refresh history after rating
   };
 
   const handleWellnessAction = (action: string) => {
@@ -73,6 +115,17 @@ const Chat = () => {
       title: "Próximamente",
       description: "La conexión con psicólogos estará disponible pronto.",
     });
+  };
+
+  const handleChatHistoryClick = (session: ChatSession) => {
+    if (session.status === 'active') {
+      setShowChatInterface(true);
+    } else {
+      toast({
+        title: "Sesión finalizada",
+        description: "Esta conversación ya ha terminado. Inicia una nueva sesión.",
+      });
+    }
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -126,6 +179,28 @@ const Chat = () => {
   ];
 
   const userName = user?.user_metadata?.full_name || 'Amigo/a';
+
+  // If chat interface is active, show full screen chat
+  if (isSessionActive && showChatInterface) {
+    return (
+      <>
+        <ChatInterface
+          messages={messages}
+          isLoading={chatLoading}
+          isSessionActive={isSessionActive}
+          onSendMessage={sendMessage}
+          onEndSession={handleEndSession}
+          onNavigateBack={handleNavigateBack}
+          messagesEndRef={messagesEndRef}
+        />
+        <SessionRatingModal
+          isOpen={showRatingModal}
+          onClose={() => setShowRatingModal(false)}
+          onSubmit={handleRatingSubmit}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white pb-24">
@@ -227,10 +302,10 @@ const Chat = () => {
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              {chatSessions.map((session, index) => (
+              {chatSessions.map((session) => (
                 <button
                   key={session.id}
-                  onClick={() => session.status === 'active' ? navigate('/services/psychological') : null}
+                  onClick={() => handleChatHistoryClick(session)}
                   className={`flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-50 border border-transparent hover:border-neutral-100 transition-all group w-full text-left ${session.status === 'completed' ? 'opacity-70' : ''}`}
                 >
                   <div className="relative w-12 h-12 shrink-0">
@@ -256,6 +331,13 @@ const Chat = () => {
           )}
         </div>
       </div>
+
+      {/* Rating Modal */}
+      <SessionRatingModal
+        isOpen={showRatingModal}
+        onClose={() => setShowRatingModal(false)}
+        onSubmit={handleRatingSubmit}
+      />
     </div>
   );
 };

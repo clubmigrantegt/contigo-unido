@@ -9,11 +9,9 @@ import Onboarding from "./pages/onboarding/Onboarding";
 import Welcome from "./pages/auth/Welcome";
 import Auth from "./pages/auth/Auth";
 import Home from "./pages/Home";
-import Services from "./pages/Services";
 import Chat from "./pages/Chat";
 import LegalInfo from "./pages/services/LegalInfo";
 import ResourceDetail from "./pages/services/ResourceDetail";
-import PsychologicalSupport from "./pages/services/PsychologicalSupport";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
@@ -61,9 +59,7 @@ const App = () => (
               </ProtectedRoute>
             }>
               <Route path="home" element={<Home />} />
-              <Route path="services" element={<Services />} />
               <Route path="chat" element={<Chat />} />
-              <Route path="services/psychological" element={<PsychologicalSupport />} />
               <Route path="services/legal" element={<LegalInfo />} />
               <Route path="services/legal/:id" element={<ResourceDetail />} />
               <Route path="resources/:id" element={<ResourceDetail />} />
