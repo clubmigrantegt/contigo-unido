@@ -51,6 +51,9 @@ const countryToCode: Record<string, string> = {
 };
 
 const categoryColors: Record<string, { bg: string; text: string }> = {
+  casual: { bg: 'bg-slate-50', text: 'text-slate-700' },
+  seguridad: { bg: 'bg-red-50', text: 'text-red-700' },
+  ventas: { bg: 'bg-purple-50', text: 'text-purple-700' },
   legal: { bg: 'bg-blue-50', text: 'text-blue-700' },
   trabajo: { bg: 'bg-emerald-50', text: 'text-emerald-700' },
   salud: { bg: 'bg-rose-50', text: 'text-rose-700' },
@@ -275,6 +278,9 @@ const PostDetail = () => {
 
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
+      casual: 'Casual',
+      seguridad: 'Seguridad',
+      ventas: 'Ventas',
       legal: 'Legal',
       trabajo: 'Trabajo',
       salud: 'Salud',
@@ -320,7 +326,7 @@ const PostDetail = () => {
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <button
             onClick={() => navigate('/community')}
-            className="p-2 -ml-2 rounded-full hover:bg-accent transition-colors text-foreground shrink-0"
+            className="p-2 -ml-2 rounded-full hover:bg-blue-50 transition-colors text-foreground shrink-0"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
@@ -329,10 +335,10 @@ const PostDetail = () => {
           </h2>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button className="p-2 rounded-full hover:bg-accent transition-colors text-muted-foreground">
+          <button className="p-2 rounded-full hover:bg-blue-50 transition-colors text-muted-foreground">
             <Bookmark className="w-5 h-5" />
           </button>
-          <button className="p-2 -mr-2 rounded-full hover:bg-accent transition-colors text-muted-foreground">
+          <button className="p-2 -mr-2 rounded-full hover:bg-blue-50 transition-colors text-muted-foreground">
             <MoreHorizontal className="w-5 h-5" />
           </button>
         </div>
