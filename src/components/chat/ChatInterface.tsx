@@ -75,7 +75,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-background">
       {/* Chat Header - Sticky at top with backdrop blur */}
       <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm">
         <div className="flex items-center gap-3">
