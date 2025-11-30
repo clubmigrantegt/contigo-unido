@@ -253,48 +253,41 @@ const Community = () => {
       glow: 'bg-slate-100/50'
     };
   };
-
   const calculatePopularityScore = (testimonial: Testimonial) => {
     const likes = testimonial.like_count || 0;
     const comments = testimonial.comment_count || 0;
-    
+
     // Pesos para el ranking
     const likeWeight = 1;
     const commentWeight = 2; // Comentarios valen más
-    
+
     // Factor de tiempo (posts recientes tienen bonus)
     const hoursOld = (Date.now() - new Date(testimonial.created_at).getTime()) / 3600000;
-    const timeDecay = Math.max(0.5, 1 - (hoursOld / 168)); // Decay over 1 week
-    
+    const timeDecay = Math.max(0.5, 1 - hoursOld / 168); // Decay over 1 week
+
     return (likes * likeWeight + comments * commentWeight) * timeDecay;
   };
-
   const getFilteredAndSortedTestimonials = () => {
     let filtered = testimonials.filter(t => {
       // Filtro de búsqueda
-      const matchesSearch = searchQuery 
-        ? t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-          t.content.toLowerCase().includes(searchQuery.toLowerCase())
-        : true;
-      
+      const matchesSearch = searchQuery ? t.title.toLowerCase().includes(searchQuery.toLowerCase()) || t.content.toLowerCase().includes(searchQuery.toLowerCase()) : true;
+
       // Filtro por categoría
       if (selectedFilter === 'destacados' || selectedFilter === 'populares') {
         return matchesSearch; // Todos los posts
       }
-      
       return t.category === selectedFilter && matchesSearch;
     });
-    
+
     // Ordenamiento
     if (selectedFilter === 'populares') {
       // Ordenar por popularidad (descendente)
       filtered.sort((a, b) => calculatePopularityScore(b) - calculatePopularityScore(a));
     }
     // Para 'destacados' y categorías, ya viene ordenado por created_at desc
-    
+
     return filtered;
   };
-
   const filteredTestimonials = getFilteredAndSortedTestimonials();
   const getCategoryCounts = () => {
     return {
@@ -312,7 +305,7 @@ const Community = () => {
   }
   return <div className="min-h-screen bg-slate-50/50 flex flex-col pb-24">
       {/* Header */}
-      <div className="px-6 pt-6 pb-0 bg-background sticky top-0 z-30">
+      <div className="px-6 pb-0 bg-background sticky top-0 z-30 pt-[56px]">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold tracking-tight text-foreground font-jakarta">
             {activeTab === 'historias' ? 'Comunidad' : 'Explorar'}
@@ -398,11 +391,7 @@ const Community = () => {
             const categoryInfo = getCategoryInfo(testimonial.category);
             const avatarColor = getAvatarColor(testimonial.author_name);
             const countryCode = getCountryCode(testimonial.country_of_origin);
-            return <div 
-                      key={testimonial.id} 
-                      className="bg-background p-5 rounded-2xl shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => navigate(`/community/post/${testimonial.id}`)}
-                    >
+            return <div key={testimonial.id} className="bg-background p-5 rounded-2xl shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/community/post/${testimonial.id}`)}>
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-3">
                           <div className="relative">
@@ -437,25 +426,19 @@ const Community = () => {
                       </p>
 
                       <div className="flex items-center gap-4 border-t border-border/50 pt-3">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLike(testimonial.id);
-                          }} 
-                          className={`flex items-center gap-1.5 transition-colors group ${testimonial.user_liked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
-                        >
+                        <button onClick={e => {
+                  e.stopPropagation();
+                  handleLike(testimonial.id);
+                }} className={`flex items-center gap-1.5 transition-colors group ${testimonial.user_liked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}>
                           <Heart className={`w-4 h-4 ${testimonial.user_liked ? 'fill-rose-500' : 'group-hover:fill-rose-500'}`} />
                           <span className="text-xs font-medium font-manrope">
                             {testimonial.like_count || 0}
                           </span>
                         </button>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCommentsModalTestimonial(testimonial.id);
-                          }} 
-                          className="flex items-center gap-1.5 text-muted-foreground hover:text-indigo-600 transition-colors"
-                        >
+                        <button onClick={e => {
+                  e.stopPropagation();
+                  setCommentsModalTestimonial(testimonial.id);
+                }} className="flex items-center gap-1.5 text-muted-foreground hover:text-indigo-600 transition-colors">
                           <MessageCircle className="w-4 h-4" />
                           <span className="text-xs font-medium font-manrope">
                             {testimonial.comment_count || 0}
