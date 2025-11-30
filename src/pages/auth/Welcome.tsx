@@ -1,112 +1,62 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { useState } from 'react';
-import { Loader2, Rocket } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const Welcome = () => {
   const navigate = useNavigate();
-  const [isLoadingDev, setIsLoadingDev] = useState(false);
-
-  const handleDevAccess = async () => {
-    setIsLoadingDev(true);
-    try {
-      const { data, error } = await supabase.auth.signInAnonymously();
-      
-      if (error) throw error;
-
-      if (data.user) {
-        await supabase.from('profiles').upsert({
-          user_id: data.user.id,
-          full_name: 'Usuario de Desarrollo',
-          phone_number: '+1 (555) 123-4567'
-        });
-      }
-
-      toast({
-        title: "¡Acceso Directo!",
-        description: "Sesión de desarrollo iniciada",
-      });
-      
-      navigate('/home');
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingDev(false);
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col animate-fade-in">
-      {/* Main Content - Text + Buttons */}
-      <div className="flex-1 flex flex-col justify-center px-6">
-        {/* Welcome Text */}
-        <div className="mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <h1 className="text-3xl font-bold text-strong-black mb-2">
-            Bienvenido
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Tu camino comienza aquí
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="space-y-4">
-          <Button 
-            size="lg" 
-            className="w-full text-lg h-14 animate-slide-up bg-brand hover:bg-brand-hover text-white rounded-full"
-            style={{ animationDelay: '0.2s' }}
-            onClick={() => navigate('/auth?mode=login')}
-          >
-            Iniciar Sesión
-          </Button>
-          
-          <Button 
-            size="lg" 
-            variant="outline"
-            className="w-full text-lg h-14 animate-slide-up border-slate-200 text-slate-900 rounded-full"
-            style={{ animationDelay: '0.3s' }}
-            onClick={() => navigate('/auth?mode=signup')}
-          >
-            Crear Cuenta
-          </Button>
+    <div className="min-h-screen bg-neutral-900 flex flex-col animate-fade-in">
+      {/* Image Area - 65% height */}
+      <div className="relative h-[65vh] w-full overflow-hidden">
+        <img 
+          src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=800" 
+          className="absolute w-full h-full object-cover"
+          alt="Community support"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-neutral-900" />
+        
+        {/* Floating Badge */}
+        <div 
+          className="absolute top-16 left-6 flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full animate-slide-down"
+          style={{ animationDelay: '0.4s' }}
+        >
+          <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
+          <span className="text-xs font-medium text-white tracking-wide">Comunidad Activa</span>
         </div>
       </div>
 
-      {/* Dev Mode Access */}
-      {import.meta.env.DEV && (
-        <div className="px-6 pb-8 animate-slide-up" style={{ animationDelay: '0.4s' }}>
-          <div className="border-t border-divider-gray pt-6">
-            <p className="text-sm text-muted-foreground text-center mb-3">
-              Modo Desarrollo
-            </p>
-            <Button 
-              size="lg"
-              variant="secondary"
-              className="w-full"
-              onClick={handleDevAccess}
-              disabled={isLoadingDev}
+      {/* Content Sheet */}
+      <div className="flex-1 bg-neutral-900 w-full rounded-t-[32px] -mt-8 relative z-10 px-8 pt-10 pb-10 flex flex-col justify-between">
+        <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <h1 className="text-3xl text-white leading-[1.1] tracking-tight mb-4 font-semibold">
+            No estás solo en este camino.
+          </h1>
+          <p className="text-neutral-400 text-sm leading-relaxed">
+            Únete a Club del Migrante. Accede a recursos legales verificados, apoyo psicológico y comunidad.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+          <Button 
+            size="lg"
+            className="w-full py-3.5 bg-white text-neutral-900 rounded-xl hover:bg-neutral-100 shadow-[0_0_20px_rgba(255,255,255,0.1)] group"
+            onClick={() => navigate('/auth?mode=signup')}
+          >
+            <span>Comenzar ahora</span>
+            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+          </Button>
+          
+          <div className="text-center">
+            <button 
+              className="text-xs text-neutral-500 hover:text-white transition-colors"
+              onClick={() => navigate('/auth?mode=login')}
             >
-              {isLoadingDev ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Accediendo...
-                </>
-              ) : (
-                <>
-                  <Rocket className="mr-2 h-5 w-5" />
-                  ACCESO RÁPIDO - SIN SMS
-                </>
-              )}
-            </Button>
+              Ya tengo cuenta. <span className="underline underline-offset-2">Iniciar sesión</span>
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
