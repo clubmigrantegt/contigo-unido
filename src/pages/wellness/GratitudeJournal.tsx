@@ -34,10 +34,12 @@ const GratitudeJournal = () => {
       return;
     }
 
-    // Save to localStorage
+    // Save to localStorage with unique ID
     const gratitudeEntries = JSON.parse(localStorage.getItem('gratitudeEntries') || '[]');
     gratitudeEntries.push({
+      id: Date.now(),
       date: today.toISOString(),
+      title: "Momentos de Luz",
       entries: entries
     });
     localStorage.setItem('gratitudeEntries', JSON.stringify(gratitudeEntries));
@@ -47,9 +49,9 @@ const GratitudeJournal = () => {
       description: "Tus momentos de gratitud han sido guardados.",
     });
 
-    // Reset and go back
+    // Reset and go to history
     setTimeout(() => {
-      navigate('/chat');
+      navigate('/wellness/gratitude/history');
     }, 1000);
   };
 
