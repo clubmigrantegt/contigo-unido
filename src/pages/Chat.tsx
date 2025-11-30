@@ -104,10 +104,22 @@ const Chat = () => {
   };
 
   const handleWellnessAction = (action: string) => {
-    toast({
-      title: "Próximamente",
-      description: `La función "${action}" estará disponible pronto.`,
-    });
+    switch (action) {
+      case 'Respiración':
+        navigate('/wellness/breathing');
+        break;
+      case 'Gratitud':
+        navigate('/wellness/gratitude');
+        break;
+      case 'Crisis':
+        navigate('/wellness/crisis');
+        break;
+      default:
+        toast({
+          title: "Próximamente",
+          description: `La función "${action}" estará disponible pronto.`,
+        });
+    }
   };
 
   const handlePsychologist = () => {

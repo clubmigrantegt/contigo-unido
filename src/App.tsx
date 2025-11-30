@@ -16,6 +16,9 @@ import Community from "./pages/Community";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
+import BreathingTool from "./pages/wellness/BreathingTool";
+import GratitudeJournal from "./pages/wellness/GratitudeJournal";
+import CrisisHelp from "./pages/wellness/CrisisHelp";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +70,23 @@ const App = () => (
               <Route path="profile" element={<Profile />} />
               <Route path="notifications" element={<Notifications />} />
             </Route>
+
+            {/* Wellness routes - fullscreen without AppLayout */}
+            <Route path="/wellness/breathing" element={
+              <ProtectedRoute>
+                <BreathingTool />
+              </ProtectedRoute>
+            } />
+            <Route path="/wellness/gratitude" element={
+              <ProtectedRoute>
+                <GratitudeJournal />
+              </ProtectedRoute>
+            } />
+            <Route path="/wellness/crisis" element={
+              <ProtectedRoute>
+                <CrisisHelp />
+              </ProtectedRoute>
+            } />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
