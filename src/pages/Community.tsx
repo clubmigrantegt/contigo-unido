@@ -398,7 +398,11 @@ const Community = () => {
             const categoryInfo = getCategoryInfo(testimonial.category);
             const avatarColor = getAvatarColor(testimonial.author_name);
             const countryCode = getCountryCode(testimonial.country_of_origin);
-            return <div key={testimonial.id} className="bg-background p-5 rounded-2xl shadow-sm border border-border">
+            return <div 
+                      key={testimonial.id} 
+                      className="bg-background p-5 rounded-2xl shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => navigate(`/community/post/${testimonial.id}`)}
+                    >
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-3">
                           <div className="relative">
@@ -433,13 +437,25 @@ const Community = () => {
                       </p>
 
                       <div className="flex items-center gap-4 border-t border-border/50 pt-3">
-                        <button onClick={() => handleLike(testimonial.id)} className={`flex items-center gap-1.5 transition-colors group ${testimonial.user_liked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLike(testimonial.id);
+                          }} 
+                          className={`flex items-center gap-1.5 transition-colors group ${testimonial.user_liked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
+                        >
                           <Heart className={`w-4 h-4 ${testimonial.user_liked ? 'fill-rose-500' : 'group-hover:fill-rose-500'}`} />
                           <span className="text-xs font-medium font-manrope">
                             {testimonial.like_count || 0}
                           </span>
                         </button>
-                        <button onClick={() => setCommentsModalTestimonial(testimonial.id)} className="flex items-center gap-1.5 text-muted-foreground hover:text-indigo-600 transition-colors">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCommentsModalTestimonial(testimonial.id);
+                          }} 
+                          className="flex items-center gap-1.5 text-muted-foreground hover:text-indigo-600 transition-colors"
+                        >
                           <MessageCircle className="w-4 h-4" />
                           <span className="text-xs font-medium font-manrope">
                             {testimonial.comment_count || 0}
