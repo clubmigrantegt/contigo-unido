@@ -10,6 +10,7 @@ import Welcome from "./pages/auth/Welcome";
 import Auth from "./pages/auth/Auth";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
+import Chat from "./pages/Chat";
 import LegalInfo from "./pages/services/LegalInfo";
 import ResourceDetail from "./pages/services/ResourceDetail";
 import PsychologicalSupport from "./pages/services/PsychologicalSupport";
@@ -61,6 +62,7 @@ const App = () => (
             }>
               <Route path="home" element={<Home />} />
               <Route path="services" element={<Services />} />
+              <Route path="chat" element={<Chat />} />
               <Route path="services/psychological" element={<PsychologicalSupport />} />
               <Route path="services/legal" element={<LegalInfo />} />
               <Route path="services/legal/:id" element={<ResourceDetail />} />

@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Heart, Users, User } from 'lucide-react';
+import { Home, Search, MessageCircle, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BottomNav = () => {
   const navItems = [
     { to: '/home', icon: Home, label: 'Inicio' },
-    { to: '/services', icon: Heart, label: 'Servicios' },
-    { to: '/community', icon: Users, label: 'Comunidad' },
+    { to: '/services', icon: Search, label: 'Servicios' },
+    { to: '/chat', icon: MessageCircle, label: 'Chat', hasIndicator: true },
     { to: '/profile', icon: User, label: 'Perfil' },
   ];
 
@@ -15,21 +15,26 @@ const BottomNav = () => {
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-around py-3">
           {navItems.map((item) => {
-            const { to, icon: Icon, label } = item;
+            const { to, icon: Icon, label, hasIndicator } = item;
             return (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center gap-1 py-2 px-4 transition-all duration-200",
+                    "flex flex-col items-center gap-1 py-2 px-4 transition-all duration-200 relative",
                     isActive 
                       ? "text-slate-900" 
                       : "text-slate-400 hover:text-slate-600"
                   )
                 }
               >
-                <Icon className="w-6 h-6" strokeWidth={1.5} />
+                <div className="relative">
+                  <Icon className="w-6 h-6" strokeWidth={1.5} />
+                  {hasIndicator && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full"></span>
+                  )}
+                </div>
                 <span className="text-[10px] font-medium">{label}</span>
               </NavLink>
             );
