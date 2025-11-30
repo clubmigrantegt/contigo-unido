@@ -133,8 +133,11 @@ const config: Config = {
           to: { opacity: "1", transform: "scale(1)" },
         },
         "float": {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-10px)" },
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        "ping-slow": {
+          "75%, 100%": { transform: "scale(2)", opacity: "0" },
         },
         "spring": {
           "0%": { transform: "scale(0.9)" },
@@ -155,6 +158,7 @@ const config: Config = {
         "slide-down": "slide-down 0.3s ease-out",
         "scale-fade-in": "scale-fade-in 0.5s ease-out",
         "float": "float 3s ease-in-out infinite",
+        "ping-slow": "ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite",
         "spring": "spring 0.3s ease-out",
         "blur-in": "blur-in 0.8s ease-out",
       },
