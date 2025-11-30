@@ -42,7 +42,79 @@ export function useNotifications() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotifications(data || []);
+      
+      // Si no hay datos reales, usar datos mock
+      if (!data || data.length === 0) {
+        const mockNotifications: Notification[] = [
+          // HOY
+          {
+            id: 'mock-1',
+            type: 'direct_message',
+            title: 'Psic. Maria E.',
+            message: 'Hola, ¿cómo te has sentido después de nuestra sesión?',
+            read: false,
+            action_url: '/chat',
+            metadata: {
+              avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100',
+              action_label: 'Responder'
+            },
+            created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 min ago
+          },
+          {
+            id: 'mock-2',
+            type: 'comment',
+            title: 'Juan Perez',
+            message: 'comentó en tu publicación "Mi experiencia solicitando asilo".',
+            read: true,
+            action_url: '/community/post/123',
+            metadata: {
+              initials: 'JP'
+            },
+            created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          },
+          {
+            id: 'mock-3',
+            type: 'new_content',
+            title: 'Derechos del Inquilino',
+            message: 'Aprende cómo protegerte contra desalojos injustos.',
+            read: false,
+            action_url: '/services/legal/derechos-inquilino',
+            metadata: {
+              prefix: 'Nueva guía disponible:'
+            },
+            created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+          },
+          // AYER
+          {
+            id: 'mock-4',
+            type: 'likes',
+            title: 'Carlos M. y 4 personas más',
+            message: 'indicaron que les gusta tu post.',
+            read: true,
+            action_url: '/community/post/456',
+            metadata: {
+              avatars: [
+                'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
+                'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=100'
+              ],
+              preview: 'Buscando abogado pro-bono en...'
+            },
+            created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 - 3.5 * 60 * 60 * 1000).toISOString(), // Yesterday 8:30 PM
+          },
+          {
+            id: 'mock-5',
+            type: 'welcome',
+            title: '¡Bienvenido a Club del Migrante! 🎉',
+            message: 'Completa tu perfil para conectar con personas de tu misma nacionalidad.',
+            read: true,
+            action_url: '/profile',
+            created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 - 15 * 60 * 60 * 1000).toISOString(), // Yesterday 9:00 AM
+          },
+        ];
+        setNotifications(mockNotifications);
+      } else {
+        setNotifications(data);
+      }
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
