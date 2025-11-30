@@ -317,13 +317,18 @@ const PostDetail = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="px-6 pt-14 pb-4 bg-background/95 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between border-b border-border">
-        <button
-          onClick={() => navigate('/community')}
-          className="p-2 -ml-2 rounded-full hover:bg-accent transition-colors text-foreground"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <button
+            onClick={() => navigate('/community')}
+            className="p-2 -ml-2 rounded-full hover:bg-accent transition-colors text-foreground shrink-0"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h2 className="text-sm font-bold text-foreground truncate flex-1 min-w-0">
+            {post.title}
+          </h2>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
           <button className="p-2 rounded-full hover:bg-accent transition-colors text-muted-foreground">
             <Bookmark className="w-5 h-5" />
           </button>
@@ -406,17 +411,14 @@ const PostDetail = () => {
                     {getInitials(comment.author_name)}
                   </div>
                   <div className="flex-1">
-                    <div className="bg-slate-50 rounded-2xl rounded-tl-none p-3 px-4">
-                      <div className="flex justify-between items-baseline mb-1">
-                        <span className="text-xs font-bold text-foreground">{comment.author_name}</span>
-                        <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{comment.content}</p>
-                    </div>
+                     <div className="bg-neutral-50 rounded-2xl rounded-tl-none p-3 px-4">
+                       <div className="flex justify-between items-baseline mb-1">
+                         <span className="text-xs font-bold text-neutral-900">{comment.author_name}</span>
+                         <span className="text-[10px] text-neutral-400">{formatRelativeTime(comment.created_at)}</span>
+                       </div>
+                       <p className="text-xs text-neutral-600 leading-relaxed">{comment.content}</p>
+                     </div>
                     <div className="flex gap-4 mt-1.5 ml-2">
-                      <button className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors">
-                        Responder
-                      </button>
                       <button
                         onClick={() => handleLikeComment(comment.id)}
                         className={`text-[10px] font-semibold transition-colors flex items-center gap-1 ${
