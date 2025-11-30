@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { Search, PenLine, Heart, MessageCircle, Scale, Briefcase, HeartPulse, Home as HomeIcon, GraduationCap, Utensils, ChevronRight, MessageSquareDashed, TrendingUp } from 'lucide-react';
+import { Search, PenLine, Heart, MessageCircle, Scale, Briefcase, HeartPulse, Home as HomeIcon, GraduationCap, Utensils, ChevronRight, MessageSquareDashed, TrendingUp, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -32,6 +32,21 @@ const categories = [{
   color: 'rose',
   icon: TrendingUp
 }, {
+  id: 'casual',
+  label: 'Casual',
+  color: 'slate',
+  icon: MessageCircle
+}, {
+  id: 'seguridad',
+  label: 'Seguridad',
+  color: 'red',
+  icon: ShieldCheck
+}, {
+  id: 'ventas',
+  label: 'Ventas',
+  color: 'purple',
+  icon: ShoppingBag
+}, {
   id: 'trabajo',
   label: 'Trabajo',
   color: 'orange',
@@ -58,6 +73,24 @@ const categories = [{
   icon: HomeIcon
 }];
 const categoryColors = {
+  casual: {
+    bg: 'bg-slate-50',
+    text: 'text-slate-700',
+    border: 'border-slate-100',
+    glow: 'bg-slate-100/50'
+  },
+  seguridad: {
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    border: 'border-red-100',
+    glow: 'bg-red-100/50'
+  },
+  ventas: {
+    bg: 'bg-purple-50',
+    text: 'text-purple-700',
+    border: 'border-purple-100',
+    glow: 'bg-purple-100/50'
+  },
   legal: {
     bg: 'bg-blue-50',
     text: 'text-blue-700',

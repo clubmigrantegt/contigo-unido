@@ -4,9 +4,12 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Image, Hash, Link as LinkIcon, EyeOff, ShieldCheck, X, ChevronDown, Scale, Briefcase, HeartPulse, Home as HomeIcon, GraduationCap } from 'lucide-react';
+import { Image, Hash, Link as LinkIcon, EyeOff, ShieldCheck, X, ChevronDown, Scale, Briefcase, HeartPulse, Home as HomeIcon, GraduationCap, MessageSquare, ShieldAlert, ShoppingBag } from 'lucide-react';
 
 const categories = [
+  { id: 'casual', label: 'Casual', color: 'slate', icon: MessageSquare },
+  { id: 'seguridad', label: 'Seguridad', color: 'red', icon: ShieldAlert },
+  { id: 'ventas', label: 'Ventas', color: 'purple', icon: ShoppingBag },
   { id: 'legal', label: 'Legal y Trámites', color: 'blue', icon: Scale },
   { id: 'trabajo', label: 'Trabajo', color: 'emerald', icon: Briefcase },
   { id: 'salud', label: 'Salud', color: 'rose', icon: HeartPulse },
