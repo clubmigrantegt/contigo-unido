@@ -81,7 +81,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white pb-24">
       {/* Header */}
-      <div className="px-6 pt-14 pb-4 animate-slide-down">
+      <div className="sticky top-0 z-10 px-6 pt-14 pb-4 bg-white/95 backdrop-blur-sm animate-slide-down border-b border-transparent">
         <div className="flex justify-between items-center mb-6">
           <div>
             <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-0.5">
