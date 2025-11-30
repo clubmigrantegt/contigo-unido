@@ -147,8 +147,8 @@ const Onboarding = () => {
         </button>
       )}
 
-      {/* Image Area (60% height) */}
-      <div className="relative h-[60vh] w-full overflow-hidden">
+      {/* Image Area - Responsive */}
+      <div className="relative flex-[3] min-h-[200px] max-h-[55vh] w-full overflow-hidden">
         <img 
           src={step.image} 
           alt={step.title}
@@ -160,16 +160,16 @@ const Onboarding = () => {
         <FloatingElement type={step.floatingElement} />
       </div>
 
-      {/* Content Sheet */}
-      <div className="flex-1 bg-white rounded-t-[32px] -mt-6 relative z-10 px-8 pt-12 pb-10 flex flex-col">
-        <div className="flex-1">
+      {/* Content Sheet - Responsive */}
+      <div className="flex-[2] min-h-[280px] bg-white rounded-t-[32px] -mt-6 relative z-10 px-6 sm:px-8 pt-8 sm:pt-10 pb-6 sm:pb-8 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
           {/* Step badge */}
           <span className={`inline-block px-3 py-1 ${step.stepColor} rounded-full text-[10px] font-bold tracking-wider uppercase mb-6 w-fit`}>
             {step.step}
           </span>
           
-          {/* Title with gray subtitle */}
-          <h2 className="text-3xl text-neutral-900 leading-[1.15] tracking-tight mb-4 font-semibold">
+          {/* Title with gray subtitle - Responsive */}
+          <h2 className="text-2xl sm:text-3xl text-neutral-900 leading-[1.15] tracking-tight mb-3 sm:mb-4 font-semibold">
             {step.title}<br/>
             <span className="text-neutral-400">{step.subtitle}</span>
           </h2>
@@ -180,8 +180,8 @@ const Onboarding = () => {
           </p>
         </div>
 
-        {/* Bottom Navigation */}
-        <div className="mt-auto">
+        {/* Bottom Navigation - Always at bottom */}
+        <div className="mt-auto pt-4 flex-shrink-0">
           {/* Pagination dots */}
           <div className="flex gap-2 mb-6">
             {onboardingSteps.map((_, idx) => (

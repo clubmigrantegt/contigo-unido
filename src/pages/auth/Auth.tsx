@@ -136,11 +136,6 @@ const Auth = () => {
           <button className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 transition-colors" onClick={() => setOtpSent(false)}>
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="flex gap-1">
-            <div className="w-2 h-2 rounded-full bg-neutral-900" />
-            <div className="w-2 h-2 rounded-full bg-neutral-900" />
-            <div className="w-2 h-2 rounded-full bg-neutral-200" />
-          </div>
           <div className="w-10" />
         </div>
 
@@ -182,11 +177,6 @@ const Auth = () => {
         <button className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 transition-colors" onClick={() => navigate('/welcome')}>
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex gap-1">
-          <div className="w-2 h-2 rounded-full bg-neutral-900" />
-          <div className="w-2 h-2 rounded-full bg-neutral-200" />
-          <div className="w-2 h-2 rounded-full bg-neutral-200" />
-        </div>
         <div className="w-10" />
       </div>
 
@@ -209,12 +199,14 @@ const Auth = () => {
 
           <CountryPhoneInput value={phoneNumber} onChange={setPhoneNumber} />
           
-          <div className="flex items-start gap-2 pt-2">
-            <Checkbox checked={smsConsent} onCheckedChange={checked => setSmsConsent(checked as boolean)} className="mt-0.5" />
-            <p className="text-[11px] text-neutral-500 leading-tight">
-              Acepto recibir códigos de verificación por SMS. Se pueden aplicar tarifas de mensajería.
-            </p>
-          </div>
+          {mode === 'signup' && (
+            <div className="flex items-start gap-2 pt-2">
+              <Checkbox checked={smsConsent} onCheckedChange={checked => setSmsConsent(checked as boolean)} className="mt-0.5" />
+              <p className="text-[11px] text-neutral-500 leading-tight">
+                Acepto recibir códigos de verificación por SMS. Se pueden aplicar tarifas de mensajería.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="mt-auto mb-8 space-y-4 animate-slide-up" style={{
@@ -225,7 +217,7 @@ const Auth = () => {
 
           
           
-          <Button className="w-full py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 shadow-lg shadow-neutral-900/10" onClick={handleSendOTP} disabled={loading || !phoneNumber || !smsConsent}>
+          <Button className="w-full py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 shadow-lg shadow-neutral-900/10" onClick={handleSendOTP} disabled={loading || !phoneNumber || (mode === 'signup' && !smsConsent)}>
             {loading ? <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Enviando...
@@ -234,6 +226,38 @@ const Auth = () => {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </>}
           </Button>
+
+          {import.meta.env.DEV && (
+            <button 
+              onClick={async () => {
+                try {
+                  const { data, error } = await supabase.auth.signInAnonymously();
+                  if (error) throw error;
+                  if (data.user) {
+                    await supabase.from('profiles').upsert({
+                      user_id: data.user.id,
+                      full_name: 'Usuario de Desarrollo',
+                      phone_number: '+1234567890'
+                    });
+                  }
+                  toast({
+                    title: "¡Acceso Dev!",
+                    description: "Entrando al app..."
+                  });
+                  navigate('/home');
+                } catch (error: any) {
+                  toast({
+                    title: "Error",
+                    description: error.message,
+                    variant: "destructive"
+                  });
+                }
+              }}
+              className="text-xs text-neutral-400 hover:text-neutral-600 underline text-center"
+            >
+              🔧 Acceso Dev
+            </button>
+          )}
         </div>
       </div>
     </div>;
