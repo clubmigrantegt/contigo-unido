@@ -321,8 +321,8 @@ const Chat = () => {
                   className={`flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-50 border border-transparent hover:border-neutral-100 transition-all group w-full text-left ${session.status === 'completed' ? 'opacity-70' : ''}`}
                 >
                   <div className="relative w-12 h-12 shrink-0">
-                    <div className="w-full h-full rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                      <Bot className="w-6 h-6" />
+                    <div className="w-full h-full rounded-full bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-600">
+                      <MessageCircleHeart className="w-6 h-6" />
                     </div>
                     {session.status === 'active' && (
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
@@ -330,7 +330,7 @@ const Chat = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline mb-0.5">
-                      <h4 className="text-sm font-semibold text-neutral-900">Asistente IA</h4>
+                      <h4 className="text-sm font-semibold text-neutral-900">Asistencia Psicológica</h4>
                       <span className="text-[10px] text-neutral-400">{formatTimestamp(session.session_start)}</span>
                     </div>
                     <p className="text-xs text-neutral-500 truncate group-hover:text-neutral-700">
