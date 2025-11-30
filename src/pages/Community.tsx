@@ -471,7 +471,10 @@ const Community = () => {
         ) : (
           <>
             {/* Categories Tab */}
-            <div className="px-6 py-4 sticky top-[110px] z-20 bg-background">
+            <div className="px-6 pt-6 pb-4">
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest font-manrope mb-3">
+                Temas Populares
+              </h2>
               <Input
                 placeholder="Buscar temas (ej. asilo, empleo)..."
                 className="bg-slate-50 border-slate-200"
@@ -479,9 +482,6 @@ const Community = () => {
             </div>
 
             <div className="px-6 pb-6">
-              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest font-manrope mb-4">
-                Temas Populares
-              </h2>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {/* Legal */}
