@@ -112,6 +112,24 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "breathe": {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.3" },
+          "50%": { transform: "scale(1.1)", opacity: "0.6" },
+        },
+        "breathe-inner": {
+          "0%, 100%": { transform: "scale(1)" },
+          "25%": { transform: "scale(1.15)" },
+          "50%": { transform: "scale(1.15)" },
+          "75%": { transform: "scale(1)" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+        "pulse-urgent": {
+          "0%, 100%": { transform: "scale(1)", opacity: "1" },
+          "50%": { transform: "scale(1.05)", opacity: "0.9" },
+        },
         "fade-in": {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
@@ -161,6 +179,10 @@ const config: Config = {
         "ping-slow": "ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite",
         "spring": "spring 0.3s ease-out",
         "blur-in": "blur-in 0.8s ease-out",
+        "breathe": "breathe 8s ease-in-out infinite",
+        "breathe-inner": "breathe-inner 8s ease-in-out infinite",
+        "pulse-soft": "pulse-soft 4s ease-in-out infinite",
+        "pulse-urgent": "pulse-urgent 2s ease-in-out infinite",
       },
     },
   },
