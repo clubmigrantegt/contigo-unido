@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { Search, PenLine, Heart, MessageCircle, Scale, Briefcase, HeartPulse, Home as HomeIcon, GraduationCap, Utensils, ChevronRight, MessageSquareDashed } from 'lucide-react';
+import { Search, PenLine, Heart, MessageCircle, Scale, Briefcase, HeartPulse, Home as HomeIcon, GraduationCap, Utensils, ChevronRight, MessageSquareDashed, TrendingUp } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -26,6 +26,11 @@ const categories = [{
   label: 'Destacados',
   color: 'neutral',
   icon: null
+}, {
+  id: 'populares',
+  label: 'Populares',
+  color: 'rose',
+  icon: TrendingUp
 }, {
   id: 'trabajo',
   label: 'Trabajo',
@@ -248,11 +253,49 @@ const Community = () => {
       glow: 'bg-slate-100/50'
     };
   };
-  const filteredTestimonials = testimonials.filter(t => {
-    const matchesFilter = selectedFilter === 'destacados' ? t.is_featured : t.category === selectedFilter;
-    const matchesSearch = searchQuery ? t.title.toLowerCase().includes(searchQuery.toLowerCase()) || t.content.toLowerCase().includes(searchQuery.toLowerCase()) : true;
-    return matchesFilter && matchesSearch;
-  });
+
+  const calculatePopularityScore = (testimonial: Testimonial) => {
+    const likes = testimonial.like_count || 0;
+    const comments = testimonial.comment_count || 0;
+    
+    // Pesos para el ranking
+    const likeWeight = 1;
+    const commentWeight = 2; // Comentarios valen más
+    
+    // Factor de tiempo (posts recientes tienen bonus)
+    const hoursOld = (Date.now() - new Date(testimonial.created_at).getTime()) / 3600000;
+    const timeDecay = Math.max(0.5, 1 - (hoursOld / 168)); // Decay over 1 week
+    
+    return (likes * likeWeight + comments * commentWeight) * timeDecay;
+  };
+
+  const getFilteredAndSortedTestimonials = () => {
+    let filtered = testimonials.filter(t => {
+      // Filtro de búsqueda
+      const matchesSearch = searchQuery 
+        ? t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          t.content.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+      
+      // Filtro por categoría
+      if (selectedFilter === 'destacados' || selectedFilter === 'populares') {
+        return matchesSearch; // Todos los posts
+      }
+      
+      return t.category === selectedFilter && matchesSearch;
+    });
+    
+    // Ordenamiento
+    if (selectedFilter === 'populares') {
+      // Ordenar por popularidad (descendente)
+      filtered.sort((a, b) => calculatePopularityScore(b) - calculatePopularityScore(a));
+    }
+    // Para 'destacados' y categorías, ya viene ordenado por created_at desc
+    
+    return filtered;
+  };
+
+  const filteredTestimonials = getFilteredAndSortedTestimonials();
   const getCategoryCounts = () => {
     return {
       legal: testimonials.filter(t => t.category === 'legal').length,
