@@ -11,7 +11,8 @@ import {
   Home as HomeIcon,
   MessageCircle,
   UsersRound,
-  User
+  User,
+  ChevronRight
 } from 'lucide-react';
 
 const Home = () => {
@@ -152,6 +153,28 @@ const Home = () => {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Diario de Gratitud */}
+      <div className="px-6 mb-8 animate-slide-up" style={{ animationDelay: '0.25s' }}>
+        <h2 className="text-sm font-bold text-neutral-900 tracking-tight mb-4">
+          Bienestar
+        </h2>
+        <button 
+          onClick={() => navigate('/wellness/gratitude/history')}
+          className="w-full p-4 bg-amber-50 rounded-2xl flex items-center justify-between group hover:bg-amber-100 transition-colors border border-amber-100 shadow-sm"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-white text-amber-500 flex items-center justify-center shadow-sm">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <span className="block text-sm font-bold text-neutral-900">Diario de Gratitud</span>
+              <span className="text-xs text-neutral-500">Ver historial de registros</span>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-neutral-300 group-hover:text-amber-500 transition-colors" />
+        </button>
       </div>
 
       {/* Novedades Legales */}

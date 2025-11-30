@@ -18,6 +18,8 @@ import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import BreathingTool from "./pages/wellness/BreathingTool";
 import GratitudeJournal from "./pages/wellness/GratitudeJournal";
+import GratitudeHistory from "./pages/wellness/GratitudeHistory";
+import GratitudeDetail from "./pages/wellness/GratitudeDetail";
 import CrisisHelp from "./pages/wellness/CrisisHelp";
 
 const queryClient = new QueryClient();
@@ -80,6 +82,16 @@ const App = () => (
             <Route path="/wellness/gratitude" element={
               <ProtectedRoute>
                 <GratitudeJournal />
+              </ProtectedRoute>
+            } />
+            <Route path="/wellness/gratitude/history" element={
+              <ProtectedRoute>
+                <GratitudeHistory />
+              </ProtectedRoute>
+            } />
+            <Route path="/wellness/gratitude/:id" element={
+              <ProtectedRoute>
+                <GratitudeDetail />
               </ProtectedRoute>
             } />
             <Route path="/wellness/crisis" element={
