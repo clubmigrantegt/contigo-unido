@@ -11,6 +11,7 @@ import Auth from "./pages/auth/Auth";
 import Home from "./pages/Home";
 import Chat from "./pages/Chat";
 import LegalInfo from "./pages/services/LegalInfo";
+import Resources from "./pages/services/Resources";
 import ResourceDetail from "./pages/services/ResourceDetail";
 import Community from "./pages/Community";
 import NewPost from "./pages/community/NewPost";
@@ -71,7 +72,8 @@ const App = () => (
               <Route path="chat" element={<Chat />} />
               <Route path="services/legal" element={<LegalInfo />} />
               <Route path="services/legal/:id" element={<ResourceDetail />} />
-              <Route path="resources/:id" element={<ResourceDetail />} />
+              <Route path="services/resources" element={<Resources />} />
+              <Route path="services/resources/:id" element={<ResourceDetail />} />
               <Route path="community" element={<Community />} />
               <Route path="community/new" element={<NewPost />} />
               <Route path="community/category/:categoryId" element={<CategoryView />} />

@@ -54,7 +54,7 @@ const Home = () => {
       title: 'Recursos',
       subtitle: 'Guías y Docs',
       hoverColor: 'group-hover:text-indigo-600',
-      route: '/services/legal'
+      route: '/services/resources'
     }
   ];
 

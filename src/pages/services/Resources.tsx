@@ -1,64 +1,64 @@
 import { useState } from 'react';
-import { ArrowLeft, Search, FileText, Briefcase, Shield, Plane, ChevronRight, Clock, ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowLeft, Search, Briefcase, Home, Heart, GraduationCap, ChevronRight, Clock, ArrowRight, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const LegalInfo = () => {
+const Resources = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todo');
 
   const categories = [
     { id: 'todo', label: 'Todo' },
-    { id: 'asilo', label: 'Asilo' },
-    { id: 'tps', label: 'TPS' },
-    { id: 'visas', label: 'Visas de Trabajo' },
-    { id: 'ciudadania', label: 'Ciudadanía' }
+    { id: 'empleo', label: 'Empleo' },
+    { id: 'vivienda', label: 'Vivienda' },
+    { id: 'salud', label: 'Salud' },
+    { id: 'educacion', label: 'Educación' }
   ];
 
-  const legalTopics = [
+  const resources = [
     {
-      id: 'asilo-i589',
-      title: 'Solicitud de Asilo (I-589)',
-      category: 'Trámite',
-      time: '5 min',
-      icon: FileText,
-      iconColor: 'group-hover:bg-indigo-50 group-hover:text-indigo-600',
-      categoryTag: 'asilo'
-    },
-    {
-      id: 'permiso-trabajo',
-      title: 'Permiso de Trabajo',
-      category: 'Formulario I-765',
-      time: null,
+      id: 'trabajo-sin-papeles',
+      title: 'Cómo Encontrar Trabajo Sin Papeles',
+      category: 'Guía Práctica',
+      time: '7 min',
       icon: Briefcase,
       iconColor: 'group-hover:bg-blue-50 group-hover:text-blue-600',
-      categoryTag: 'asilo'
+      categoryTag: 'empleo'
     },
     {
-      id: 'derechos-detencion',
-      title: 'Tus Derechos al ser Detenido',
-      category: 'Guía Rápida',
-      time: '3 min',
-      icon: Shield,
+      id: 'derechos-inquilino',
+      title: 'Derechos del Inquilino',
+      category: 'Información Legal',
+      time: '5 min',
+      icon: Home,
       iconColor: 'group-hover:bg-emerald-50 group-hover:text-emerald-600',
-      categoryTag: 'asilo'
+      categoryTag: 'vivienda'
     },
     {
-      id: 'parole-humanitario',
-      title: 'Parole Humanitario',
-      category: 'Información',
+      id: 'acceso-salud',
+      title: 'Acceso a Servicios de Salud',
+      category: 'Recursos',
+      time: '6 min',
+      icon: Heart,
+      iconColor: 'group-hover:bg-rose-50 group-hover:text-rose-600',
+      categoryTag: 'salud'
+    },
+    {
+      id: 'becas-migrantes',
+      title: 'Becas para Migrantes',
+      category: 'Oportunidades',
       time: null,
-      icon: Plane,
-      iconColor: 'group-hover:bg-orange-50 group-hover:text-orange-600',
-      categoryTag: 'tps'
+      icon: GraduationCap,
+      iconColor: 'group-hover:bg-indigo-50 group-hover:text-indigo-600',
+      categoryTag: 'educacion'
     }
   ];
 
-  const filteredTopics = legalTopics.filter(topic => {
-    const matchesCategory = selectedCategory === 'todo' || topic.categoryTag === selectedCategory;
+  const filteredResources = resources.filter(resource => {
+    const matchesCategory = selectedCategory === 'todo' || resource.categoryTag === selectedCategory;
     const matchesSearch = searchQuery === '' || 
-      topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      topic.category.toLowerCase().includes(searchQuery.toLowerCase());
+      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -75,7 +75,7 @@ const LegalInfo = () => {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-bold text-neutral-900">Centro Legal</h1>
+            <h1 className="text-lg font-bold text-neutral-900">Centro de Recursos</h1>
           </div>
           <button className="p-2 -mr-2 rounded-full hover:bg-neutral-50 text-neutral-500 transition-colors">
             <Search className="w-5 h-5" />
@@ -87,7 +87,7 @@ const LegalInfo = () => {
           <div className="relative">
             <input 
               type="text" 
-              placeholder="Buscar guías, formularios..." 
+              placeholder="Buscar recursos, guías..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-10 bg-neutral-100 rounded-lg pl-9 pr-4 text-xs font-medium text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white transition-all"
@@ -121,20 +121,20 @@ const LegalInfo = () => {
         {/* Featured Card */}
         <div className="px-6 pt-4 mb-2">
           <div 
-            className="relative w-full rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-5 shadow-lg group cursor-pointer"
-            onClick={() => navigate('/services/legal/tps-2024')}
+            className="relative w-full rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-5 shadow-lg group cursor-pointer"
+            onClick={() => navigate('/services/resources/ayuda-alquiler')}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8" />
             <div className="relative z-10">
               <span className="inline-block px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-[10px] font-semibold tracking-wide border border-white/10 mb-2">
                 DESTACADO
               </span>
-              <h3 className="text-lg font-bold leading-tight mb-2">Guía TPS 2024: Fechas Límite</h3>
-              <p className="text-xs text-indigo-100 line-clamp-2 leading-relaxed opacity-90">
-                Todo lo que necesitas saber sobre la reinscripción y los nuevos requisitos para venezolanos y haitianos.
+              <h3 className="text-lg font-bold leading-tight mb-2">Programas de Ayuda para Alquiler</h3>
+              <p className="text-xs text-emerald-100 line-clamp-2 leading-relaxed opacity-90">
+                Descubre los programas disponibles para asistencia con el alquiler y cómo aplicar.
               </p>
               <div className="mt-4 flex items-center gap-2 text-xs font-medium text-white">
-                <span>Leer guía completa</span>
+                <span>Explorar recursos</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -143,25 +143,25 @@ const LegalInfo = () => {
 
         {/* List Items */}
         <div className="px-6 py-2 space-y-3">
-          {filteredTopics.map(topic => (
+          {filteredResources.map(resource => (
             <button 
-              key={topic.id}
-              onClick={() => navigate(`/services/legal/${topic.id}`)}
+              key={resource.id}
+              onClick={() => navigate(`/services/resources/${resource.id}`)}
               className="w-full bg-white border border-neutral-100 rounded-xl p-3 flex gap-4 items-center hover:border-neutral-300 hover:shadow-sm transition-all group text-left"
             >
-              <div className={`w-12 h-12 rounded-lg bg-neutral-50 border border-neutral-100 flex items-center justify-center shrink-0 transition-colors text-neutral-500 ${topic.iconColor}`}>
-                <topic.icon className="w-5 h-5" />
+              <div className={`w-12 h-12 rounded-lg bg-neutral-50 border border-neutral-100 flex items-center justify-center shrink-0 transition-colors text-neutral-500 ${resource.iconColor}`}>
+                <resource.icon className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-neutral-900">{topic.title}</h4>
+                <h4 className="text-sm font-semibold text-neutral-900">{resource.title}</h4>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">
-                    {topic.category}
+                    {resource.category}
                   </span>
-                  {topic.time && (
+                  {resource.time && (
                     <span className="text-[10px] text-neutral-400 flex items-center gap-0.5">
                       <Clock className="w-2.5 h-2.5" />
-                      {topic.time}
+                      {resource.time}
                     </span>
                   )}
                 </div>
@@ -174,7 +174,7 @@ const LegalInfo = () => {
         {/* CTA Box */}
         <div className="mx-6 mt-4 p-4 bg-neutral-50 border border-dashed border-neutral-300 rounded-xl flex flex-col items-center text-center gap-2">
           <p className="text-xs text-neutral-500 max-w-[200px]">
-            ¿No encuentras lo que buscas? Nuestro asistente legal puede ayudarte.
+            ¿Necesitas más información? Habla con nuestro asistente.
           </p>
           <button 
             onClick={() => navigate('/chat')}
@@ -189,4 +189,4 @@ const LegalInfo = () => {
   );
 };
 
-export default LegalInfo;
+export default Resources;
