@@ -1,208 +1,153 @@
-import { useEffect, useState } from 'react';
-import { Search, Heart, MessageCircle, PenLine, MoreHorizontal } from 'lucide-react';
-import TestimonialComments from '@/components/community/TestimonialComments';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { getUserInitials } from '@/lib/countries';
+import { Search, PenLine, Heart, MessageCircle, Scale, Briefcase, HeartPulse, Home as HomeIcon, GraduationCap, Utensils, ChevronRight, MessageSquareDashed } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import TestimonialComments from '@/components/community/TestimonialComments';
 
 interface Testimonial {
   id: string;
   title: string;
   content: string;
   author_name: string;
-  country_of_origin: string;
+  country_of_origin: string | null;
   category: string;
-  tags?: string[];
   is_featured: boolean;
   created_at: string;
   like_count?: number;
   user_liked?: boolean;
   comment_count?: number;
+  user_id?: string;
 }
 
 const categories = [
-  { id: 'destacados', label: 'Destacados', color: 'slate' },
-  { id: 'trabajo', label: 'Trabajo', color: 'orange' },
-  { id: 'legal', label: 'Legal', color: 'indigo' },
-  { id: 'salud', label: 'Salud', color: 'emerald' },
-  { id: 'educacion', label: 'Educación', color: 'blue' },
-  { id: 'familia', label: 'Familia', color: 'pink' },
-  { id: 'general', label: 'General', color: 'slate' }
+  { id: 'destacados', label: 'Destacados', color: 'neutral', icon: null },
+  { id: 'trabajo', label: 'Trabajo', color: 'orange', icon: Briefcase },
+  { id: 'legal', label: 'Legal', color: 'blue', icon: Scale },
+  { id: 'salud', label: 'Salud', color: 'rose', icon: HeartPulse },
+  { id: 'educacion', label: 'Educación', color: 'indigo', icon: GraduationCap },
+  { id: 'vivienda', label: 'Vivienda', color: 'amber', icon: HomeIcon },
 ];
 
+const categoryColors = {
+  legal: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-100', glow: 'bg-blue-100/50' },
+  trabajo: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-100', glow: 'bg-emerald-100/50' },
+  salud: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-100', glow: 'bg-rose-100/50' },
+  vivienda: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-100', glow: 'bg-amber-100/50' },
+  educacion: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-100', glow: 'bg-indigo-100/50' },
+  alimentacion: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-100', glow: 'bg-green-100/50' },
+};
+
 const countryToCode: Record<string, string> = {
-  'Venezuela': 've',
-  'Colombia': 'co',
-  'México': 'mx',
-  'Guatemala': 'gt',
-  'El Salvador': 'sv',
-  'Honduras': 'hn',
-  'Nicaragua': 'ni',
-  'Ecuador': 'ec',
-  'Perú': 'pe',
-  'Cuba': 'cu',
-  'Ucrania': 'ua',
-  'Argentina': 'ar',
-  'Chile': 'cl',
-  'Bolivia': 'bo',
-  'Paraguay': 'py',
-  'Uruguay': 'uy',
-  'República Dominicana': 'do',
-  'Costa Rica': 'cr',
-  'Panamá': 'pa',
-  'Brasil': 'br'
+  'Venezuela': 've', 'Colombia': 'co', 'México': 'mx', 'Guatemala': 'gt',
+  'El Salvador': 'sv', 'Honduras': 'hn', 'Nicaragua': 'ni', 'Ecuador': 'ec',
+  'Perú': 'pe', 'Cuba': 'cu', 'Ucrania': 'ua', 'Siria': 'sy',
 };
 
 const Community = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState<'historias' | 'categorias'>('historias');
+  const [selectedFilter, setSelectedFilter] = useState('destacados');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('destacados');
-  const [activeTab, setActiveTab] = useState('historias');
-  const [selectedTestimonialId, setSelectedTestimonialId] = useState<string | null>(null);
-  const [commentsOpen, setCommentsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [newTestimonial, setNewTestimonial] = useState({
-    title: '',
-    content: '',
-    author_name: '',
-    country_of_origin: '',
-    category: 'general'
-  });
+  const [uniqueUsersCount, setUniqueUsersCount] = useState(0);
+  const [topCountries, setTopCountries] = useState<string[]>([]);
+  const [totalCountries, setTotalCountries] = useState(0);
+  const [commentsModalTestimonial, setCommentsModalTestimonial] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTestimonials();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      // Get unique users
+      const { data: users, error: usersError } = await supabase
+        .from('testimonials')
+        .select('user_id', { count: 'exact' });
+
+      if (usersError) throw usersError;
+
+      const uniqueUsers = new Set(users?.map(t => t.user_id).filter(Boolean));
+      setUniqueUsersCount(uniqueUsers.size);
+
+      // Get unique countries
+      const { data: countries, error: countriesError } = await supabase
+        .from('testimonials')
+        .select('country_of_origin');
+
+      if (countriesError) throw countriesError;
+
+      const uniqueCountries = Array.from(
+        new Set(countries?.map(t => t.country_of_origin).filter(Boolean))
+      ) as string[];
+
+      setTotalCountries(uniqueCountries.length);
+      setTopCountries(uniqueCountries.slice(0, 3));
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
 
   const fetchTestimonials = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('testimonials')
-        .select(`
-          id, title, content, author_name, country_of_origin, category, tags, is_featured, created_at,
-          testimonial_reactions!left(id),
-          testimonial_comments!left(id)
-        `)
-        .eq('is_approved', true)
-        .order('is_featured', { ascending: false })
+        .select('*, testimonial_reactions(count), testimonial_comments(count)')
         .order('created_at', { ascending: false });
 
+      const { data, error } = await query;
       if (error) throw error;
 
-      const processedTestimonials = await Promise.all(
-        (data || []).map(async (testimonial: any) => {
-          const like_count = testimonial.testimonial_reactions?.length || 0;
-          const comment_count = testimonial.testimonial_comments?.length || 0;
+      const processedData = await Promise.all(
+        (data || []).map(async (testimonial) => {
+          const likeCount = testimonial.testimonial_reactions?.[0]?.count || 0;
+          const commentCount = testimonial.testimonial_comments?.[0]?.count || 0;
 
-          let user_liked = false;
+          let userLiked = false;
           if (user) {
-            const { data: userReaction } = await supabase
+            const { data: reactionData } = await supabase
               .from('testimonial_reactions')
               .select('id')
               .eq('testimonial_id', testimonial.id)
               .eq('user_id', user.id)
-              .single();
-            user_liked = !!userReaction;
+              .maybeSingle();
+            userLiked = !!reactionData;
           }
 
           return {
             ...testimonial,
-            like_count,
-            comment_count,
-            user_liked,
-            testimonial_reactions: undefined,
-            testimonial_comments: undefined
+            like_count: likeCount,
+            comment_count: commentCount,
+            user_liked: userLiked,
           };
         })
       );
 
-      setTestimonials(processedTestimonials);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar los testimonios",
-        variant: "destructive"
-      });
+      setTestimonials(processedData);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      toast.error('Error al cargar las historias');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmitTestimonial = async () => {
-    if (!user || !newTestimonial.title || !newTestimonial.content || !newTestimonial.author_name) {
-      toast({
-        title: "Error",
-        description: "Por favor completa todos los campos requeridos",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.from('testimonials').insert({
-        user_id: user.id,
-        title: newTestimonial.title,
-        content: newTestimonial.content,
-        author_name: newTestimonial.author_name,
-        country_of_origin: newTestimonial.country_of_origin || null,
-        category: newTestimonial.category,
-        is_approved: false,
-        is_featured: false
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "¡Testimonio enviado!",
-        description: "Tu testimonio será revisado antes de publicarse"
-      });
-
-      setNewTestimonial({
-        title: '',
-        content: '',
-        author_name: '',
-        country_of_origin: '',
-        category: 'general'
-      });
-      setShowForm(false);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "No se pudo enviar el testimonio",
-        variant: "destructive"
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleLikeTestimonial = async (testimonialId: string) => {
+  const handleLike = async (testimonialId: string) => {
     if (!user) {
-      toast({
-        title: "Inicia sesión",
-        description: "Debes iniciar sesión para dar me gusta",
-        variant: "destructive"
-      });
+      toast.error('Debes iniciar sesión para dar like');
       return;
     }
 
     try {
-      const testimonial = testimonials.find(t => t.id === testimonialId);
+      const testimonial = testimonials.find((t) => t.id === testimonialId);
       if (!testimonial) return;
 
       if (testimonial.user_liked) {
@@ -215,211 +160,203 @@ const Community = () => {
         await supabase.from('testimonial_reactions').insert({
           testimonial_id: testimonialId,
           user_id: user.id,
-          reaction_type: 'like'
+          reaction_type: 'like',
         });
       }
 
-      setTestimonials(prev =>
-        prev.map(t => {
-          if (t.id === testimonialId) {
-            return {
-              ...t,
-              like_count: t.user_liked ? (t.like_count || 1) - 1 : (t.like_count || 0) + 1,
-              user_liked: !t.user_liked
-            };
-          }
-          return t;
-        })
+      setTestimonials((prev) =>
+        prev.map((t) =>
+          t.id === testimonialId
+            ? {
+                ...t,
+                like_count: t.user_liked ? (t.like_count || 1) - 1 : (t.like_count || 0) + 1,
+                user_liked: !t.user_liked,
+              }
+            : t
+        )
       );
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "No se pudo procesar la reacción",
-        variant: "destructive"
-      });
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast.error('Error al actualizar el like');
     }
   };
 
-  const formatRelativeTime = (dateString: string) => {
+  const getInitials = (name: string) => {
+    const names = name.split(' ');
+    return names.length > 1
+      ? `${names[0][0]}${names[1][0]}`.toUpperCase()
+      : names[0][0].toUpperCase();
+  };
+
+  const getUserInitials = () => {
+    if (!user?.user_metadata?.full_name) return 'U';
+    return getInitials(user.user_metadata.full_name);
+  };
+
+  const getAvatarColor = (name: string) => {
+    const colors = ['blue', 'orange', 'emerald', 'rose', 'purple', 'amber'];
+    const index = name.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+
+  const getCountryCode = (country: string | null): string => {
+    if (!country) return '';
+    return countryToCode[country] || '';
+  };
+
+  const formatRelativeTime = (date: string) => {
     const now = new Date();
-    const date = new Date(dateString);
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const past = new Date(date);
+    const diffInHours = Math.floor((now.getTime() - past.getTime()) / 3600000);
 
-    if (diffInSeconds < 60) return 'hace unos segundos';
-    if (diffInSeconds < 3600) return `hace ${Math.floor(diffInSeconds / 60)} min`;
-    if (diffInSeconds < 86400) return `hace ${Math.floor(diffInSeconds / 3600)} horas`;
-    if (diffInSeconds < 604800) return `hace ${Math.floor(diffInSeconds / 86400)} días`;
-    return new Date(dateString).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+    if (diffInHours < 1) return 'hace menos de 1 hora';
+    if (diffInHours < 24) return `hace ${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'}`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `hace ${diffInDays} ${diffInDays === 1 ? 'día' : 'días'}`;
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    return `hace ${diffInWeeks} ${diffInWeeks === 1 ? 'semana' : 'semanas'}`;
   };
 
-  const getCountryCode = (country: string): string | null => {
-    return countryToCode[country] || null;
+  const getCategoryInfo = (category: string) => {
+    const colors = categoryColors[category as keyof typeof categoryColors];
+    return colors || { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-100', glow: 'bg-slate-100/50' };
   };
 
-  const getCategoryColor = (category: string) => {
-    const cat = categories.find(c => c.id === category);
-    return cat?.color || 'slate';
+  const filteredTestimonials = testimonials.filter((t) => {
+    const matchesFilter = selectedFilter === 'destacados' ? t.is_featured : t.category === selectedFilter;
+    const matchesSearch = searchQuery
+      ? t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.content.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    return matchesFilter && matchesSearch;
+  });
+
+  const getCategoryCounts = () => {
+    return {
+      legal: testimonials.filter(t => t.category === 'legal').length,
+      trabajo: testimonials.filter(t => t.category === 'trabajo').length,
+      salud: testimonials.filter(t => t.category === 'salud').length,
+      vivienda: testimonials.filter(t => t.category === 'vivienda').length,
+    };
   };
 
-  const getFilteredTestimonials = () => {
-    let filtered = testimonials;
-
-    if (selectedCategory === 'destacados') {
-      filtered = testimonials.filter(t => t.is_featured);
-    } else {
-      filtered = testimonials.filter(t => t.category === selectedCategory);
-    }
-
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        t =>
-          t.title.toLowerCase().includes(query) ||
-          t.content.toLowerCase().includes(query) ||
-          t.author_name.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
-  };
-
-  const getUniqueCountries = () => {
-    const countries = testimonials
-      .filter(t => t.country_of_origin)
-      .map(t => t.country_of_origin);
-    return [...new Set(countries)];
-  };
-
-  const getTopCountries = () => {
-    const countries = getUniqueCountries();
-    return countries.slice(0, 3);
-  };
-
-  const filteredTestimonials = getFilteredTestimonials();
-  const uniqueCountries = getUniqueCountries();
-  const topCountries = getTopCountries();
+  const counts = getCategoryCounts();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Header Sticky */}
-      <div className="px-6 pt-14 pb-0 bg-white sticky top-0 z-30">
+    <div className="min-h-screen bg-slate-50/50 flex flex-col pb-24">
+      {/* Header */}
+      <div className="px-6 pt-6 pb-0 bg-background sticky top-0 z-30">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Comunidad</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground font-jakarta">
+            {activeTab === 'historias' ? 'Comunidad' : 'Explorar'}
+          </h1>
           <div className="flex gap-2">
             <button
               onClick={() => setShowSearch(!showSearch)}
-              className="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors"
+              className="w-9 h-9 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground transition-colors"
             >
               <Search className="w-5 h-5" />
             </button>
-            <div className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-white text-xs font-bold">
-              {user ? getUserInitials(user.user_metadata?.full_name) : 'U'}
-            </div>
+            <Avatar className="w-9 h-9 bg-neutral-900">
+              <AvatarFallback className="text-white text-xs font-bold font-manrope">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
           </div>
         </div>
 
-        {/* Search Input (Expandable) */}
+        {/* Search Input (expandable) */}
         {showSearch && (
-          <div className="mb-4 animate-slide-down">
+          <div className="mb-4">
             <Input
-              type="text"
               placeholder="Buscar historias..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-slate-50 border-slate-200"
             />
           </div>
         )}
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full h-auto p-0 bg-transparent border-b border-slate-100">
-            <TabsTrigger
-              value="historias"
-              className="px-1 pb-3 text-sm font-semibold data-[state=active]:text-indigo-600 data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=inactive]:text-slate-500 mr-6 rounded-none bg-transparent"
-            >
-              Historias
-            </TabsTrigger>
-            <TabsTrigger
-              value="categorias"
-              className="px-1 pb-3 text-sm font-medium data-[state=active]:text-indigo-600 data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 data-[state=inactive]:text-slate-500 rounded-none bg-transparent"
-            >
-              Categorías
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex border-b border-border">
+          <button
+            onClick={() => setActiveTab('historias')}
+            className={`px-1 pb-3 text-sm font-manrope mr-6 transition-colors ${
+              activeTab === 'historias'
+                ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600'
+                : 'font-medium text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Historias
+          </button>
+          <button
+            onClick={() => setActiveTab('categorias')}
+            className={`px-1 pb-3 text-sm font-manrope transition-colors ${
+              activeTab === 'categorias'
+                ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600'
+                : 'font-medium text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Categorías
+          </button>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto pb-24">
-        <Tabs value={activeTab} className="w-full">
-          <TabsContent value="historias" className="mt-0">
+      <div className="flex-1 overflow-y-auto no-scrollbar">
+        {activeTab === 'historias' ? (
+          <>
             {/* Stats Banner */}
             <div className="px-6 pt-6 pb-2">
-              <div
-                className="rounded-2xl p-4 text-white shadow-lg flex items-center justify-between"
-                style={{
-                  background: 'linear-gradient(135deg, rgb(79, 70, 229) 0%, rgb(139, 92, 246) 100%)'
-                }}
-              >
+              <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-4 text-white shadow-lg shadow-indigo-200 flex items-center justify-between">
                 <div>
-                  <span className="block text-2xl font-bold">{testimonials.length}</span>
-                  <span className="text-xs uppercase tracking-wide" style={{ color: 'rgb(199, 210, 254)' }}>
+                  <span className="block text-2xl font-bold font-jakarta">{uniqueUsersCount}</span>
+                  <span className="text-xs text-indigo-100 font-manrope uppercase tracking-wide">
                     Voces Unidas
                   </span>
                 </div>
                 <div className="text-right">
                   <div className="flex -space-x-2 justify-end mb-1">
-                    {topCountries.map((country, idx) => {
-                      const code = getCountryCode(country);
-                      return code ? (
-                        <div
-                          key={idx}
-                          className="w-6 h-6 rounded-full border-2 bg-white overflow-hidden"
-                          style={{ borderColor: 'rgb(99, 102, 241)' }}
-                        >
-                          <img
-                            src={`https://flagcdn.com/w40/${code}.png`}
-                            alt={country}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ) : null;
-                    })}
-                    {uniqueCountries.length > 3 && (
+                    {topCountries.slice(0, 3).map((country, idx) => (
                       <div
-                        className="w-6 h-6 rounded-full border-2 bg-slate-800 text-[8px] flex items-center justify-center font-bold text-white"
-                        style={{ borderColor: 'rgb(99, 102, 241)' }}
+                        key={idx}
+                        className="w-6 h-6 rounded-full border-2 border-indigo-500 bg-white overflow-hidden"
                       >
-                        +{uniqueCountries.length - 3}
+                        <img
+                          src={`https://flagcdn.com/w40/${getCountryCode(country)}.png`}
+                          alt={country}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                    {totalCountries > 3 && (
+                      <div className="w-6 h-6 rounded-full border-2 border-indigo-500 bg-neutral-800 text-[8px] flex items-center justify-center font-bold">
+                        +{totalCountries - 3}
                       </div>
                     )}
                   </div>
-                  <span className="text-xs" style={{ color: 'rgb(199, 210, 254)' }}>
-                    {uniqueCountries.length} Países
-                  </span>
+                  <span className="text-xs text-indigo-100 font-manrope">{totalCountries} Países</span>
                 </div>
               </div>
             </div>
 
-            {/* Filters (Horizontal Scroll) */}
+            {/* Filters */}
             <div className="flex overflow-x-auto no-scrollbar px-6 gap-2 py-4">
-              {categories.map(cat => (
+              {categories.map((cat) => (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-                    selectedCategory === cat.id
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  onClick={() => setSelectedFilter(cat.id)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-manrope whitespace-nowrap transition-colors ${
+                    selectedFilter === cat.id
+                      ? 'bg-neutral-900 text-white font-semibold'
+                      : 'bg-background border border-border text-muted-foreground hover:bg-muted font-medium'
                   }`}
                 >
                   {cat.label}
@@ -428,245 +365,227 @@ const Community = () => {
             </div>
 
             {/* Feed */}
-            <div className="px-6 flex flex-col gap-4">
-              {filteredTestimonials.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-slate-500 text-sm mb-4">No hay historias en esta categoría</p>
-                  <Button
-                    onClick={() => setShowForm(true)}
-                    className="bg-slate-900 text-white hover:bg-slate-800"
-                  >
-                    <PenLine className="w-4 h-4 mr-2" />
-                    Compartir Historia
-                  </Button>
+            {filteredTestimonials.length === 0 ? (
+              <div className="flex flex-col items-center justify-center px-8 py-16 text-center">
+                <div className="w-32 h-32 bg-muted rounded-full flex items-center justify-center mb-6 relative animate-float">
+                  <div className="absolute inset-0 bg-muted/50 rounded-full blur-2xl"></div>
+                  <MessageSquareDashed className="w-12 h-12 text-muted-foreground/30" />
                 </div>
-              ) : (
-                filteredTestimonials.map(testimonial => {
-                  const categoryColor = getCategoryColor(testimonial.category);
+                <h2 className="text-lg font-bold text-foreground font-jakarta mb-2">
+                  Todo está muy tranquilo
+                </h2>
+                <p className="text-sm text-muted-foreground font-manrope leading-relaxed mb-8 max-w-[240px]">
+                  Aún no hay publicaciones {selectedFilter !== 'destacados' && 'en esta categoría'}. Sé la primera persona en compartir algo.
+                </p>
+                <button
+                  onClick={() => navigate('/community/new')}
+                  className="w-full max-w-xs py-3.5 bg-neutral-900 text-white rounded-xl font-semibold text-sm hover:bg-neutral-800 transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95"
+                >
+                  <PenLine className="w-4 h-4" />
+                  <span className="font-manrope">Iniciar conversación</span>
+                </button>
+              </div>
+            ) : (
+              <div className="px-6 flex flex-col gap-4">
+                {filteredTestimonials.map((testimonial) => {
+                  const categoryInfo = getCategoryInfo(testimonial.category);
+                  const avatarColor = getAvatarColor(testimonial.author_name);
                   const countryCode = getCountryCode(testimonial.country_of_origin);
-                  const avatarColors = [
-                    'bg-blue-100 text-blue-600',
-                    'bg-orange-100 text-orange-600',
-                    'bg-emerald-100 text-emerald-600',
-                    'bg-pink-100 text-pink-600',
-                    'bg-indigo-100 text-indigo-600'
-                  ];
-                  const avatarColor = avatarColors[testimonial.id.charCodeAt(0) % avatarColors.length];
 
                   return (
-                    <Card key={testimonial.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div
+                      key={testimonial.id}
+                      className="bg-background p-5 rounded-2xl shadow-sm border border-border"
+                    >
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full ${avatarColor} flex items-center justify-center font-bold text-sm relative`}>
-                            {getUserInitials(testimonial.author_name)}
+                          <div className="relative">
+                            <Avatar className={`w-10 h-10 bg-${avatarColor}-100 text-${avatarColor}-600`}>
+                              <AvatarFallback className="font-bold font-manrope text-sm">
+                                {getInitials(testimonial.author_name)}
+                              </AvatarFallback>
+                            </Avatar>
                             {countryCode && (
-                              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white overflow-hidden">
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-background overflow-hidden">
                                 <img
                                   src={`https://flagcdn.com/w40/${countryCode}.png`}
-                                  alt={testimonial.country_of_origin}
+                                  alt={testimonial.country_of_origin || ''}
                                   className="w-full h-full object-cover"
                                 />
                               </div>
                             )}
                           </div>
                           <div>
-                            <h3 className="text-sm font-bold text-slate-900">{testimonial.author_name}</h3>
-                            <p className="text-[10px] text-slate-400">
+                            <h3 className="text-sm font-bold text-foreground font-jakarta">
+                              {testimonial.author_name}
+                            </h3>
+                            <p className="text-[10px] text-muted-foreground font-manrope">
                               {formatRelativeTime(testimonial.created_at)} •{' '}
-                              <span className="text-indigo-600 font-medium">
-                                {categories.find(c => c.id === testimonial.category)?.label}
+                              <span className={`font-medium ${categoryInfo.text}`}>
+                                {categories.find(c => c.id === testimonial.category)?.label || testimonial.category}
                               </span>
                             </p>
                           </div>
                         </div>
-                        <button className="text-slate-400 hover:text-slate-600">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </button>
                       </div>
 
-                      <h4 className="text-sm font-bold text-slate-900 mb-2 leading-tight">{testimonial.title}</h4>
-                      <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-3">{testimonial.content}</p>
+                      <h4 className="text-sm font-bold text-foreground mb-2 font-jakarta leading-tight">
+                        {testimonial.title}
+                      </h4>
+                      <p className="text-xs text-muted-foreground font-manrope leading-relaxed mb-4 line-clamp-3">
+                        {testimonial.content}
+                      </p>
 
-                      <div className="flex items-center gap-4 border-t border-slate-50 pt-3">
+                      <div className="flex items-center gap-4 border-t border-border/50 pt-3">
                         <button
-                          onClick={() => handleLikeTestimonial(testimonial.id)}
+                          onClick={() => handleLike(testimonial.id)}
                           className={`flex items-center gap-1.5 transition-colors group ${
-                            testimonial.user_liked ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'
+                            testimonial.user_liked
+                              ? 'text-rose-500'
+                              : 'text-muted-foreground hover:text-rose-500'
                           }`}
                         >
                           <Heart
                             className={`w-4 h-4 ${testimonial.user_liked ? 'fill-rose-500' : 'group-hover:fill-rose-500'}`}
                           />
-                          <span className="text-xs font-medium">{testimonial.like_count || 0}</span>
+                          <span className="text-xs font-medium font-manrope">
+                            {testimonial.like_count || 0}
+                          </span>
                         </button>
                         <button
-                          onClick={() => {
-                            setSelectedTestimonialId(testimonial.id);
-                            setCommentsOpen(true);
-                          }}
-                          className="flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
+                          onClick={() => setCommentsModalTestimonial(testimonial.id)}
+                          className="flex items-center gap-1.5 text-muted-foreground hover:text-indigo-600 transition-colors"
                         >
                           <MessageCircle className="w-4 h-4" />
-                          <span className="text-xs font-medium">{testimonial.comment_count || 0}</span>
+                          <span className="text-xs font-medium font-manrope">
+                            {testimonial.comment_count || 0}
+                          </span>
                         </button>
                       </div>
-                    </Card>
+                    </div>
                   );
-                })
-              )}
+                })}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Categories Tab */}
+            <div className="px-6 py-4 sticky top-[110px] z-20 bg-background">
+              <Input
+                placeholder="Buscar temas (ej. asilo, empleo)..."
+                className="bg-slate-50 border-slate-200"
+              />
             </div>
-          </TabsContent>
 
-          <TabsContent value="categorias" className="mt-0">
-            <div className="px-6 pt-6">
+            <div className="px-6 pb-6">
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest font-manrope mb-4">
+                Temas Populares
+              </h2>
+
               <div className="grid grid-cols-2 gap-3 mb-6">
-                {categories
-                  .filter(c => c.id !== 'destacados')
-                  .map(category => {
-                    const count = testimonials.filter(t => t.category === category.id).length;
-                    return (
-                      <Card
-                        key={category.id}
-                        onClick={() => {
-                          setSelectedCategory(category.id);
-                          setActiveTab('historias');
-                        }}
-                        className="p-4 rounded-2xl shadow-sm border border-slate-100 cursor-pointer hover:shadow-md transition-all"
-                      >
-                        <h3 className="text-sm font-bold text-slate-900 mb-1">{category.label}</h3>
-                        <p className="text-2xl font-bold text-indigo-600">{count}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">historias</p>
-                      </Card>
-                    );
-                  })}
+                {/* Legal */}
+                <button
+                  onClick={() => navigate('/community/category/legal')}
+                  className="p-4 rounded-2xl bg-blue-50 border border-blue-100 text-left hover:scale-[1.02] transition-transform group relative overflow-hidden"
+                >
+                  <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-blue-100/50 rounded-full blur-xl group-hover:bg-blue-200/50 transition-colors"></div>
+                  <div className="w-10 h-10 rounded-xl bg-white text-blue-600 flex items-center justify-center shadow-sm mb-3 relative z-10">
+                    <Scale className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-sm font-bold text-neutral-900 font-jakarta mb-0.5">Legal</h3>
+                  <p className="text-[10px] text-blue-700/70 font-manrope">{counts.legal} publicaciones</p>
+                </button>
+
+                {/* Trabajo */}
+                <button
+                  onClick={() => navigate('/community/category/trabajo')}
+                  className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-left hover:scale-[1.02] transition-transform group relative overflow-hidden"
+                >
+                  <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-emerald-100/50 rounded-full blur-xl group-hover:bg-emerald-200/50 transition-colors"></div>
+                  <div className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-sm mb-3 relative z-10">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-sm font-bold text-neutral-900 font-jakarta mb-0.5">Trabajo</h3>
+                  <p className="text-[10px] text-emerald-700/70 font-manrope">{counts.trabajo} publicaciones</p>
+                </button>
+
+                {/* Salud */}
+                <button
+                  onClick={() => navigate('/community/category/salud')}
+                  className="p-4 rounded-2xl bg-rose-50 border border-rose-100 text-left hover:scale-[1.02] transition-transform group relative overflow-hidden"
+                >
+                  <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-rose-100/50 rounded-full blur-xl group-hover:bg-rose-200/50 transition-colors"></div>
+                  <div className="w-10 h-10 rounded-xl bg-white text-rose-600 flex items-center justify-center shadow-sm mb-3 relative z-10">
+                    <HeartPulse className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-sm font-bold text-neutral-900 font-jakarta mb-0.5">Salud</h3>
+                  <p className="text-[10px] text-rose-700/70 font-manrope">{counts.salud} publicaciones</p>
+                </button>
+
+                {/* Vivienda */}
+                <button
+                  onClick={() => navigate('/community/category/vivienda')}
+                  className="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-left hover:scale-[1.02] transition-transform group relative overflow-hidden"
+                >
+                  <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-amber-100/50 rounded-full blur-xl group-hover:bg-amber-200/50 transition-colors"></div>
+                  <div className="w-10 h-10 rounded-xl bg-white text-amber-600 flex items-center justify-center shadow-sm mb-3 relative z-10">
+                    <HomeIcon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-sm font-bold text-neutral-900 font-jakarta mb-0.5">Vivienda</h3>
+                  <p className="text-[10px] text-amber-700/70 font-manrope">{counts.vivienda} publicaciones</p>
+                </button>
               </div>
 
-              {/* Overall Stats */}
-              <Card className="p-5 rounded-2xl shadow-sm border border-slate-100 mb-6">
-                <h3 className="text-sm font-bold text-slate-900 mb-4">Estadísticas Generales</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-600">Total Historias</span>
-                    <span className="text-sm font-bold text-slate-900">{testimonials.length}</span>
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest font-manrope mb-4">
+                Otros Recursos
+              </h2>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => navigate('/community/category/educacion')}
+                  className="w-full p-3 bg-background border border-border rounded-xl flex items-center justify-between hover:bg-muted transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                      <GraduationCap className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-semibold text-foreground font-manrope">Educación</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-600">Países Representados</span>
-                    <span className="text-sm font-bold text-slate-900">{uniqueCountries.length}</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+
+                <button
+                  onClick={() => navigate('/community/category/alimentacion')}
+                  className="w-full p-3 bg-background border border-border rounded-xl flex items-center justify-between hover:bg-muted transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                      <Utensils className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-semibold text-foreground font-manrope">Alimentación</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-600">Historias Destacadas</span>
-                    <span className="text-sm font-bold text-slate-900">
-                      {testimonials.filter(t => t.is_featured).length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-600">Reacciones Totales</span>
-                    <span className="text-sm font-bold text-slate-900">
-                      {testimonials.reduce((sum, t) => sum + (t.like_count || 0), 0)}
-                    </span>
-                  </div>
-                </div>
-              </Card>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
             </div>
-          </TabsContent>
-        </Tabs>
+          </>
+        )}
       </div>
 
-      {/* Floating Action Button */}
+      {/* FAB */}
       <button
-        onClick={() => setShowForm(true)}
-        className="fixed bottom-24 right-6 w-14 h-14 bg-slate-900 rounded-full text-white shadow-xl flex items-center justify-center hover:scale-105 transition-transform z-20"
-        style={{ boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.3)' }}
+        onClick={() => navigate('/community/new')}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-neutral-900 rounded-full text-white shadow-xl shadow-neutral-900/30 flex items-center justify-center hover:scale-105 transition-transform z-20"
       >
         <PenLine className="w-6 h-6" />
       </button>
 
-      {/* Dialog: Compartir Historia */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Comparte tu Historia</DialogTitle>
-            <DialogDescription>Tu testimonio puede inspirar y ayudar a otros migrantes</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Título de tu historia</Label>
-              <Input
-                id="title"
-                value={newTestimonial.title}
-                onChange={e => setNewTestimonial({ ...newTestimonial, title: e.target.value })}
-                placeholder="¿Cómo resumirías tu experiencia?"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="author">Tu nombre (o seudónimo)</Label>
-              <Input
-                id="author"
-                value={newTestimonial.author_name}
-                onChange={e => setNewTestimonial({ ...newTestimonial, author_name: e.target.value })}
-                placeholder="Como quieres que te identifiquen"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country">País de origen (opcional)</Label>
-              <Input
-                id="country"
-                value={newTestimonial.country_of_origin}
-                onChange={e => setNewTestimonial({ ...newTestimonial, country_of_origin: e.target.value })}
-                placeholder="Tu país de origen"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="category">Categoría</Label>
-              <Select
-                value={newTestimonial.category}
-                onValueChange={value => setNewTestimonial({ ...newTestimonial, category: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona una categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories
-                    .filter(c => c.id !== 'destacados')
-                    .map(category => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="content">Tu historia</Label>
-              <Textarea
-                id="content"
-                value={newTestimonial.content}
-                onChange={e => setNewTestimonial({ ...newTestimonial, content: e.target.value })}
-                placeholder="Comparte tu experiencia, los desafíos que has enfrentado y cómo has salido adelante..."
-                className="min-h-[120px]"
-              />
-            </div>
-
-            <Button onClick={handleSubmitTestimonial} disabled={submitting} className="w-full btn-primary">
-              {submitting ? 'Enviando...' : 'Compartir Historia'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Comments Modal */}
-      {selectedTestimonialId && (
+      {commentsModalTestimonial && (
         <TestimonialComments
-          testimonialId={selectedTestimonialId}
-          isOpen={commentsOpen}
-          onClose={() => {
-            setCommentsOpen(false);
-            setSelectedTestimonialId(null);
-          }}
+          testimonialId={commentsModalTestimonial}
+          isOpen={!!commentsModalTestimonial}
+          onClose={() => setCommentsModalTestimonial(null)}
         />
       )}
     </div>

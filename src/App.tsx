@@ -13,6 +13,8 @@ import Chat from "./pages/Chat";
 import LegalInfo from "./pages/services/LegalInfo";
 import ResourceDetail from "./pages/services/ResourceDetail";
 import Community from "./pages/Community";
+import NewPost from "./pages/community/NewPost";
+import CategoryView from "./pages/community/CategoryView";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
@@ -69,6 +71,8 @@ const App = () => (
               <Route path="services/legal/:id" element={<ResourceDetail />} />
               <Route path="resources/:id" element={<ResourceDetail />} />
               <Route path="community" element={<Community />} />
+              <Route path="community/new" element={<NewPost />} />
+              <Route path="community/category/:categoryId" element={<CategoryView />} />
               <Route path="profile" element={<Profile />} />
               <Route path="notifications" element={<Notifications />} />
             </Route>
