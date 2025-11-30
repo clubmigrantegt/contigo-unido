@@ -383,15 +383,22 @@ const Community = () => {
                   </span>
                 </div>
                 <div className="text-right">
-                  <div className="flex -space-x-2 justify-end mb-1">
-                    {topCountries.slice(0, 3).map((country, idx) => <div key={idx} className="w-6 h-6 rounded-full border-2 border-indigo-500 bg-white overflow-hidden">
-                        <img src={`https://flagcdn.com/w40/${getCountryCode(country)}.png`} alt={country} className="w-full h-full object-cover" />
-                      </div>)}
-                    {totalCountries > 3 && <div className="w-6 h-6 rounded-full border-2 border-indigo-500 bg-neutral-800 text-[8px] flex items-center justify-center font-bold">
-                        +{totalCountries - 3}
-                      </div>}
+                  <div className="flex -space-x-2 justify-end mb-1.5">
+                    {/* Mock flags - 4 banderas de países latinoamericanos */}
+                    <div className="w-6 h-6 rounded-full border-2 border-white/80 bg-white overflow-hidden shadow-sm">
+                      <img src="https://flagcdn.com/w40/ve.png" alt="Venezuela" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="w-6 h-6 rounded-full border-2 border-white/80 bg-white overflow-hidden shadow-sm">
+                      <img src="https://flagcdn.com/w40/mx.png" alt="México" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="w-6 h-6 rounded-full border-2 border-white/80 bg-white overflow-hidden shadow-sm">
+                      <img src="https://flagcdn.com/w40/co.png" alt="Colombia" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="w-6 h-6 rounded-full border-2 border-white/80 bg-white overflow-hidden shadow-sm">
+                      <img src="https://flagcdn.com/w40/ar.png" alt="Argentina" className="w-full h-full object-cover" />
+                    </div>
                   </div>
-                  <span className="text-xs text-indigo-100 font-manrope">{totalCountries} Países</span>
+                  <span className="text-xs text-indigo-100 font-manrope">17 Países</span>
                 </div>
               </div>
             </div>
