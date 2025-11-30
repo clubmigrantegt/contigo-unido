@@ -210,7 +210,7 @@ const Chat = () => {
               
               <button onClick={handleStartChat} className="w-full py-3.5 bg-white text-indigo-950 rounded-xl font-semibold text-sm hover:bg-indigo-50 transition-all shadow-[0_0_15px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2 transform active:scale-[0.98]">
                 <MessageCircleHeart className="w-4 h-4" />
-                Hablar con la IA ahora
+                Iniciar chat de asistencia
               </button>
               
               <div className="mt-4 pt-4 border-t border-white/10 w-full flex items-center justify-center gap-2">
