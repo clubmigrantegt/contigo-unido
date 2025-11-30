@@ -75,16 +75,14 @@ const FloatingElement = ({ type }: FloatingElementProps) => {
     return (
       <>
         <div 
-          className="absolute top-[35%] right-10 flex gap-2 items-center bg-white rounded-t-xl rounded-bl-xl rounded-br-none px-4 py-3 shadow-xl opacity-0 animate-slide-up"
-          style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
+          className="absolute top-[35%] right-10 flex gap-2 items-center bg-white rounded-t-xl rounded-bl-xl rounded-br-none px-4 py-3 shadow-xl"
         >
           <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
           <p className="text-[10px] font-medium text-neutral-800">¿Alguien sabe sobre el TPS?</p>
         </div>
         
         <div 
-          className="absolute top-[50%] left-8 flex gap-2 items-center bg-indigo-600 rounded-t-xl rounded-br-xl rounded-bl-none px-4 py-3 shadow-xl opacity-0 animate-slide-up"
-          style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
+          className="absolute top-[50%] left-8 flex gap-2 items-center bg-indigo-600 rounded-t-xl rounded-br-xl rounded-bl-none px-4 py-3 shadow-xl"
         >
           <p className="text-[10px] font-medium text-white">¡Yo te ayudo! Aquí el link...</p>
           <Heart className="w-3 h-3 text-white/80 fill-white/20" />
@@ -103,7 +101,6 @@ const FloatingElement = ({ type }: FloatingElementProps) => {
           />
           <div 
             className="w-48 h-48 rounded-full border border-white/10 animate-ping-slow absolute inset-0"
-            style={{ animationDelay: '0.5s' }}
           />
         </div>
 

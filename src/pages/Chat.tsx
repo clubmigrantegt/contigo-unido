@@ -190,9 +190,7 @@ const Chat = () => {
 
       <div className="flex-1 overflow-y-auto pb-6 bg-white">
         {/* Prominent AI Chat Hero */}
-        <div className="px-6 py-4" style={{
-        animation: 'slideUp 0.5s ease-out both'
-      }}>
+        <div className="px-6 py-4">
           <div className="relative w-full rounded-3xl overflow-hidden bg-neutral-900 p-6 shadow-xl text-center flex flex-col items-center">
             {/* Decorative Gradients */}
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-indigo-900/50 to-neutral-900"></div>
@@ -223,9 +221,7 @@ const Chat = () => {
         </div>
 
         {/* Quick Access Carousel */}
-        <div className="mt-2 mb-6" style={{
-        animation: 'slideUp 0.5s ease-out 0.1s both'
-      }}>
+        <div className="mt-2 mb-6">
           <div className="px-6 flex justify-between items-end mb-3">
             <h3 className="text-sm font-bold text-neutral-900">Bienestar Rápido</h3>
           </div>
@@ -243,9 +239,7 @@ const Chat = () => {
         </div>
 
         {/* Chat History */}
-        <div className="px-6 pb-6" style={{
-        animation: 'slideUp 0.5s ease-out 0.2s both'
-      }}>
+        <div className="px-6 pb-6">
           <h3 className="text-sm font-bold text-neutral-900 mb-3">Historial Reciente</h3>
           
           {isLoading ? <div className="flex flex-col gap-2">

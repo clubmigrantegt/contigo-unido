@@ -6,7 +6,7 @@ const Welcome = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col animate-fade-in">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       {/* Image Area - 65% height */}
       <div className="relative h-[65vh] w-full overflow-hidden">
         <img 
@@ -18,8 +18,7 @@ const Welcome = () => {
         
         {/* Floating Badge */}
         <div 
-          className="absolute top-16 left-6 flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full animate-slide-down"
-          style={{ animationDelay: '0.4s' }}
+          className="absolute top-16 left-6 flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full"
         >
           <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
           <span className="text-xs font-medium text-white tracking-wide">Comunidad Activa</span>
@@ -28,7 +27,7 @@ const Welcome = () => {
 
       {/* Content Sheet */}
       <div className="flex-1 bg-neutral-900 w-full rounded-t-[32px] -mt-8 relative z-10 px-8 pt-10 pb-10 flex flex-col justify-between">
-        <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+        <div>
           <h1 className="text-3xl text-white leading-[1.1] tracking-tight mb-4 font-semibold">
             No estás solo en este camino.
           </h1>
@@ -37,7 +36,7 @@ const Welcome = () => {
           </p>
         </div>
 
-        <div className="flex flex-col gap-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+        <div className="flex flex-col gap-4">
           <Button 
             size="lg"
             className="w-full py-3.5 bg-white text-neutral-900 rounded-xl hover:bg-neutral-100 shadow-[0_0_20px_rgba(255,255,255,0.1)] group"
