@@ -15,6 +15,8 @@ import ResourceDetail from "./pages/services/ResourceDetail";
 import Community from "./pages/Community";
 import NewPost from "./pages/community/NewPost";
 import CategoryView from "./pages/community/CategoryView";
+import PostDetail from "./pages/community/PostDetail";
+import WriteComment from "./pages/community/WriteComment";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
@@ -73,6 +75,8 @@ const App = () => (
               <Route path="community" element={<Community />} />
               <Route path="community/new" element={<NewPost />} />
               <Route path="community/category/:categoryId" element={<CategoryView />} />
+              <Route path="community/post/:postId" element={<PostDetail />} />
+              <Route path="community/post/:postId/comment" element={<WriteComment />} />
               <Route path="profile" element={<Profile />} />
               <Route path="notifications" element={<Notifications />} />
             </Route>
