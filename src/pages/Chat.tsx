@@ -204,7 +204,7 @@ const Chat = () => {
                 <Sparkles className="w-7 h-7 text-indigo-300" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Hola, {userName}</h2>
-              <p className="text-sm text-neutral-300 mb-6 leading-relaxed max-w-[240px]">Estoy aquí para escucharte y ayudarte a procesar tus emociones. Sin juicios. Sin burla, Solo apoyo.</p>
+              <p className="text-sm text-neutral-300 mb-6 leading-relaxed max-w-[240px]">Estoy aquí para escucharte y ayudarte a procesar tus emociones. Sin juicios. Sin burla. Solo apoyo.</p>
               
               <button onClick={handleStartChat} className="w-full py-3.5 bg-white text-indigo-950 rounded-xl font-semibold text-sm hover:bg-indigo-50 transition-all shadow-[0_0_15px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2 transform active:scale-[0.98]">
                 <MessageCircleHeart className="w-4 h-4" />
