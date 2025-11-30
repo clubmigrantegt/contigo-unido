@@ -75,9 +75,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Chat Header - Fixed at top */}
-      <div className="flex items-center justify-between p-4 border-b bg-card">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+      {/* Chat Header - Sticky at top with backdrop blur */}
+      <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -194,8 +194,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area - Fixed at bottom */}
-      <div className="p-4 border-t bg-card">
+      {/* Input Area - Sticky at bottom with backdrop blur and safe area */}
+      <div className="sticky bottom-0 z-10 p-4 border-t bg-background/95 backdrop-blur-sm" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
         <div className="flex gap-3 items-end">
           <Textarea
             value={inputMessage}
