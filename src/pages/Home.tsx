@@ -59,6 +59,7 @@ const Home = () => {
 
   const news = [
     {
+      id: 'tps-venezuela-update',
       image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=200',
       badge: 'Urgente',
       badgeColor: 'bg-cyan-50 text-cyan-700 border-cyan-100',
@@ -67,6 +68,7 @@ const Home = () => {
       time: 'Hace 2h'
     },
     {
+      id: 'taller-derechos-laborales',
       image: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?auto=format&fit=crop&q=80&w=200',
       badge: 'Evento',
       badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
@@ -175,7 +177,7 @@ const Home = () => {
             <div 
               key={index}
               className="p-3 rounded-xl border border-neutral-100 bg-white shadow-sm flex gap-4 items-center cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate('/services/legal')}
+              onClick={() => navigate(`/services/legal/${item.id}`)}
             >
               <div className="w-16 h-16 rounded-lg bg-neutral-100 flex-shrink-0 overflow-hidden">
                 <img 

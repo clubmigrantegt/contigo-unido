@@ -11,6 +11,7 @@ import Auth from "./pages/auth/Auth";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
 import LegalInfo from "./pages/services/LegalInfo";
+import ResourceDetail from "./pages/services/ResourceDetail";
 import PsychologicalSupport from "./pages/services/PsychologicalSupport";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
@@ -62,6 +63,8 @@ const App = () => (
               <Route path="services" element={<Services />} />
               <Route path="services/psychological" element={<PsychologicalSupport />} />
               <Route path="services/legal" element={<LegalInfo />} />
+              <Route path="services/legal/:id" element={<ResourceDetail />} />
+              <Route path="resources/:id" element={<ResourceDetail />} />
               <Route path="community" element={<Community />} />
               <Route path="profile" element={<Profile />} />
               <Route path="notifications" element={<Notifications />} />

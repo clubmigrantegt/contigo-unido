@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FileText, ExternalLink, Search, Scale, BookOpen, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ interface LegalTopic {
 
 const LegalInfo = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [topics, setTopics] = useState<LegalTopic[]>([]);
   const [filteredTopics, setFilteredTopics] = useState<LegalTopic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -276,7 +277,12 @@ const LegalInfo = () => {
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => navigate(`/services/legal/${topic.id}`)}
+                    >
                       <FileText className="h-4 w-4 mr-2" />
                       Ver Detalles
                     </Button>
