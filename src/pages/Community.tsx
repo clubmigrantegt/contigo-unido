@@ -329,7 +329,7 @@ const Community = () => {
 
             {/* Filters */}
             <div className="flex overflow-x-auto no-scrollbar px-6 gap-2 py-4">
-              {categories.map(cat => <button key={cat.id} onClick={() => setSelectedFilter(cat.id)} className={`px-4 py-1.5 rounded-full text-xs font-manrope whitespace-nowrap transition-colors ${selectedFilter === cat.id ? 'bg-neutral-900 text-white font-semibold' : 'bg-background border border-border text-muted-foreground hover:bg-muted font-medium'}`}>
+              {categories.map(cat => <button key={cat.id} onClick={() => setSelectedFilter(cat.id)} className={`px-4 py-1.5 rounded-full text-xs font-manrope whitespace-nowrap transition-colors ${selectedFilter === cat.id ? 'bg-neutral-900 text-white font-normal' : 'bg-background border border-border text-muted-foreground hover:bg-muted font-medium'}`}>
                   {cat.label}
                 </button>)}
             </div>
