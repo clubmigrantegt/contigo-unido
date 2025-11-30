@@ -1,290 +1,354 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Phone,
-  HeartHandshake,
-  Scale,
-  Users,
-  FileText,
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Sparkles, 
+  Phone, 
+  FileText, 
+  Lightbulb, 
   MessageCircle,
-  Download,
-  Search,
-  Sparkles,
-  Calendar,
-} from "lucide-react";
+  Clock,
+  Star,
+  ChevronRight,
+  Calendar
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { usePsychologicalChat } from '@/hooks/usePsychologicalChat';
 
-interface FAQ {
+interface ChatSession {
   id: string;
-  question: string;
-  answer: string;
-  category: string;
+  session_start: string;
+  session_end: string | null;
+  status: string;
+  rating: number | null;
+  feedback: string | null;
 }
 
 const Services = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [faqs, setFaqs] = useState<FAQ[]>([]);
-  const [isLoadingFaqs, setIsLoadingFaqs] = useState(true);
-  const [showAllFaqs, setShowAllFaqs] = useState(false);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
+  
+  const { isSessionActive, startSession } = usePsychologicalChat();
 
   useEffect(() => {
-    fetchFAQs();
-  }, []);
+    if (user) {
+      fetchRecentSessions();
+    } else {
+      setLoadingSessions(false);
+    }
+  }, [user]);
 
-  const fetchFAQs = async () => {
+  const fetchRecentSessions = async () => {
     try {
       const { data, error } = await supabase
-        .from("faqs")
-        .select("id, question, answer, category")
-        .eq("is_published", true)
-        .order("order_index", { ascending: true });
+        .from('chat_sessions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('session_start', { ascending: false })
+        .limit(5);
 
       if (error) throw error;
-      setFaqs(data || []);
+      setSessions(data || []);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar las preguntas frecuentes",
-        variant: "destructive",
-      });
+      console.error('Error fetching sessions:', error);
     } finally {
-      setIsLoadingFaqs(false);
+      setLoadingSessions(false);
     }
   };
 
-  const mainServices = [
-    {
-      icon: HeartHandshake,
-      title: "Salud Mental",
-      description: "Chat con profesionales",
-      bgColor: "bg-cyan-50",
-      iconColor: "text-cyan-600",
-      borderColor: "border-cyan-100",
-      onClick: () => navigate("/services/psychological"),
-    },
-    {
-      icon: Scale,
-      title: "Info Legal",
-      description: "TPS, Asilo, Visas",
-      bgColor: "bg-indigo-50",
-      iconColor: "text-indigo-600",
-      borderColor: "border-indigo-100",
-      onClick: () => navigate("/services/legal"),
-    },
-    {
-      icon: Users,
-      title: "Comunidad",
-      description: "Foros y eventos",
-      bgColor: "bg-violet-50",
-      iconColor: "text-violet-600",
-      borderColor: "border-violet-100",
-      onClick: () => navigate("/community"),
-    },
-    {
-      icon: FileText,
-      title: "Recursos",
-      description: "Guías y documentos",
-      bgColor: "bg-emerald-50",
-      iconColor: "text-emerald-600",
-      borderColor: "border-emerald-100",
-      onClick: () => navigate("/services/legal"),
-    },
-  ];
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatDuration = (start: string, end: string | null) => {
+    if (!end) return 'En progreso';
+    
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+    const duration = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+    
+    if (duration < 1) return '< 1 min';
+    if (duration < 60) return `${duration} min`;
+    
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    return `${hours}h ${minutes}m`;
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <Badge variant="default" className="text-xs">Completada</Badge>;
+      case 'active':
+        return <Badge variant="secondary" className="text-xs">Activa</Badge>;
+      default:
+        return <Badge variant="outline" className="text-xs">{status}</Badge>;
+    }
+  };
+
+  const getRatingStars = (rating: number | null) => {
+    if (!rating) return null;
+    
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-3 w-3 ${
+              star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-neutral-300'
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const handleStartNewSession = async () => {
+    if (!user) {
+      toast({
+        title: "Inicia sesión",
+        description: "Debes iniciar sesión para acceder al chat de apoyo",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (isSessionActive) {
+      navigate('/services/psychological-support');
+      return;
+    }
+
+    await startSession();
+    navigate('/services/psychological-support');
+  };
 
   const quickActions = [
-    {
-      icon: MessageCircle,
-      title: "Chat Rápido",
-      description: "Consulta inmediata",
-      bgColor: "bg-violet-50",
-      iconColor: "text-violet-600",
-      borderColor: "border-violet-100",
-      onClick: () => navigate("/services/psychological"),
+    { 
+      icon: Phone, 
+      title: 'Línea de Crisis', 
+      subtitle: '988 - 24/7',
+      bgColor: 'bg-red-50',
+      iconColor: 'text-red-600',
+      borderColor: 'border-red-100',
+      action: () => window.location.href = 'tel:988'
     },
-    {
-      icon: Download,
-      title: "Formularios",
-      description: "Documentos PDF",
-      bgColor: "bg-emerald-50",
-      iconColor: "text-emerald-600",
-      borderColor: "border-emerald-100",
-      onClick: () => navigate("/services/legal"),
+    { 
+      icon: FileText, 
+      title: 'Guías de Ayuda', 
+      subtitle: 'Recursos útiles',
+      bgColor: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
+      borderColor: 'border-emerald-100',
+      action: () => navigate('/services/legal')
     },
-    {
-      icon: Search,
-      title: "Buscar Abogado",
-      description: "Directorio legal",
-      bgColor: "bg-amber-50",
-      iconColor: "text-amber-600",
-      borderColor: "border-amber-100",
-      onClick: () => navigate("/services/legal"),
-    },
-    {
-      icon: Calendar,
-      title: "Agendar Cita",
-      description: "Reserva tu turno",
-      bgColor: "bg-blue-50",
-      iconColor: "text-blue-600",
-      borderColor: "border-blue-100",
-      onClick: () => navigate("/services/legal"),
+    { 
+      icon: Lightbulb, 
+      title: 'Tips Bienestar', 
+      subtitle: 'Autocuidado',
+      bgColor: 'bg-amber-50',
+      iconColor: 'text-amber-600',
+      borderColor: 'border-amber-100',
+      action: () => toast({
+        title: "Próximamente",
+        description: "Esta funcionalidad estará disponible pronto",
+      })
     },
   ];
 
-  const displayedFaqs = showAllFaqs ? faqs : faqs.slice(0, 3);
-
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-white pb-24">
       {/* Header */}
       <div className="px-6 pt-14 pb-4">
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-0.5">
+        <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-0.5">
           Club del Migrante
         </p>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Servicios
+        <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
+          Chat de Apoyo
         </h1>
       </div>
 
-      {/* Hero Card - Emergencia */}
-      <div className="mx-6 mb-6 p-5 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-            <Phone className="w-6 h-6" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold mb-0.5">Línea de Crisis 24/7</h3>
-            <p className="text-sm text-white/90">Ayuda inmediata cuando más lo necesitas</p>
-          </div>
-          <a
-            href="tel:988"
-            className="px-4 py-2 bg-white text-red-600 rounded-xl font-medium text-sm hover:bg-red-50 transition-colors shrink-0"
-          >
-            Llamar
-          </a>
-        </div>
+      {/* Hero Card - Iniciar Nueva Sesión */}
+      <div className="px-6 mb-6">
+        <Card className="border-0 bg-gradient-to-br from-neutral-900 to-neutral-700 text-white overflow-hidden relative">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <Badge className="bg-cyan-500/20 text-cyan-200 border-cyan-400/30 text-xs">
+                Disponible ahora
+              </Badge>
+            </div>
+            
+            <h2 className="text-xl font-bold mb-2">
+              Apoyo Psicológico Inmediato
+            </h2>
+            <p className="text-sm text-white/80 mb-4 leading-relaxed">
+              Conecta con profesionales certificados especializados en temas de migración. 
+              Confidencial y en español.
+            </p>
+            
+            <Button 
+              onClick={handleStartNewSession}
+              className="w-full bg-white hover:bg-white/90 text-neutral-900 font-semibold rounded-xl h-11"
+            >
+              {isSessionActive ? 'Continuar Sesión' : 'Iniciar Nueva Sesión'}
+            </Button>
+          </CardContent>
+          
+          {/* Decorative elements */}
+          <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
+          <div className="absolute -left-8 top-1/2 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl" />
+        </Card>
       </div>
 
-      {/* Servicios Principales */}
-      <div className="px-6 mb-8">
-        <h2 className="text-sm font-bold text-foreground mb-4">Servicios Principales</h2>
-        <div className="grid grid-cols-2 gap-3">
-          {mainServices.map((service, index) => {
-            const Icon = service.icon;
-            return (
-              <button
-                key={index}
-                onClick={service.onClick}
-                className={`p-4 rounded-xl border ${service.borderColor} ${service.bgColor} hover:bg-white hover:shadow-md transition-all text-left flex flex-col gap-3`}
-              >
-                <div className={`w-10 h-10 rounded-lg ${service.bgColor} flex items-center justify-center ${service.iconColor}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="block text-sm font-medium text-foreground mb-0.5">
-                    {service.title}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{service.description}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Acceso Rápido */}
+      {/* Acceso Rápido - Horizontal Scroll */}
       <div className="mb-8">
         <div className="px-6 mb-4">
-          <h2 className="text-sm font-bold text-foreground">Acceso Rápido</h2>
+          <h2 className="text-sm font-bold text-neutral-900">Acceso Rápido</h2>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-2 px-6 no-scrollbar">
-          {quickActions.map((action, index) => {
-            const Icon = action.icon;
-            return (
-              <button
-                key={index}
-                onClick={action.onClick}
-                className={`flex-shrink-0 w-36 p-4 rounded-xl ${action.bgColor} border ${action.borderColor} hover:shadow-md transition-all`}
-              >
-                <Icon className={`w-5 h-5 ${action.iconColor} mb-2`} />
-                <span className="text-sm font-medium text-foreground block mb-0.5">
-                  {action.title}
-                </span>
-                <span className="text-[10px] text-muted-foreground">{action.description}</span>
-              </button>
-            );
-          })}
+          {quickActions.map((action, index) => (
+            <button
+              key={index}
+              onClick={action.action}
+              className={`flex-shrink-0 w-36 p-4 rounded-xl ${action.bgColor} border ${action.borderColor} hover:shadow-md transition-all text-left`}
+            >
+              <action.icon className={`w-5 h-5 ${action.iconColor} mb-2`} />
+              <span className="text-sm font-medium text-neutral-900 block mb-0.5">
+                {action.title}
+              </span>
+              <span className="text-[10px] text-neutral-500">{action.subtitle}</span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Preguntas Frecuentes */}
-      {!isLoadingFaqs && faqs.length > 0 && (
-        <div className="px-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-foreground">Preguntas Frecuentes</h2>
-            {faqs.length > 3 && (
-              <button
-                onClick={() => setShowAllFaqs(!showAllFaqs)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showAllFaqs ? "Ver menos" : "Ver todas"}
-              </button>
-            )}
-          </div>
-          <div className="space-y-2">
-            {displayedFaqs.map((faq) => (
-              <Accordion key={faq.id} type="single" collapsible>
-                <AccordionItem
-                  value={faq.id}
-                  className="border border-border rounded-xl px-4 bg-card"
-                >
-                  <AccordionTrigger className="text-sm font-medium py-3 hover:no-underline">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-xs text-muted-foreground pb-3 leading-relaxed">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+      {/* Conversaciones Recientes */}
+      <div className="px-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-bold text-neutral-900">Conversaciones Recientes</h2>
+          {sessions.length > 0 && (
+            <button 
+              onClick={() => navigate('/profile')}
+              className="text-xs text-neutral-500 hover:text-neutral-900 transition-colors"
+            >
+              Ver todas
+            </button>
+          )}
+        </div>
+
+        {loadingSessions ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-24 bg-neutral-100 rounded-xl" />
+              </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : sessions.length === 0 ? (
+          <Card className="border border-neutral-100 rounded-xl">
+            <CardContent className="text-center py-12">
+              <MessageCircle className="h-12 w-12 text-neutral-300 mx-auto mb-3" />
+              <h3 className="text-base font-semibold mb-1 text-neutral-900">
+                No hay conversaciones
+              </h3>
+              <p className="text-sm text-neutral-500 mb-4">
+                Inicia tu primera sesión de apoyo psicológico
+              </p>
+              <Button 
+                onClick={handleStartNewSession}
+                variant="outline" 
+                size="sm"
+                className="rounded-lg"
+              >
+                Comenzar ahora
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((session) => (
+              <Card 
+                key={session.id} 
+                className="border border-neutral-100 rounded-xl hover:shadow-md transition-all cursor-pointer"
+                onClick={() => {
+                  if (session.status === 'active') {
+                    navigate('/services/psychological-support');
+                  }
+                }}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 text-xs text-neutral-500">
+                      <Calendar className="h-3 w-3" />
+                      <span>{formatDate(session.session_start)}</span>
+                    </div>
+                    {getStatusBadge(session.status)}
+                  </div>
 
-      {/* Loading Spinner */}
-      {isLoadingFaqs && (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      )}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center gap-1 text-xs text-neutral-500">
+                      <Clock className="h-3 w-3" />
+                      <span>{formatDuration(session.session_start, session.session_end)}</span>
+                    </div>
+                    {session.rating && getRatingStars(session.rating)}
+                  </div>
 
-      {/* AI Assistant Widget */}
-      <div className="mx-6 mb-8 p-4 rounded-xl bg-gradient-to-br from-blue-50 to-white border border-blue-100 shadow-sm">
-        <div className="flex gap-3 items-center">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-            <Sparkles className="w-5 h-5" />
+                  {session.feedback && (
+                    <div className="bg-neutral-50 rounded-lg p-2 mb-3">
+                      <p className="text-xs text-neutral-600 italic line-clamp-2">
+                        "{session.feedback}"
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+                    <span className="text-xs text-neutral-400">
+                      ID: {session.id.slice(0, 8)}
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-xs h-7 px-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (session.status === 'active') {
+                          navigate('/services/psychological-support');
+                        }
+                      }}
+                    >
+                      {session.status === 'active' ? (
+                        <>
+                          Continuar
+                          <ChevronRight className="h-3 w-3 ml-1" />
+                        </>
+                      ) : (
+                        <>
+                          Revisar
+                          <ChevronRight className="h-3 w-3 ml-1" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          <div className="flex-1 min-w-0">
-            <h5 className="text-sm font-semibold text-blue-900 mb-1">
-              ¿No encuentras lo que buscas?
-            </h5>
-            <p className="text-xs text-neutral-600 leading-relaxed">
-              Nuestro asistente de IA puede ayudarte 24/7
-            </p>
-          </div>
-          <button
-            onClick={() => navigate("/services/psychological")}
-            className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg font-medium hover:bg-blue-700 transition-colors shrink-0"
-          >
-            Chatear
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
