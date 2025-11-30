@@ -35,7 +35,7 @@ const Home = () => {
       title: 'Salud Mental',
       subtitle: 'Apoyo Psicológico',
       hoverColor: 'group-hover:text-cyan-600',
-      route: '/services/psychological'
+      route: '/chat'
     },
     {
       icon: Users,
@@ -53,7 +53,7 @@ const Home = () => {
       title: 'Recursos',
       subtitle: 'Guías y Docs',
       hoverColor: 'group-hover:text-indigo-600',
-      route: '/services'
+      route: '/services/legal'
     }
   ];
 
@@ -103,7 +103,7 @@ const Home = () => {
         {/* AI Assistant CTA (Hero Card) */}
         <div 
           className="relative w-full rounded-2xl bg-neutral-900 p-5 text-white overflow-hidden shadow-lg group cursor-pointer transition-transform active:scale-[0.98]"
-          onClick={() => navigate('/services/psychological')}
+          onClick={() => navigate('/chat')}
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl -mr-10 -mt-10" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-teal-500/20 rounded-full blur-2xl -ml-5 -mb-5" />
