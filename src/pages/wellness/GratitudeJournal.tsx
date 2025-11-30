@@ -56,7 +56,7 @@ const GratitudeJournal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-amber-50 animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-amber-50">
       {/* Header */}
       <div className="px-6 pt-14 pb-6 flex justify-between items-start z-20 bg-amber-50">
         <div>

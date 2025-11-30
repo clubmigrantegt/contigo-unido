@@ -29,7 +29,7 @@ const CrisisHelp = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-white animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-white overflow-y-auto">
       {/* Header Alert */}
       <div className="bg-rose-50 border-b border-rose-100 pt-14 pb-6 px-6 relative z-10">
         <div className="flex justify-between items-start mb-4">

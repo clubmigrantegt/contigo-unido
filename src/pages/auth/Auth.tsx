@@ -131,7 +131,7 @@ const Auth = () => {
     }
   };
   if (otpSent) {
-    return <div className="min-h-screen bg-white flex flex-col animate-fade-in px-6">
+    return <div className="min-h-screen bg-white flex flex-col px-6">
         <div className="pt-14 pb-2 flex items-center justify-between">
           <button className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 transition-colors" onClick={() => setOtpSent(false)}>
             <ArrowLeft className="w-5 h-5" />
@@ -140,7 +140,7 @@ const Auth = () => {
         </div>
 
         <div className="flex-1 pt-6 flex flex-col">
-          <div className="animate-slide-up">
+          <div>
             <h2 className="text-2xl font-semibold text-neutral-900 tracking-tight mb-3">
               Ingresa el código
             </h2>
@@ -149,15 +149,11 @@ const Auth = () => {
             </p>
           </div>
 
-          <div className="space-y-4 animate-slide-up" style={{
-          animationDelay: '0.1s'
-        }}>
+          <div className="space-y-4">
             <Input type="text" placeholder="000000" value={otp} onChange={e => setOtp(e.target.value)} className="h-14 rounded-xl border-neutral-200 text-center text-lg tracking-widest" maxLength={6} />
           </div>
 
-          <div className="mt-auto mb-8 animate-slide-up" style={{
-          animationDelay: '0.2s'
-        }}>
+          <div className="mt-auto mb-8">
             <Button className="w-full py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800" onClick={handleVerifyOTP} disabled={loading || otp.length < 6}>
               {loading ? <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -171,7 +167,7 @@ const Auth = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-white flex flex-col animate-fade-in">
+  return <div className="min-h-screen bg-white flex flex-col">
       {/* Header Nav */}
       <div className="px-6 pt-14 pb-2 flex items-center justify-between">
         <button className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 transition-colors" onClick={() => navigate('/welcome')}>
@@ -182,7 +178,7 @@ const Auth = () => {
 
       {/* Main Content */}
       <div className="flex-1 px-6 pt-6 flex flex-col">
-        <div className="animate-slide-up">
+        <div>
           <h2 className="text-2xl font-semibold text-neutral-900 tracking-tight mb-3">
             ¿Cuál es tu número?
           </h2>
@@ -192,9 +188,7 @@ const Auth = () => {
         </div>
 
         {/* Phone Input Group */}
-        <div className="space-y-4 animate-slide-up" style={{
-        animationDelay: '0.1s'
-      }}>
+        <div className="space-y-4">
           {mode === 'signup' && <Input type="text" placeholder="Nombre completo" value={fullName} onChange={e => setFullName(e.target.value)} className="h-14 rounded-xl border-neutral-200" />}
 
           <CountryPhoneInput value={phoneNumber} onChange={setPhoneNumber} />
@@ -209,9 +203,7 @@ const Auth = () => {
           )}
         </div>
 
-        <div className="mt-auto mb-8 space-y-4 animate-slide-up" style={{
-        animationDelay: '0.2s'
-      }}>
+        <div className="mt-auto mb-8 space-y-4">
           {/* Divider */}
           
 

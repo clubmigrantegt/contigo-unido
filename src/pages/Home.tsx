@@ -82,7 +82,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-6 pt-14 pb-4 bg-white/95 backdrop-blur-sm animate-slide-down border-b border-transparent">
+      <div className="sticky top-0 z-10 px-6 pt-14 pb-4 bg-white/95 backdrop-blur-sm border-b border-transparent">
         <div className="flex justify-between items-center mb-6">
           <div>
             <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-0.5">
@@ -128,7 +128,7 @@ const Home = () => {
       </div>
 
       {/* Servicios Esenciales - Grid 2x2 */}
-      <div className="px-6 mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+      <div className="px-6 mb-8">
         <h2 className="text-sm font-bold text-neutral-900 tracking-tight mb-4">
           Servicios Esenciales
         </h2>
@@ -156,7 +156,7 @@ const Home = () => {
       </div>
 
       {/* Diario de Gratitud */}
-      <div className="px-6 mb-8 animate-slide-up" style={{ animationDelay: '0.25s' }}>
+      <div className="px-6 mb-8">
         <h2 className="text-sm font-bold text-neutral-900 tracking-tight mb-4">
           Bienestar
         </h2>
@@ -178,7 +178,7 @@ const Home = () => {
       </div>
 
       {/* Novedades Legales */}
-      <div className="px-6 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+      <div className="px-6">
         <div className="flex justify-between items-end mb-4">
           <h2 className="text-sm font-semibold text-neutral-900 tracking-tight">
             Novedades Legales
