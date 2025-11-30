@@ -406,7 +406,7 @@ const PostDetail = () => {
                     {getInitials(comment.author_name)}
                   </div>
                   <div className="flex-1">
-                    <div className="bg-accent rounded-2xl rounded-tl-none p-3 px-4">
+                    <div className="bg-slate-50 rounded-2xl rounded-tl-none p-3 px-4">
                       <div className="flex justify-between items-baseline mb-1">
                         <span className="text-xs font-bold text-foreground">{comment.author_name}</span>
                         <span className="text-[10px] text-muted-foreground">{formatRelativeTime(comment.created_at)}</span>
@@ -414,10 +414,13 @@ const PostDetail = () => {
                       <p className="text-xs text-muted-foreground leading-relaxed">{comment.content}</p>
                     </div>
                     <div className="flex gap-4 mt-1.5 ml-2">
+                      <button className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                        Responder
+                      </button>
                       <button
                         onClick={() => handleLikeComment(comment.id)}
                         className={`text-[10px] font-semibold transition-colors flex items-center gap-1 ${
-                          comment.user_liked ? 'text-rose-500' : 'text-muted-foreground hover:text-foreground'
+                          comment.user_liked ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'
                         }`}
                       >
                         <Heart className={`w-3 h-3 ${comment.user_liked ? 'fill-current' : ''}`} />
@@ -437,12 +440,12 @@ const PostDetail = () => {
         <div className="flex items-center gap-2 max-w-screen-lg mx-auto">
           {user && (
             <>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${getAvatarColor(user.email || 'User')}`}>
+              <div className="w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
                 {getInitials(user.email?.split('@')[0] || 'U')}
               </div>
               <div
                 onClick={() => navigate(`/community/post/${postId}/comment`)}
-                className="flex-1 bg-accent rounded-full h-10 px-4 flex items-center border border-transparent hover:border-border transition-colors cursor-pointer"
+                className="flex-1 bg-slate-50 rounded-full h-10 px-4 flex items-center border border-transparent hover:border-slate-200 transition-colors cursor-pointer"
               >
                 <span className="text-sm text-muted-foreground">Agrega un comentario...</span>
               </div>
