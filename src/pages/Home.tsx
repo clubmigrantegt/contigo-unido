@@ -206,40 +206,6 @@ const Home = () => {
           ))}
         </div>
       </div>
-
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-neutral-200 px-6 py-4 pb-8 z-30">
-        <div className="flex justify-between items-center max-w-md mx-auto">
-          <button 
-            className="flex flex-col items-center gap-1 text-neutral-900"
-            onClick={() => navigate('/home')}
-          >
-            <HomeIcon className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Inicio</span>
-          </button>
-          <button 
-            className="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-600 transition-colors"
-            onClick={() => navigate('/services/psychological')}
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Chat</span>
-          </button>
-          <button 
-            className="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-600 transition-colors"
-            onClick={() => navigate('/community')}
-          >
-            <UsersRound className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Comunidad</span>
-          </button>
-          <button 
-            className="flex flex-col items-center gap-1 text-neutral-400 hover:text-neutral-600 transition-colors"
-            onClick={() => navigate('/profile')}
-          >
-            <User className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Perfil</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
