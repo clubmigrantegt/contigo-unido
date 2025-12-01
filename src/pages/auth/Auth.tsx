@@ -219,37 +219,35 @@ const Auth = () => {
               </>}
           </Button>
 
-          {import.meta.env.DEV && (
-            <button 
-              onClick={async () => {
-                try {
-                  const { data, error } = await supabase.auth.signInAnonymously();
-                  if (error) throw error;
-                  if (data.user) {
-                    await supabase.from('profiles').upsert({
-                      user_id: data.user.id,
-                      full_name: 'Usuario de Desarrollo',
-                      phone_number: '+1234567890'
-                    });
-                  }
-                  toast({
-                    title: "¡Acceso Dev!",
-                    description: "Entrando al app..."
-                  });
-                  navigate('/home');
-                } catch (error: any) {
-                  toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive"
+          <button 
+            onClick={async () => {
+              try {
+                const { data, error } = await supabase.auth.signInAnonymously();
+                if (error) throw error;
+                if (data.user) {
+                  await supabase.from('profiles').upsert({
+                    user_id: data.user.id,
+                    full_name: 'Usuario de Desarrollo',
+                    phone_number: '+1234567890'
                   });
                 }
-              }}
-              className="text-xs text-neutral-400 hover:text-neutral-600 underline text-center"
-            >
-              🔧 Acceso Dev
-            </button>
-          )}
+                toast({
+                  title: "¡Acceso Dev!",
+                  description: "Entrando al app..."
+                });
+                navigate('/home');
+              } catch (error: any) {
+                toast({
+                  title: "Error",
+                  description: error.message,
+                  variant: "destructive"
+                });
+              }
+            }}
+            className="text-xs text-neutral-400 hover:text-neutral-600 underline text-center"
+          >
+            🔧 Acceso Dev
+          </button>
         </div>
       </div>
     </div>;

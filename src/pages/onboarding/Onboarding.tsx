@@ -1,33 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronRight, ShieldCheck, Heart, Sparkles } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
+import { ArrowRight, ChevronRight, ShieldCheck, Heart, Sparkles, Users } from 'lucide-react';
 
 const onboardingSteps = [
   {
+    id: 0,
+    step: "Bienvenida",
+    stepColor: "bg-amber-50 text-amber-600",
+    title: "Bienvenido al",
+    subtitle: "Club del Migrante",
+    description: "Tu compañero de viaje en el proceso migratorio. Aquí encontrarás apoyo, información y una comunidad que entiende tu camino.",
+    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=800",
+    accentColor: "bg-amber-500",
+    floatingElement: "welcome" as const,
+  },
+  {
     id: 1,
     step: "Paso 1",
-    stepColor: "bg-neutral-100 text-neutral-600",
-    title: "Información Legal",
-    subtitle: "Sin Confusión.",
-    description: "Navega el sistema migratorio con guías simplificadas y validadas por expertos. Entiende tus derechos desde el primer día.",
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=800",
-    accentColor: "bg-neutral-900",
-    floatingElement: "legal" as const,
-  },
-  {
-    id: 2,
-    step: "Paso 2", 
-    stepColor: "bg-indigo-50 text-indigo-600",
-    title: "Una Comunidad",
-    subtitle: "Que te Respalda.",
-    description: "Conecta con personas que atraviesan tu misma situación. Comparte experiencias, consejos y apoyo emocional seguro.",
-    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=800",
-    accentColor: "bg-indigo-600",
-    floatingElement: "community" as const,
-  },
-  {
-    id: 3,
-    step: "Paso 3",
     stepColor: "bg-blue-50 text-blue-600", 
     title: "Asistencia IA",
     subtitle: "Cuando la necesites.",
@@ -36,13 +26,45 @@ const onboardingSteps = [
     accentColor: "bg-blue-500",
     floatingElement: "ai" as const,
   },
+  {
+    id: 2,
+    step: "Paso 2", 
+    stepColor: "bg-indigo-50 text-indigo-600",
+    title: "Una Comunidad",
+    subtitle: "Que te Respalda.",
+    description: "Conecta con personas que atraviesan tu misma situación. Comparte experiencias, consejos y apoyo emocional seguro.",
+    image: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=800",
+    accentColor: "bg-indigo-600",
+    floatingElement: "community" as const,
+  },
+  {
+    id: 3,
+    step: "Paso 3",
+    stepColor: "bg-neutral-100 text-neutral-600",
+    title: "Información Legal",
+    subtitle: "Sin Confusión.",
+    description: "Navega el sistema migratorio con guías simplificadas y validadas por expertos. Entiende tus derechos desde el primer día.",
+    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=800",
+    accentColor: "bg-neutral-900",
+    floatingElement: "legal" as const,
+  },
 ];
 
 interface FloatingElementProps {
-  type: "legal" | "community" | "ai";
+  type: "welcome" | "legal" | "community" | "ai";
 }
 
 const FloatingElement = ({ type }: FloatingElementProps) => {
+  if (type === "welcome") {
+    return (
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl animate-float">
+          <Users className="w-12 h-12 text-white" />
+        </div>
+      </div>
+    );
+  }
+
   if (type === "legal") {
     return (
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px]">
@@ -116,13 +138,27 @@ const FloatingElement = ({ type }: FloatingElementProps) => {
 };
 
 const Onboarding = () => {
-  const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
+  const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = onboardingSteps.length;
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCurrentStep(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
   const nextStep = () => {
     if (currentStep < totalSteps - 1) {
-      setCurrentStep(prev => prev + 1);
+      emblaApi?.scrollNext();
     } else {
       navigate('/welcome');
     }
@@ -134,8 +170,8 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col overflow-hidden">
-      {/* Skip button - only visible on step 2 */}
-      {currentStep === 1 && (
+      {/* Skip button - visible on middle steps */}
+      {currentStep > 0 && currentStep < totalSteps - 1 && (
         <button 
           onClick={skip} 
           className="absolute top-6 right-6 z-20 text-white/60 text-xs font-medium hover:text-white transition-colors"
@@ -144,28 +180,34 @@ const Onboarding = () => {
         </button>
       )}
 
-      {/* Image Area - Responsive */}
-      <div className="relative flex-[3] min-h-[200px] max-h-[55vh] w-full overflow-hidden">
-        <img 
-          src={step.image} 
-          alt={step.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neutral-900/20 to-neutral-900" />
-        
-        {/* Floating element based on step */}
-        <FloatingElement type={step.floatingElement} />
+      {/* Image Carousel with Swipe - Fixed height */}
+      <div className="relative h-[50vh] sm:h-[55vh] w-full overflow-hidden">
+        <div ref={emblaRef} className="h-full overflow-hidden">
+          <div className="flex h-full">
+            {onboardingSteps.map((stepItem, idx) => (
+              <div key={idx} className="flex-[0_0_100%] min-w-0 relative h-full">
+                <img 
+                  src={stepItem.image} 
+                  alt={stepItem.title}
+                  className="w-full h-full object-cover absolute inset-0"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neutral-900/20 to-neutral-900" />
+                <FloatingElement type={stepItem.floatingElement} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Content Sheet - Responsive */}
-      <div className="flex-[2] min-h-[280px] bg-white rounded-t-[32px] -mt-6 relative z-10 px-6 sm:px-8 pt-8 sm:pt-10 pb-6 sm:pb-8 flex flex-col overflow-hidden">
+      {/* Content Sheet */}
+      <div className="flex-1 min-h-[280px] bg-white rounded-t-[32px] -mt-6 relative z-10 px-6 sm:px-8 pt-8 sm:pt-10 pb-6 sm:pb-8 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto">
           {/* Step badge */}
           <span className={`inline-block px-3 py-1 ${step.stepColor} rounded-full text-[10px] font-bold tracking-wider uppercase mb-6 w-fit`}>
             {step.step}
           </span>
           
-          {/* Title with gray subtitle - Responsive */}
+          {/* Title with gray subtitle */}
           <h2 className="text-2xl sm:text-3xl text-neutral-900 leading-[1.15] tracking-tight mb-3 sm:mb-4 font-semibold">
             {step.title}<br/>
             <span className="text-neutral-400">{step.subtitle}</span>
@@ -177,7 +219,7 @@ const Onboarding = () => {
           </p>
         </div>
 
-        {/* Bottom Navigation - Always at bottom */}
+        {/* Bottom Navigation */}
         <div className="mt-auto pt-4 flex-shrink-0">
           {/* Pagination dots */}
           <div className="flex gap-2 mb-6">
@@ -195,7 +237,6 @@ const Onboarding = () => {
 
           {/* Action button */}
           {currentStep < totalSteps - 1 ? (
-            // Circular arrow button for steps 1-2
             <div className="flex justify-end">
               <button 
                 onClick={nextStep}
@@ -205,7 +246,6 @@ const Onboarding = () => {
               </button>
             </div>
           ) : (
-            // Full-width "Unirme al Club" button for step 3
             <button 
               onClick={nextStep}
               className="w-full py-4 bg-neutral-900 text-white rounded-xl font-semibold text-sm hover:bg-neutral-800 transition-all flex items-center justify-center gap-2 shadow-xl shadow-neutral-900/10 active:scale-[0.98] group"
