@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import PersonalInfoEditor from '@/components/profile/PersonalInfoEditor';
 import PreferencesEditor from '@/components/profile/PreferencesEditor';
+import SecurityEditor from '@/components/profile/SecurityEditor';
 import ActivityView from '@/components/profile/ActivityView';
 import { getCountryInfo, formatPhoneNumber, getDisplayName, getUserInitials } from '@/lib/countries';
 
@@ -30,7 +31,7 @@ interface UserStats {
   lastActivity: string;
 }
 
-type ViewMode = 'main' | 'personalInfo' | 'preferences' | 'activity';
+type ViewMode = 'main' | 'personalInfo' | 'preferences' | 'activity' | 'security';
 
 interface SettingsRowProps {
   icon: LucideIcon;
@@ -324,6 +325,10 @@ const Profile = () => {
     return <ActivityView stats={userStats} onBack={handleBackToMain} />;
   }
 
+  if (viewMode === 'security') {
+    return <SecurityEditor onBack={handleBackToMain} />;
+  }
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
@@ -402,12 +407,7 @@ const Profile = () => {
                 <SettingsRow
                   icon={ShieldCheck}
                   label="Seguridad y Privacidad"
-                  onClick={() => {
-                    toast({
-                      title: "Próximamente",
-                      description: "Esta función estará disponible pronto"
-                    });
-                  }}
+                  onClick={() => setViewMode('security')}
                   isLast
                 />
               </div>
