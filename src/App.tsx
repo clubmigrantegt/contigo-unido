@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/auth/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
+import Splash from "./pages/Splash";
 import Onboarding from "./pages/onboarding/Onboarding";
 import Welcome from "./pages/auth/Welcome";
 import Auth from "./pages/auth/Auth";
@@ -57,7 +58,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<Navigate to="/onboarding" replace />} />
+            <Route path="/" element={<Navigate to="/splash" replace />} />
+            <Route path="/splash" element={<Splash />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/auth" element={<Auth />} />
