@@ -336,7 +336,7 @@ const Community = () => {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>;
   }
-  return <div className="min-h-screen bg-slate-50/50 flex flex-col pb-24">
+  return <div className="min-h-screen bg-white flex flex-col pb-24">
       {/* Header */}
       <div className="px-6 pb-0 bg-background sticky top-0 z-30 pt-[56px]">
         <div className="flex justify-between items-center mb-4">
