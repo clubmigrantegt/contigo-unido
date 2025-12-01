@@ -338,7 +338,7 @@ const Community = () => {
   }
   return <div className="min-h-screen bg-white flex flex-col pb-24">
       {/* Header */}
-      <div className="px-6 pb-0 bg-background sticky top-0 z-30 pt-[56px]">
+      <div className="px-6 pb-0 bg-white sticky top-0 z-30 pt-[56px]">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold tracking-tight text-foreground font-jakarta">
             {activeTab === 'historias' ? 'Comunidad' : 'Explorar'}
