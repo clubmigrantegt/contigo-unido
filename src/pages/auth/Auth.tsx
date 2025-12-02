@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -18,6 +18,20 @@ const Auth = () => {
   const [otp, setOtp] = useState('');
   const [fullName, setFullName] = useState('');
   const [smsConsent, setSmsConsent] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const [canResend, setCanResend] = useState(false);
+
+  // Countdown timer for resend OTP
+  useEffect(() => {
+    if (otpSent && resendCountdown > 0) {
+      const timer = setTimeout(() => {
+        setResendCountdown(prev => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (otpSent && resendCountdown === 0) {
+      setCanResend(true);
+    }
+  }, [otpSent, resendCountdown]);
 
   const handleSendOTP = async () => {
     if (!phoneNumber) {
@@ -44,6 +58,8 @@ const Auth = () => {
       }
 
       setOtpSent(true);
+      setResendCountdown(60);
+      setCanResend(false);
       toast({
         title: "Código Enviado",
         description: "Revisa tus mensajes de texto"
@@ -137,6 +153,43 @@ const Auth = () => {
     }
   };
 
+  const handleResendOTP = async () => {
+    if (!canResend) return;
+    
+    setLoading(true);
+    setCanResend(false);
+    
+    try {
+      const response = await supabase.functions.invoke('send-otp', {
+        body: { phone: phoneNumber }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Error reenviando código');
+      }
+
+      if (!response.data?.success) {
+        throw new Error(response.data?.error || 'Error reenviando código');
+      }
+
+      setResendCountdown(60);
+      toast({
+        title: "Código Reenviado",
+        description: "Revisa tus mensajes de texto"
+      });
+    } catch (error: any) {
+      console.error('Resend OTP error:', error);
+      setCanResend(true);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo reenviar el código",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -187,6 +240,23 @@ const Auth = () => {
               className="h-14 rounded-xl border-neutral-200 text-center text-lg tracking-widest" 
               maxLength={6} 
             />
+            
+            {/* Resend OTP section */}
+            <div className="text-center pt-2">
+              {canResend ? (
+                <button
+                  onClick={handleResendOTP}
+                  disabled={loading}
+                  className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                >
+                  Reenviar código
+                </button>
+              ) : resendCountdown > 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Reenviar código en {resendCountdown}s
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="mt-auto mb-8">
