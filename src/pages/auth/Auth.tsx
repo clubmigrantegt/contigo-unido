@@ -124,11 +124,27 @@ const Auth = () => {
       navigate('/home');
     } catch (error: any) {
       console.error('Verify OTP error:', error);
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo verificar el código",
-        variant: "destructive"
-      });
+      
+      // Limpiar el input del OTP después de un error
+      setOtp('');
+      
+      // Detectar error de código expirado/inválido
+      if (error.message?.includes('expired') || error.message?.includes('invalid') || error.message?.includes('Token')) {
+        toast({
+          title: "Código inválido o expirado",
+          description: "Por favor solicita un nuevo código",
+          variant: "destructive"
+        });
+        // Habilitar el botón de reenvío inmediatamente
+        setCanResend(true);
+        setResendCountdown(0);
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "No se pudo verificar el código",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -216,16 +232,25 @@ const Auth = () => {
               maxLength={6} 
             />
             
+            {/* Warning message */}
+            <p className="text-xs text-amber-600 mt-2 text-center">
+              ⚠️ El código se invalida después de un intento incorrecto
+            </p>
+            
             {/* Resend OTP section */}
             <div className="text-center pt-2">
               {canResend ? (
-                <button
+                <Button
+                  variant="outline"
                   onClick={handleResendOTP}
                   disabled={loading}
-                  className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                  className="w-full border-primary text-primary hover:bg-primary/10"
                 >
-                  Reenviar código
-                </button>
+                  {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Solicitar nuevo código
+                </Button>
               ) : resendCountdown > 0 ? (
                 <p className="text-sm text-muted-foreground">
                   Reenviar código en {resendCountdown}s
