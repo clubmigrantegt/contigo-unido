@@ -45,17 +45,11 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const response = await supabase.functions.invoke('send-otp', {
-        body: { phone: phoneNumber }
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phoneNumber,
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Error enviando código');
-      }
-
-      if (!response.data?.success) {
-        throw new Error(response.data?.error || 'Error enviando código');
-      }
+      if (error) throw error;
 
       setOtpSent(true);
       setResendCountdown(60);
@@ -106,34 +100,21 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      // Call our custom verify-otp edge function
-      const response = await supabase.functions.invoke('verify-otp', {
-        body: { 
-          phone: phoneNumber, 
-          code: otp, 
-          fullName: mode === 'signup' ? fullName : undefined 
-        }
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: phoneNumber,
+        token: otp,
+        type: 'sms'
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Error verificando código');
-      }
+      if (error) throw error;
 
-      if (!response.data?.success) {
-        throw new Error(response.data?.error || 'Código inválido');
-      }
-
-      // Sign in with the temp credentials returned from verify-otp
-      const { email, tempPassword } = response.data;
-      
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: tempPassword
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        throw new Error('Error iniciando sesión');
+      // Si es signup y hay nombre, actualizar el perfil
+      if (mode === 'signup' && fullName && data.user) {
+        await supabase.from('profiles').upsert({
+          user_id: data.user.id,
+          full_name: fullName,
+          phone_number: phoneNumber
+        });
       }
 
       toast({
@@ -160,17 +141,11 @@ const Auth = () => {
     setCanResend(false);
     
     try {
-      const response = await supabase.functions.invoke('send-otp', {
-        body: { phone: phoneNumber }
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phoneNumber,
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Error reenviando código');
-      }
-
-      if (!response.data?.success) {
-        throw new Error(response.data?.error || 'Error reenviando código');
-      }
+      if (error) throw error;
 
       setResendCountdown(60);
       toast({
