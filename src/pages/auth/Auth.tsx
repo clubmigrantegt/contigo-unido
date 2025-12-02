@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { CountryPhoneInput } from '@/components/ui/country-phone-input';
+
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -17,6 +18,7 @@ const Auth = () => {
   const [otp, setOtp] = useState('');
   const [fullName, setFullName] = useState('');
   const [smsConsent, setSmsConsent] = useState(false);
+
   const handleSendOTP = async () => {
     if (!phoneNumber) {
       toast({
@@ -26,36 +28,43 @@ const Auth = () => {
       });
       return;
     }
+
     setLoading(true);
     try {
-      const {
-        error
-      } = await supabase.auth.signInWithOtp({
-        phone: phoneNumber
+      const response = await supabase.functions.invoke('send-otp', {
+        body: { phone: phoneNumber }
       });
-      if (error) throw error;
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Error enviando código');
+      }
+
+      if (!response.data?.success) {
+        throw new Error(response.data?.error || 'Error enviando código');
+      }
+
       setOtpSent(true);
       toast({
         title: "Código Enviado",
         description: "Revisa tus mensajes de texto"
       });
     } catch (error: any) {
+      console.error('Send OTP error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "No se pudo enviar el código",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
+
   const handleVerifyOTP = async () => {
+    // Dev bypass for testing
     if (import.meta.env.DEV && otp === '123456') {
       try {
-        const {
-          data,
-          error
-        } = await supabase.auth.signInAnonymously();
+        const { data, error } = await supabase.auth.signInAnonymously();
         if (error) throw error;
         if (data.user) {
           await supabase.from('profiles').upsert({
@@ -78,44 +87,59 @@ const Auth = () => {
       }
       return;
     }
+
     setLoading(true);
     try {
-      const {
-        data,
-        error
-      } = await supabase.auth.verifyOtp({
-        phone: phoneNumber,
-        token: otp,
-        type: 'sms'
+      // Call our custom verify-otp edge function
+      const response = await supabase.functions.invoke('verify-otp', {
+        body: { 
+          phone: phoneNumber, 
+          code: otp, 
+          fullName: mode === 'signup' ? fullName : undefined 
+        }
       });
-      if (error) throw error;
-      if (data.user && mode === 'signup') {
-        await supabase.from('profiles').upsert({
-          user_id: data.user.id,
-          full_name: fullName,
-          phone_number: phoneNumber
-        });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Error verificando código');
       }
+
+      if (!response.data?.success) {
+        throw new Error(response.data?.error || 'Código inválido');
+      }
+
+      // Sign in with the temp credentials returned from verify-otp
+      const { email, tempPassword } = response.data;
+      
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: tempPassword
+      });
+
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        throw new Error('Error iniciando sesión');
+      }
+
       toast({
         title: "¡Bienvenido!",
         description: "Inicio de sesión exitoso"
       });
       navigate('/home');
     } catch (error: any) {
+      console.error('Verify OTP error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "No se pudo verificar el código",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
+
   const handleGoogleSignIn = async () => {
     try {
-      const {
-        error
-      } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/home`
@@ -130,10 +154,15 @@ const Auth = () => {
       });
     }
   };
+
   if (otpSent) {
-    return <div className="min-h-screen bg-white flex flex-col px-6">
+    return (
+      <div className="min-h-screen bg-white flex flex-col px-6">
         <div className="pt-14 pb-2 flex items-center justify-between">
-          <button className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 transition-colors" onClick={() => setOtpSent(false)}>
+          <button 
+            className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 transition-colors" 
+            onClick={() => setOtpSent(false)}
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="w-10" />
@@ -150,27 +179,48 @@ const Auth = () => {
           </div>
 
           <div className="space-y-4">
-            <Input type="text" placeholder="000000" value={otp} onChange={e => setOtp(e.target.value)} className="h-14 rounded-xl border-neutral-200 text-center text-lg tracking-widest" maxLength={6} />
+            <Input 
+              type="text" 
+              placeholder="000000" 
+              value={otp} 
+              onChange={e => setOtp(e.target.value.replace(/\D/g, ''))} 
+              className="h-14 rounded-xl border-neutral-200 text-center text-lg tracking-widest" 
+              maxLength={6} 
+            />
           </div>
 
           <div className="mt-auto mb-8">
-            <Button className="w-full py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800" onClick={handleVerifyOTP} disabled={loading || otp.length < 6}>
-              {loading ? <>
+            <Button 
+              className="w-full py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800" 
+              onClick={handleVerifyOTP} 
+              disabled={loading || otp.length < 6}
+            >
+              {loading ? (
+                <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Verificando...
-                </> : <>
+                </>
+              ) : (
+                <>
                   <span>Verificar</span>
                   <ArrowRight className="w-4 h-4 ml-2" />
-                </>}
+                </>
+              )}
             </Button>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen bg-white flex flex-col">
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Header Nav */}
       <div className="px-6 pt-14 pb-2 flex items-center justify-between">
-        <button className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 transition-colors" onClick={() => navigate('/welcome')}>
+        <button 
+          className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 transition-colors" 
+          onClick={() => navigate('/welcome')}
+        >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="w-10" />
@@ -189,13 +239,25 @@ const Auth = () => {
 
         {/* Phone Input Group */}
         <div className="space-y-4">
-          {mode === 'signup' && <Input type="text" placeholder="Nombre completo" value={fullName} onChange={e => setFullName(e.target.value)} className="h-14 rounded-xl border-neutral-200" />}
+          {mode === 'signup' && (
+            <Input 
+              type="text" 
+              placeholder="Nombre completo" 
+              value={fullName} 
+              onChange={e => setFullName(e.target.value)} 
+              className="h-14 rounded-xl border-neutral-200" 
+            />
+          )}
 
           <CountryPhoneInput value={phoneNumber} onChange={setPhoneNumber} />
           
           {mode === 'signup' && (
             <div className="flex items-start gap-2 pt-2">
-              <Checkbox checked={smsConsent} onCheckedChange={checked => setSmsConsent(checked as boolean)} className="mt-0.5" />
+              <Checkbox 
+                checked={smsConsent} 
+                onCheckedChange={checked => setSmsConsent(checked as boolean)} 
+                className="mt-0.5" 
+              />
               <p className="text-[11px] text-neutral-500 leading-tight">
                 Acepto recibir códigos de verificación por SMS. Se pueden aplicar tarifas de mensajería.
               </p>
@@ -204,19 +266,22 @@ const Auth = () => {
         </div>
 
         <div className="mt-auto mb-8 space-y-4">
-          {/* Divider */}
-          
-
-          
-          
-          <Button className="w-full py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 shadow-lg shadow-neutral-900/10" onClick={handleSendOTP} disabled={loading || !phoneNumber || (mode === 'signup' && !smsConsent)}>
-            {loading ? <>
+          <Button 
+            className="w-full py-4 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 shadow-lg shadow-neutral-900/10" 
+            onClick={handleSendOTP} 
+            disabled={loading || !phoneNumber || (mode === 'signup' && !smsConsent)}
+          >
+            {loading ? (
+              <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Enviando...
-              </> : <>
+              </>
+            ) : (
+              <>
                 <span>Continuar</span>
                 <ArrowRight className="w-4 h-4 ml-2" />
-              </>}
+              </>
+            )}
           </Button>
 
           <button 
@@ -250,6 +315,8 @@ const Auth = () => {
           </button>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Auth;
