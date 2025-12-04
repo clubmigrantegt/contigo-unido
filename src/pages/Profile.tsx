@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import PreferencesEditor from '@/components/profile/PreferencesEditor';
 import SecurityEditor from '@/components/profile/SecurityEditor';
 import ActivityView from '@/components/profile/ActivityView';
 import { getCountryInfo, formatPhoneNumber, getDisplayName, getUserInitials } from '@/lib/countries';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 interface Profile {
   full_name: string;
@@ -47,12 +49,12 @@ interface SettingsRowProps {
   isLast?: boolean;
 }
 
-const SettingsRow = ({ 
-  icon: Icon, 
-  iconBgClass = 'bg-neutral-100', 
+const SettingsRow = ({
+  icon: Icon,
+  iconBgClass = 'bg-neutral-100',
   iconColorClass = 'text-neutral-600',
-  label, 
-  rightElement, 
+  label,
+  rightElement,
   rightText,
   hasChevron = true,
   hasExternalLink = false,
@@ -61,9 +63,9 @@ const SettingsRow = ({
   isLast = false
 }: SettingsRowProps) => {
   const isDanger = variant === 'danger';
-  
+
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`w-full flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors group ${!isLast ? 'border-b border-neutral-100' : ''} ${isDanger ? 'hover:bg-red-50' : ''}`}
     >
@@ -75,7 +77,7 @@ const SettingsRow = ({
           {label}
         </span>
       </div>
-      
+
       {rightElement || (
         <div className="flex items-center gap-1">
           {rightText && (
@@ -173,7 +175,7 @@ const Profile = () => {
 
       let lastActivity = 'Nunca';
       if (sessions && sessions.length > 0) {
-        const sortedSessions = sessions.sort((a, b) => 
+        const sortedSessions = sessions.sort((a, b) =>
           new Date(b.session_start).getTime() - new Date(a.session_start).getTime()
         );
         const lastSessionDate = new Date(sortedSessions[0].session_start);
@@ -212,7 +214,7 @@ const Profile = () => {
     if (!profile) return;
 
     const newValue = !profile.notifications_enabled;
-    
+
     try {
       const { error } = await supabase
         .from('profiles')
@@ -222,11 +224,11 @@ const Profile = () => {
       if (error) throw error;
 
       setProfile({ ...profile, notifications_enabled: newValue });
-      
+
       toast({
         title: newValue ? "Notificaciones activadas" : "Notificaciones desactivadas",
-        description: newValue 
-          ? "Recibirás notificaciones sobre tus sesiones" 
+        description: newValue
+          ? "Recibirás notificaciones sobre tus sesiones"
           : "No recibirás notificaciones"
       });
     } catch (error) {
@@ -285,11 +287,7 @@ const Profile = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!profile) {
@@ -309,14 +307,14 @@ const Profile = () => {
 
   if (viewMode === 'preferences') {
     return (
-      <PreferencesEditor 
+      <PreferencesEditor
         preferences={{
           language: profile.language,
           notifications_enabled: profile.notifications_enabled,
           theme: 'system'
-        }} 
-        onBack={handleBackToMain} 
-        onSave={handlePreferencesSave} 
+        }}
+        onBack={handleBackToMain}
+        onSave={handlePreferencesSave}
       />
     );
   }
@@ -330,155 +328,155 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
-      <div className="px-6 pt-14 pb-4 bg-white sticky top-0 z-20 border-b border-transparent">
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900">Perfil y Ajustes</h1>
-      </div>
+    <>
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Header */}
+        <div className="px-6 pt-14 pb-4 bg-white sticky top-0 z-20 border-b border-transparent">
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900">Perfil y Ajustes</h1>
+        </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto pb-24 bg-white">
-        <div className="px-6 pb-6 pt-2">
-          {/* User Profile Section */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative shrink-0">
-              <Avatar className="w-16 h-16 border border-neutral-200 shadow-sm">
-                <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`} />
-                <AvatarFallback className="bg-neutral-100 text-neutral-600 text-lg font-semibold">
-                  {userInitials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center">
-                <Check className="w-3 h-3 text-white" />
-              </div>
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight">
-                {displayName}
-              </h2>
-              <p className="text-sm text-neutral-500 mb-1">{formattedPhone || 'Sin teléfono'}</p>
-              <Badge variant="outline" className="text-[10px] px-2 py-0.5">
-                Miembro Básico
-              </Badge>
-            </div>
-          </div>
-
-          {/* Complete Profile Card */}
-          {isProfileIncomplete && (
-            <div className="relative overflow-hidden rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-4 shadow-sm mb-6">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-indigo-900">Completa tu perfil</h3>
-                  <p className="text-xs text-indigo-700/80 mt-1 max-w-[200px]">
-                    Añade tu información legal básica para recibir ayuda personalizada.
-                  </p>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                  <UserCog className="w-4 h-4" />
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto pb-24 bg-white">
+          <div className="px-6 pb-6 pt-2">
+            {/* User Profile Section */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="relative shrink-0">
+                <Avatar className="w-16 h-16 border border-neutral-200 shadow-sm">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`} />
+                  <AvatarFallback className="bg-neutral-100 text-neutral-600 text-lg font-semibold">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Progress value={profileCompletion} className="flex-1 h-2" />
-                <span className="text-xs font-bold text-indigo-900">{profileCompletion}%</span>
+              <div>
+                <h2 className="text-lg font-bold text-neutral-900 leading-tight">
+                  {displayName}
+                </h2>
+                <p className="text-sm text-neutral-500 mb-1">{formattedPhone || 'Sin teléfono'}</p>
+                <Badge variant="outline" className="text-[10px] px-2 py-0.5">
+                  Miembro Básico
+                </Badge>
               </div>
-              <Button
-                onClick={() => setViewMode('personalInfo')}
-                className="mt-3 w-full py-2 bg-white border border-indigo-100 rounded-lg text-xs font-semibold text-indigo-700 hover:bg-indigo-50 shadow-sm"
-                variant="outline"
-              >
-                Continuar
-              </Button>
             </div>
-          )}
 
-          {/* Settings Sections */}
-          <div className="space-y-6">
-            {/* CUENTA */}
-            <div>
-              <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-2">
-                Cuenta
-              </h4>
-              <div className="bg-white border border-neutral-100 rounded-2xl shadow-sm overflow-hidden">
-                <SettingsRow
-                  icon={User}
-                  label="Información Personal"
+            {/* Complete Profile Card */}
+            {isProfileIncomplete && (
+              <Card className="relative overflow-hidden border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-4 shadow-sm mb-6">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-indigo-900">Completa tu perfil</h3>
+                    <p className="text-xs text-indigo-700/80 mt-1 max-w-[200px]">
+                      Añade tu información legal básica para recibir ayuda personalizada.
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    <UserCog className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Progress value={profileCompletion} className="flex-1 h-2" />
+                  <span className="text-xs font-bold text-indigo-900">{profileCompletion}%</span>
+                </div>
+                <Button
                   onClick={() => setViewMode('personalInfo')}
-                />
-                <SettingsRow
-                  icon={ShieldCheck}
-                  label="Seguridad y Privacidad"
-                  onClick={() => setViewMode('security')}
-                  isLast
-                />
+                  className="mt-3 w-full py-2 bg-white border border-indigo-100 rounded-lg text-xs font-semibold text-indigo-700 hover:bg-indigo-50 shadow-sm"
+                  variant="outline"
+                >
+                  Continuar
+                </Button>
+              </Card>
+            )}
+
+            {/* Settings Sections */}
+            <div className="space-y-6">
+              {/* CUENTA */}
+              <div>
+                <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-2">
+                  Cuenta
+                </h4>
+                <Card className="bg-white border-neutral-100 shadow-sm overflow-hidden">
+                  <SettingsRow
+                    icon={User}
+                    label="Información Personal"
+                    onClick={() => setViewMode('personalInfo')}
+                  />
+                  <SettingsRow
+                    icon={ShieldCheck}
+                    label="Seguridad y Privacidad"
+                    onClick={() => setViewMode('security')}
+                    isLast
+                  />
+                </Card>
+              </div>
+
+              {/* PREFERENCIAS */}
+              <div>
+                <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-2">
+                  Preferencias
+                </h4>
+                <Card className="bg-white border-neutral-100 shadow-sm overflow-hidden">
+                  <SettingsRow
+                    icon={Bell}
+                    label="Notificaciones"
+                    hasChevron={false}
+                    rightElement={
+                      <div
+                        className={`w-10 h-6 rounded-full relative transition-colors duration-200 cursor-pointer ${profile.notifications_enabled ? 'bg-emerald-500' : 'bg-neutral-200'
+                          }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleNotifications();
+                        }}
+                      >
+                        <div
+                          className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${profile.notifications_enabled ? 'translate-x-5' : 'translate-x-1'
+                            }`}
+                        />
+                      </div>
+                    }
+                    onClick={handleToggleNotifications}
+                  />
+                  <SettingsRow
+                    icon={Globe}
+                    label="Idioma"
+                    rightText="Español"
+                    onClick={() => setViewMode('preferences')}
+                    isLast
+                  />
+                </Card>
+              </div>
+
+              {/* SOPORTE */}
+              <div>
+                <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-2">
+                  Soporte
+                </h4>
+                <Card className="bg-white border-neutral-100 shadow-sm overflow-hidden mb-6">
+                  <SettingsRow
+                    icon={HelpCircle}
+                    label="Ayuda y Soporte"
+                    hasExternalLink
+                    onClick={() => window.open('https://docs.lovable.dev/features/cloud', '_blank')}
+                  />
+                  <SettingsRow
+                    icon={LogOut}
+                    label="Cerrar Sesión"
+                    variant="danger"
+                    hasChevron={false}
+                    onClick={() => setShowLogoutDialog(true)}
+                    isLast
+                  />
+                </Card>
               </div>
             </div>
 
-            {/* PREFERENCIAS */}
-            <div>
-              <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-2">
-                Preferencias
-              </h4>
-              <div className="bg-white border border-neutral-100 rounded-2xl shadow-sm overflow-hidden">
-                <SettingsRow
-                  icon={Bell}
-                  label="Notificaciones"
-                  hasChevron={false}
-                  rightElement={
-                    <div 
-                      className={`w-10 h-6 rounded-full relative transition-colors duration-200 cursor-pointer ${
-                        profile.notifications_enabled ? 'bg-emerald-500' : 'bg-neutral-200'
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleNotifications();
-                      }}
-                    >
-                      <div 
-                        className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${
-                          profile.notifications_enabled ? 'translate-x-5' : 'translate-x-1'
-                        }`}
-                      />
-                    </div>
-                  }
-                  onClick={handleToggleNotifications}
-                />
-                <SettingsRow
-                  icon={Globe}
-                  label="Idioma"
-                  rightText="Español"
-                  onClick={() => setViewMode('preferences')}
-                  isLast
-                />
-              </div>
-            </div>
-
-            {/* SOPORTE */}
-            <div>
-              <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-2">
-                Soporte
-              </h4>
-              <div className="bg-white border border-neutral-100 rounded-2xl shadow-sm overflow-hidden mb-6">
-                <SettingsRow
-                  icon={HelpCircle}
-                  label="Ayuda y Soporte"
-                  hasExternalLink
-                  onClick={() => window.open('https://docs.lovable.dev/features/cloud', '_blank')}
-                />
-                <SettingsRow
-                  icon={LogOut}
-                  label="Cerrar Sesión"
-                  variant="danger"
-                  hasChevron={false}
-                  onClick={() => setShowLogoutDialog(true)}
-                  isLast
-                />
-              </div>
-
-              {/* Footer */}
-              <div className="flex justify-center flex-col items-center pb-6">
-                <p className="text-[10px] text-neutral-400">Versión 1.0.4</p>
-                <p className="text-[10px] text-neutral-300 mt-1">Hecho con ❤️ para la comunidad</p>
-              </div>
+            {/* Footer */}
+            <div className="flex justify-center flex-col items-center pb-6">
+              <p className="text-[10px] text-neutral-400">Versión 1.0.4</p>
+              <p className="text-[10px] text-neutral-300 mt-1">Hecho con ❤️ para la comunidad</p>
             </div>
           </div>
         </div>
@@ -501,7 +499,7 @@ const Profile = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 };
 

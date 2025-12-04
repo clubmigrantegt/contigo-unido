@@ -1,19 +1,23 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/auth/AuthContext';
-import { 
-  Bell, 
-  Sparkles, 
-  ArrowRight, 
-  Scale, 
-  HeartHandshake, 
-  Users, 
+import {
+  Bell,
+  Sparkles,
+  ArrowRight,
+  Scale,
+  HeartHandshake,
+  Users,
   BookOpen,
   Home as HomeIcon,
   MessageCircle,
   UsersRound,
   User,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -39,16 +43,16 @@ const Home = () => {
       route: '/chat'
     },
     {
-      icon: Users,
+      icon: BookOpen,
       iconBg: 'bg-indigo-50',
       iconColor: 'text-indigo-600',
-      title: 'Comunidad',
-      subtitle: 'Foros y Eventos',
+      title: 'Educación',
+      subtitle: 'Cursos, guias y mas',
       hoverColor: 'group-hover:text-indigo-600',
       route: '/community'
     },
     {
-      icon: BookOpen,
+      icon: FileText,
       iconBg: 'bg-indigo-50',
       iconColor: 'text-indigo-600',
       title: 'Recursos',
@@ -92,23 +96,25 @@ const Home = () => {
               Club del Migrante
             </h1>
           </div>
-          <button 
-            className="w-9 h-9 rounded-full bg-neutral-50 border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors relative"
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-9 h-9 rounded-full bg-neutral-50 border-neutral-200 text-neutral-500 hover:text-neutral-900 relative"
             onClick={() => navigate('/notifications')}
           >
             <Bell className="w-4 h-4" />
             <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white" />
-          </button>
+          </Button>
         </div>
 
         {/* AI Assistant CTA (Hero Card) */}
-        <div 
-          className="relative w-full rounded-2xl bg-neutral-900 p-5 text-white overflow-hidden shadow-lg group cursor-pointer transition-transform active:scale-[0.98]"
+        <Card
+          className="relative w-full bg-neutral-900 p-5 text-white overflow-hidden shadow-lg group cursor-pointer transition-transform active:scale-[0.98] border-none"
           onClick={() => navigate('/chat')}
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl -mr-10 -mt-10" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-teal-500/20 rounded-full blur-2xl -ml-5 -mb-5" />
-          
+
           <div className="relative z-10 flex flex-col gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
               <Sparkles className="w-5 h-5 text-indigo-300" />
@@ -124,7 +130,7 @@ const Home = () => {
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Servicios Esenciales - Grid 2x2 */}
@@ -134,9 +140,9 @@ const Home = () => {
         </h2>
         <div className="grid grid-cols-2 gap-3">
           {services.map((service, index) => (
-            <button
+            <Card
               key={index}
-              className="p-4 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-white hover:shadow-sm transition-all text-left flex flex-col gap-3 group"
+              className="p-4 border-neutral-200 bg-neutral-50 hover:bg-white hover:shadow-sm transition-all text-left flex flex-col gap-3 group cursor-pointer"
               onClick={() => navigate(service.route)}
             >
               <div className={`w-8 h-8 rounded-lg ${service.iconBg} flex items-center justify-center ${service.iconColor}`}>
@@ -150,7 +156,7 @@ const Home = () => {
                   {service.subtitle}
                 </span>
               </div>
-            </button>
+            </Card>
           ))}
         </div>
       </div>
@@ -160,9 +166,9 @@ const Home = () => {
         <h2 className="text-sm font-bold text-neutral-900 tracking-tight mb-4">
           Bienestar
         </h2>
-        <button 
+        <Card
           onClick={() => navigate('/wellness/gratitude/history')}
-          className="w-full p-4 bg-amber-50 rounded-2xl flex items-center justify-between group hover:bg-amber-100 transition-colors border border-amber-100 shadow-sm"
+          className="w-full p-4 bg-amber-50 flex items-center justify-between group hover:bg-amber-100 transition-colors border-amber-100 shadow-sm cursor-pointer"
         >
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-white text-amber-500 flex items-center justify-center shadow-sm">
@@ -174,7 +180,7 @@ const Home = () => {
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-neutral-300 group-hover:text-amber-500 transition-colors" />
-        </button>
+        </Card>
       </div>
 
       {/* Novedades Legales */}
@@ -183,8 +189,8 @@ const Home = () => {
           <h2 className="text-sm font-semibold text-neutral-900 tracking-tight">
             Novedades Legales
           </h2>
-          <a 
-            href="#" 
+          <a
+            href="#"
             className="text-xs font-medium text-neutral-500 hover:text-neutral-900"
             onClick={(e) => {
               e.preventDefault();
@@ -194,26 +200,26 @@ const Home = () => {
             Ver todo
           </a>
         </div>
-        
+
         <div className="flex flex-col gap-3">
           {news.map((item, index) => (
-            <div 
+            <Card
               key={index}
-              className="p-3 rounded-xl border border-neutral-100 bg-white shadow-sm flex gap-4 items-center cursor-pointer hover:shadow-md transition-shadow"
+              className="p-3 border-neutral-100 bg-white shadow-sm flex gap-4 items-center cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => navigate(`/services/legal/${item.id}`)}
             >
               <div className="w-16 h-16 rounded-lg bg-neutral-100 flex-shrink-0 overflow-hidden">
-                <img 
-                  src={item.image} 
-                  className="w-full h-full object-cover opacity-90" 
+                <img
+                  src={item.image}
+                  className="w-full h-full object-cover opacity-90"
                   alt={item.title}
                 />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium border ${item.badgeColor}`}>
+                  <Badge variant="outline" className={`px-1.5 py-0.5 text-[10px] font-medium ${item.badgeColor}`}>
                     {item.badge}
-                  </span>
+                  </Badge>
                   {item.time && (
                     <span className="text-[10px] text-neutral-400">{item.time}</span>
                   )}
@@ -225,7 +231,7 @@ const Home = () => {
                   {item.subtitle}
                 </p>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
